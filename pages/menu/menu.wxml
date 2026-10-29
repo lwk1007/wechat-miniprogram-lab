@@ -1,0 +1,44 @@
+<view class="page">
+  <view class="hero">
+    <text class="hero-title">拾光咖啡</text>
+    <text class="hero-sub">今日现磨 · 到店自取，约 8 分钟</text>
+  </view>
+
+  <scroll-view class="cats" scroll-x enable-flex show-scrollbar="{{false}}">
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="cat {{activeCat === item.id ? 'cat-on' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onSwitchCat"
+    >{{item.name}}</view>
+  </scroll-view>
+
+  <view class="list">
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="card"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="cover" style="background: {{item.cover}}">
+        <text class="cover-text">{{item.initial}}</text>
+      </view>
+
+      <view class="body">
+        <view class="title-row">
+          <text class="name">{{item.name}}</text>
+          <text class="tag" wx:if="{{item.tag}}">{{item.tag}}</text>
+        </view>
+        <text class="desc">{{item.desc}}</text>
+        <view class="bottom-row">
+          <text class="price">¥{{item.priceText}}</text>
+          <view class="add" data-id="{{item.id}}" catchtap="onAdd">+</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip">点击商品可查看详情，右下角加号直接加入购物车</view>
+</view>

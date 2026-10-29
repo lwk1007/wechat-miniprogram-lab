@@ -1,0 +1,36 @@
+{
+  "pages": [
+    "pages/menu/menu",
+    "pages/cart/cart",
+    "pages/orders/orders",
+    "pages/product/product"
+  ],
+  "window": {
+    "navigationBarTitleText": "拾光咖啡",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f6f6f4"
+  },
+  "tabBar": {
+    "color": "#8a8a86",
+    "selectedColor": "#1d9e75",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/menu/menu",
+        "text": "点单"
+      },
+      {
+        "pagePath": "pages/cart/cart",
+        "text": "购物车"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "订单"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

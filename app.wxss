@@ -1,0 +1,34 @@
+page {
+  background: #f6f6f4;
+  color: #1a1a18;
+  font-size: 28rpx;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+view,
+text {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+}
+
+.price {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #1a1a18;
+}
+
+.muted {
+  color: #8a8a86;
+}
+
+.empty {
+  padding: 160rpx 0;
+  text-align: center;
+  color: #8a8a86;
+  font-size: 26rpx;
+}

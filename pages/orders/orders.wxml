@@ -1,0 +1,30 @@
+<view class="page" wx:if="{{orders.length > 0}}">
+  <view class="head">
+    <text class="head-title">我的订单</text>
+    <text class="head-sub">数据存在本机缓存，卸载即清空</text>
+  </view>
+
+  <view class="list">
+    <view class="order" wx:for="{{orders}}" wx:key="id">
+      <view class="order-top">
+        <text class="order-time">{{item.createdAt}}</text>
+        <text class="order-status">{{item.status}}</text>
+      </view>
+
+      <text class="order-summary">{{item.summary}}</text>
+
+      <view class="order-bottom">
+        <text class="order-id">单号 {{item.id}}</text>
+        <text class="order-total">¥{{item.totalText}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="page" wx:else>
+  <view class="empty">
+    <view class="empty-title">还没有订单</view>
+    <view class="empty-sub">下第一单后，记录会出现在这里</view>
+    <view class="empty-btn" bindtap="goMenu">去点单</view>
+  </view>
+</view>

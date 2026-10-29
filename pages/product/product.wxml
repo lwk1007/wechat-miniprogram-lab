@@ -1,0 +1,30 @@
+<view class="page" wx:if="{{product}}">
+  <view class="banner" style="background: {{product.cover}}">
+    <text class="banner-text">{{product.initial}}</text>
+  </view>
+
+  <view class="info">
+    <view class="title-row">
+      <text class="name">{{product.name}}</text>
+      <text class="tag" wx:if="{{product.tag}}">{{product.tag}}</text>
+    </view>
+    <text class="desc">{{product.desc}}</text>
+    <text class="price big">¥{{product.priceText}}</text>
+
+    <view class="spec">
+      <text class="spec-label">规格</text>
+      <text class="spec-value">中杯 / 标准冰 / 半糖</text>
+    </view>
+    <view class="spec">
+      <text class="spec-label">取餐方式</text>
+      <text class="spec-value">到店自取</text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <view class="footer-btn ghost" bindtap="goCart">去购物车</view>
+    <view class="footer-btn solid" bindtap="onAdd">加入购物车</view>
+  </view>
+</view>
+
+<view class="empty" wx:else>商品不存在</view>

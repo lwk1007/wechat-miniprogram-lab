@@ -1,0 +1,40 @@
+<view class="page" wx:if="{{items.length > 0}}">
+  <view class="head">
+    <text class="head-title">共 {{count}} 件</text>
+    <text class="head-clear" bindtap="onClear">清空</text>
+  </view>
+
+  <view class="list">
+    <view class="row" wx:for="{{items}}" wx:key="id">
+      <view class="cover" style="background: {{item.cover}}">
+        <text class="cover-text">{{item.initial}}</text>
+      </view>
+
+      <view class="row-body">
+        <text class="row-name">{{item.name}}</text>
+        <text class="row-price">¥{{item.price}} / 份</text>
+      </view>
+
+      <view class="stepper">
+        <view class="step" data-id="{{item.id}}" bindtap="onMinus">−</view>
+        <text class="step-qty">{{item.qty}}</text>
+        <view class="step solid" data-id="{{item.id}}" bindtap="onPlus">+</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bar">
+    <view class="bar-left">
+      <text class="bar-label">合计</text>
+      <text class="bar-total">¥{{totalText}}</text>
+    </view>
+    <view class="bar-btn" bindtap="onSubmit">提交订单</view>
+  </view>
+</view>
+
+<view class="page" wx:else>
+  <view class="empty">
+    <view class="empty-title">购物车是空的</view>
+    <view class="empty-sub">去点单页挑一杯吧</view>
+  </view>
+</view>
