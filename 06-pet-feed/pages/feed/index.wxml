@@ -1,7 +1,11 @@
 <view class="page">
+  <view wx:if="{{!isCloud}}" class="warn">
+    演示模式：动态存在本地缓存，别人看不到。填 envId 后自动切到云开发。
+  </view>
+
   <view wx:if="{{tip}}" class="warn">{{tip}}</view>
 
-  <view wx:if="{{!posts.length && !loading && envReady}}" class="empty">
+  <view wx:if="{{!posts.length && !loading}}" class="empty">
     还没有动态，点右下角发一条
   </view>
 

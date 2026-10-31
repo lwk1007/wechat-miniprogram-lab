@@ -1,12 +1,12 @@
 <view class="page">
   <view class="header">
     <view class="title">上传宠物照片</view>
-    <view class="sub">选图 → 压缩 → 云存储 → 云数据库 → 列表回显，一条完整链路</view>
+    <view class="sub">选图 → 压缩 → 存储 → 入库 → 列表回显，一条完整链路</view>
   </view>
 
-  <view wx:if="{{!envReady}}" class="warn">
-    还没配置云环境：打开 <text class="code">config.js</text> 填入 envId，并在云开发控制台建
-    <text class="code">pets</text> 集合（权限选「仅创建者可读写」）。
+  <view class="warn" wx:if="{{!isCloud}}">
+    当前是<text class="code">演示模式</text>：数据存在本地缓存，不消耗云资源。
+    真正用云开发时，在 <text class="code">config.js</text> 填 envId，代码会自动切过去。
   </view>
 
   <view wx:if="{{tip}}" class="warn">{{tip}}</view>
@@ -14,21 +14,21 @@
   <view class="btn" bindtap="pickAndUpload">＋ 选一张照片上传</view>
 
   <view class="list-head" wx:if="{{photos.length}}">
-    已有 {{photos.length}} 张（只显示最近 20 条）
+    已有 {{photos.length}} 张{{isCloud ? '（只显示最近 20 条）' : '（演示模式最多留 6 张）'}}
   </view>
 
   <view class="grid">
     <view class="cell" wx:for="{{photos}}" wx:key="_id">
       <image
         class="thumb"
-        src="{{item.fileID}}"
+        src="{{item.src}}"
         mode="aspectFill"
-        data-src="{{item.fileID}}"
+        data-src="{{item.src}}"
         bindtap="preview"
       />
-      <view class="del" data-id="{{item._id}}" data-fileid="{{item.fileID}}" catchtap="removePhoto">×</view>
+      <view class="del" data-id="{{item._id}}" catchtap="removePhoto">×</view>
     </view>
   </view>
 
-  <view wx:if="{{!photos.length && envReady}}" class="empty">还没有照片，点上面的按钮试试</view>
+  <view wx:if="{{!photos.length && !loading}}" class="empty">还没有照片，点上面的按钮试试</view>
 </view>

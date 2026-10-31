@@ -4,10 +4,13 @@
     <view class="sub">云函数 + 定时触发器。承诺写进文案，就必须真做。</view>
   </view>
 
-  <view wx:if="{{!envReady}}" class="warn">
-    还没配置云环境：填 <text class="code">config.js</text> 里的 envId，上传部署
-    <text class="code">cloudfunctions/cleanup-photos</text>，并在云开发控制台建
-    <text class="code">pets</text> 集合。
+  <view wx:if="{{!isCloud}}" class="warn">
+    演示模式：清理逻辑在本地跑，数据存在本地缓存。<text class="code">addOldRecord</text>
+    造出来的旧记录可以被真的删掉 —— 流程和云端一致，只是执行者不同。
+  </view>
+
+  <view wx:else class="warn">
+    云端模式：确认 <text class="code">cleanup-photos</text> 云函数已部署，且触发器已上传。
   </view>
 
   <view class="stats">

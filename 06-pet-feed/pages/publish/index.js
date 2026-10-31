@@ -1,11 +1,12 @@
-const config = require('../../config')
+const api = require('../../api')
 
 Page({
   data: {
     nickname: '',
     content: '',
     images: [],
-    submitting: false
+    submitting: false,
+    isCloud: api.isCloud
   },
 
   onLoad() {
@@ -62,29 +63,14 @@ Page({
     wx.showLoading({ title: '发布中', mask: true })
 
     try {
-      // 图片先并发上传，拿 fileID 数组；任一失败就整体失败，避免发出半截内容
-      const uploads = await Promise.all(
-        this.data.images.map(async (path, i) => {
-          const ext = (path.match(/\.(\w+)$/) || [, 'jpg'])[1]
-          const res = await wx.cloud.uploadFile({
-            cloudPath: `posts/${Date.now()}-${i}.${ext}`,
-            filePath: path
-          })
-          return res.fileID
-        })
-      )
-
       const nickname = this.data.nickname.trim() || '宠友'
       wx.setStorageSync('pet_nickname', nickname)
 
-      await wx.cloud.database().collection(config.collection).add({
-        data: {
-          nickname,
-          content,
-          images: uploads,
-          likeCount: 0,
-          createdAt: Date.now()
-        }
+      // 上传图片 + 写库的细节都在 api.js 里，页面只管交数据和收结果
+      await api.publish({
+        nickname,
+        content,
+        tempPaths: this.data.images
       })
 
       wx.hideLoading()
