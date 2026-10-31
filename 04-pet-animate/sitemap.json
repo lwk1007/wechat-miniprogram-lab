@@ -1,0 +1,4 @@
+{
+  "desc": "宠物动效练习",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

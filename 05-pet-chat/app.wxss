@@ -1,0 +1,16 @@
+page {
+  --bg: #fdf8f3;
+  --ink: #2b2320;
+  --muted: #98897f;
+  --accent: #e8855b;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 28rpx;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", Helvetica, sans-serif;
+}
+
+view,
+text,
+image {
+  box-sizing: border-box;
+}

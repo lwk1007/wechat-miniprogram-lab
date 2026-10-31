@@ -1,0 +1,13 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "和豆豆说说话",
+    "navigationBarBackgroundColor": "#fdf8f3",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fdf8f3"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

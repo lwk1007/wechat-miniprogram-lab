@@ -1,0 +1,23 @@
+{
+  "description": "06 宠物社群 Feed 练习",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "appid": "wx9ab8161a49864e29",
+  "projectname": "06-pet-feed",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "packNpmManually": false,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "useCompilerPlugins": false
+  },
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
+}

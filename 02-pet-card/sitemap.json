@@ -1,0 +1,4 @@
+{
+  "desc": "宠物卡片组件练习",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

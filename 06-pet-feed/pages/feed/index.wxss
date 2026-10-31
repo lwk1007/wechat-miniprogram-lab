@@ -1,0 +1,150 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx calc(160rpx + env(safe-area-inset-bottom));
+}
+
+.warn {
+  margin-bottom: 20rpx;
+  padding: 20rpx 24rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #a35a3c;
+  background: #fdeee6;
+  border-radius: 16rpx;
+}
+
+.post {
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+  background: #fff;
+  border-radius: 26rpx;
+  box-shadow: 0 6rpx 20rpx rgba(120, 96, 80, 0.05);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 50%;
+  background: #e8855b;
+  color: #fff;
+  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.who {
+  margin-left: 16rpx;
+}
+
+.name {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.time {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #b6a79c;
+}
+
+.content {
+  margin: 20rpx 0 4rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: #3a2f29;
+  word-break: break-all;
+}
+
+/* 图片：三种布局 */
+.pics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.pic {
+  border-radius: 14rpx;
+  background: #efe6dd;
+}
+
+.pics-1 .pic {
+  width: 100%;
+  height: 360rpx;
+}
+
+.cols-2 .pic {
+  width: calc((100% - 10rpx) / 2);
+  height: 240rpx;
+}
+
+.cols-3 .pic {
+  width: calc((100% - 20rpx) / 3);
+  height: 190rpx;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 2rpx solid #f6efe8;
+}
+
+.like {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 6rpx 10rpx;
+}
+
+.heart {
+  font-size: 34rpx;
+  color: #cbb9ad;
+  line-height: 1;
+}
+
+.liked {
+  color: #e2564c;
+}
+
+.count {
+  font-size: 24rpx;
+  color: #98897f;
+}
+
+.empty {
+  padding: 200rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #b6a79c;
+}
+
+.loading {
+  padding: 24rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: #b6a79c;
+}
+
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: calc(60rpx + env(safe-area-inset-bottom));
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  background: #e8855b;
+  color: #fff;
+  font-size: 52rpx;
+  line-height: 100rpx;
+  text-align: center;
+  box-shadow: 0 12rpx 30rpx rgba(232, 133, 91, 0.38);
+}

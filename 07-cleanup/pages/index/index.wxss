@@ -1,0 +1,129 @@
+.header {
+  padding: 8rpx 4rpx 28rpx;
+}
+
+.title {
+  font-size: 42rpx;
+  font-weight: 600;
+}
+
+.sub {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #98897f;
+  line-height: 1.6;
+}
+
+.warn {
+  margin-bottom: 22rpx;
+  padding: 20rpx 24rpx;
+  font-size: 24rpx;
+  line-height: 1.8;
+  color: #a35a3c;
+  background: #fdeee6;
+  border-radius: 16rpx;
+}
+
+.code {
+  padding: 2rpx 8rpx;
+  font-family: Menlo, Consolas, monospace;
+  font-size: 22rpx;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 6rpx;
+}
+
+.stats {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 28rpx;
+}
+
+.stat {
+  flex: 1;
+  padding: 30rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  text-align: center;
+}
+
+.num {
+  font-size: 56rpx;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.hot {
+  color: #e2564c;
+}
+
+.label {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #b6a79c;
+}
+
+.btn {
+  padding: 30rpx;
+  margin-bottom: 18rpx;
+  text-align: center;
+  font-size: 28rpx;
+  border-radius: 22rpx;
+}
+
+.ghost {
+  color: #b4674a;
+  background: #fdeee6;
+  border: 2rpx solid #f3d6c7;
+}
+
+.danger {
+  color: #fff;
+  background: #e2564c;
+}
+
+.plain {
+  color: #8c7c72;
+  background: #fff;
+  border: 2rpx solid #f0e6dc;
+}
+
+.btn:active {
+  opacity: 0.86;
+}
+
+.log-title {
+  margin: 30rpx 4rpx 12rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.log {
+  padding: 24rpx;
+  min-height: 180rpx;
+  font-family: Menlo, Consolas, monospace;
+  font-size: 22rpx;
+  line-height: 1.9;
+  color: #5a4a40;
+  white-space: pre-wrap;
+  background: #fff;
+  border-radius: 20rpx;
+}
+
+.tips {
+  margin-top: 28rpx;
+  padding: 24rpx;
+  background: #f7f1ea;
+  border-radius: 20rpx;
+}
+
+.tip-h {
+  font-size: 25rpx;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.tip {
+  font-size: 23rpx;
+  line-height: 1.9;
+  color: #8c7c72;
+}

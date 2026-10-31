@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/feed/index",
+    "pages/publish/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "宠物圈",
+    "navigationBarBackgroundColor": "#fdf8f3",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fdf8f3"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

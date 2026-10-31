@@ -1,0 +1,91 @@
+.page {
+  min-height: 100vh;
+  padding: 28rpx;
+}
+
+.nick {
+  height: 80rpx;
+  padding: 0 24rpx;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  background: #fff;
+  border-radius: 20rpx;
+}
+
+.editor {
+  width: 100%;
+  min-height: 220rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  background: #fff;
+  border-radius: 20rpx;
+}
+
+.pics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 22rpx;
+}
+
+.cell {
+  position: relative;
+  width: calc((100% - 28rpx) / 3);
+  height: 200rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #efe6dd;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+}
+
+.add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52rpx;
+  color: #c9b6a8;
+  background: #f7f1ea;
+  border: 2rpx dashed #e3d3c6;
+}
+
+.del {
+  position: absolute;
+  top: 6rpx;
+  right: 6rpx;
+  width: 42rpx;
+  height: 42rpx;
+  line-height: 38rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 50%;
+}
+
+.hint {
+  margin: 20rpx 4rpx 0;
+  font-size: 22rpx;
+  color: #b6a79c;
+}
+
+.submit {
+  position: fixed;
+  left: 28rpx;
+  right: 28rpx;
+  bottom: calc(28rpx + env(safe-area-inset-bottom));
+  padding: 30rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #fff;
+  background: #e8855b;
+  border-radius: 24rpx;
+}
+
+.submit.disabled {
+  opacity: 0.6;
+}

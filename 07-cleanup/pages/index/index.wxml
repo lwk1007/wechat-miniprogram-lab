@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="header">
+    <view class="title">照片 24 小时自动清理</view>
+    <view class="sub">云函数 + 定时触发器。承诺写进文案，就必须真做。</view>
+  </view>
+
+  <view wx:if="{{!envReady}}" class="warn">
+    还没配置云环境：填 <text class="code">config.js</text> 里的 envId，上传部署
+    <text class="code">cloudfunctions/cleanup-photos</text>，并在云开发控制台建
+    <text class="code">pets</text> 集合。
+  </view>
+
+  <view class="stats">
+    <view class="stat">
+      <view class="num">{{total}}</view>
+      <view class="label">集合总记录</view>
+    </view>
+    <view class="stat">
+      <view class="num hot">{{expired}}</view>
+      <view class="label">超过 {{hours}} 小时</view>
+    </view>
+  </view>
+
+  <view class="btn ghost" data-dry="true" bindtap="run">先演练（只统计不删）</view>
+  <view class="btn danger" data-dry="false" bindtap="run">执行删除</view>
+  <view class="btn plain" bindtap="addOldRecord">造一条 25 小时前的测试记录</view>
+
+  <view class="log-title">执行结果</view>
+  <view class="log">{{log}}</view>
+
+  <view class="tips">
+    <view class="tip-h">三条容易翻车的点</view>
+    <view class="tip">1. Cron 是 7 段（秒 分 时 日 月 周 年），写 5 段不生效。</view>
+    <view class="tip">2. 上传云函数后，还要在「云函数 → 版本与配置 → 触发器」里上传触发器。</view>
+    <view class="tip">3. 先删文件再删记录；顺序反了会留下永远删不掉的孤儿文件。</view>
+  </view>
+</view>

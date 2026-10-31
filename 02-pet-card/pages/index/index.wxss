@@ -1,0 +1,39 @@
+.header {
+  padding: 8rpx 4rpx 36rpx;
+}
+
+.title {
+  font-size: 44rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+
+.sub {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #98897f;
+  line-height: 1.6;
+}
+
+.hint {
+  margin: 8rpx 4rpx 24rpx;
+  padding: 18rpx 24rpx;
+  font-size: 24rpx;
+  color: #b4674a;
+  background: #fdeee6;
+  border-radius: 16rpx;
+}
+
+.btn {
+  margin-top: 20rpx;
+  padding: 30rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #fff;
+  background: #e8855b;
+  border-radius: 24rpx;
+}
+
+.btn:active {
+  opacity: 0.85;
+}

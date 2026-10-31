@@ -1,0 +1,49 @@
+<view class="chat">
+  <scroll-view
+    class="msg-area"
+    scroll-y
+    scroll-with-animation
+    scroll-into-view="{{scrollTarget}}"
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view class="day-tip">今天</view>
+
+    <view wx:for="{{messages}}" wx:key="id" id="{{item.id}}" class="row {{item.role === 'me' ? 'row-me' : ''}}">
+      <view wx:if="{{item.role !== 'me'}}" class="avatar">豆</view>
+      <view class="bubble {{item.role === 'me' ? 'bubble-me' : ''}}">{{item.text}}</view>
+    </view>
+
+    <view wx:if="{{typing}}" class="row">
+      <view class="avatar">豆</view>
+      <view class="bubble typing">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+    </view>
+
+    <view class="spacer"></view>
+  </scroll-view>
+
+  <view class="quick">
+    <view class="q" data-text="我回来啦" bindtap="quickSend">我回来啦</view>
+    <view class="q" data-text="你饿不饿" bindtap="quickSend">你饿不饿</view>
+    <view class="q" data-text="今天乖不乖" bindtap="quickSend">今天乖不乖</view>
+    <view class="q" data-text="晚安" bindtap="quickSend">晚安</view>
+  </view>
+
+  <view class="input-bar">
+    <input
+      class="input"
+      value="{{inputValue}}"
+      placeholder="说点什么…"
+      confirm-type="send"
+      adjust-position="{{true}}"
+      cursor-spacing="20"
+      bindinput="onInput"
+      bindconfirm="send"
+    />
+    <view class="send {{inputValue && !typing ? 'send-on' : ''}}" bindtap="send">发送</view>
+  </view>
+</view>

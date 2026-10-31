@@ -1,0 +1,21 @@
+<view class="page">
+  <view class="header">
+    <view class="title">我的宠物</view>
+    <view class="sub">点卡片看事件冒泡，点下面的按钮看数据驱动</view>
+  </view>
+
+  <!-- 父子通信：属性往下传（name/mood/days/color），事件往上传（bind:cardtap） -->
+  <pet-card
+    wx:for="{{pets}}"
+    wx:key="id"
+    name="{{item.name}}"
+    mood="{{item.mood}}"
+    days="{{item.days}}"
+    color="{{item.color}}"
+    bind:cardtap="onCardTap"
+  />
+
+  <view wx:if="{{lastTap}}" class="hint">刚才点的是：{{lastTap}}</view>
+
+  <view class="btn" bindtap="addPet">+ 加一只宠物（只改 data，不碰 DOM）</view>
+</view>

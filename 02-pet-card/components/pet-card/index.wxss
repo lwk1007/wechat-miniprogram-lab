@@ -1,0 +1,53 @@
+.card {
+  display: flex;
+  align-items: center;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  background: #fff;
+  border-radius: 26rpx;
+  box-shadow: 0 8rpx 24rpx rgba(120, 96, 80, 0.06);
+}
+
+.card-hover {
+  transform: scale(0.985);
+  background: #fdf5ef;
+}
+
+.avatar {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.initial {
+  color: #fff;
+  font-size: 44rpx;
+  font-weight: 500;
+}
+
+.info {
+  flex: 1;
+  margin-left: 24rpx;
+  min-width: 0;
+}
+
+.name {
+  font-size: 32rpx;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+}
+
+.meta {
+  font-size: 24rpx;
+  color: #98897f;
+}
+
+.arrow {
+  color: #d6c9bf;
+  font-size: 36rpx;
+  margin-left: 12rpx;
+}

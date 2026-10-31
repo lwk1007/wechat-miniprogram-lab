@@ -1,0 +1,13 @@
+<!-- 组件内部用 properties 里的名字，直接写 {{name}} 即可，不需要 this.data.name -->
+<view class="card" hover-class="card-hover" bindtap="onTap">
+  <view class="avatar" style="background: {{color}}">
+    <text class="initial">{{initial}}</text>
+  </view>
+
+  <view class="info">
+    <view class="name">{{name}}</view>
+    <view class="meta">心情：{{mood}} · 陪伴 {{days}} 天</view>
+  </view>
+
+  <view class="arrow">›</view>
+</view>

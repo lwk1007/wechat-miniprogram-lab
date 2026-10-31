@@ -1,0 +1,148 @@
+.chat {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fdf8f3;
+}
+
+.msg-area {
+  flex: 1;
+  padding: 24rpx 28rpx 0;
+}
+
+.day-tip {
+  margin: 10rpx 0 28rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #b6a79c;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 22rpx;
+}
+
+.row-me {
+  justify-content: flex-end;
+}
+
+.avatar {
+  width: 64rpx;
+  height: 64rpx;
+  margin-right: 14rpx;
+  border-radius: 50%;
+  background: #e8855b;
+  color: #fff;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bubble {
+  max-width: 72%;
+  padding: 22rpx 26rpx;
+  font-size: 28rpx;
+  line-height: 1.65;
+  color: #3a2f29;
+  background: #fff;
+  border-radius: 8rpx 24rpx 24rpx 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(120, 96, 80, 0.05);
+  word-break: break-all;
+}
+
+.bubble-me {
+  color: #fff;
+  background: #e8855b;
+  border-radius: 24rpx 8rpx 24rpx 24rpx;
+}
+
+/* 打字中：三个点依次跳动 */
+.typing {
+  display: flex;
+  gap: 8rpx;
+  padding: 26rpx;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #cbb9ad;
+  animation: blink 1.2s infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-6rpx);
+  }
+}
+
+.spacer {
+  height: 24rpx;
+}
+
+.quick {
+  display: flex;
+  gap: 12rpx;
+  padding: 0 28rpx 16rpx;
+  overflow-x: auto;
+}
+
+.q {
+  flex-shrink: 0;
+  padding: 12rpx 22rpx;
+  font-size: 24rpx;
+  color: #8c7c72;
+  background: #fff;
+  border-radius: 30rpx;
+  border: 2rpx solid #f0e6dc;
+}
+
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 28rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 2rpx solid #f4ece4;
+}
+
+.input {
+  flex: 1;
+  height: 76rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  background: #f7f2ec;
+  border-radius: 38rpx;
+}
+
+.send {
+  padding: 18rpx 30rpx;
+  font-size: 26rpx;
+  color: #cbb9ad;
+  background: #f4ece4;
+  border-radius: 34rpx;
+}
+
+.send-on {
+  color: #fff;
+  background: #e8855b;
+}

@@ -1,0 +1,9 @@
+{
+  "name": "cleanup-photos",
+  "version": "1.0.0",
+  "description": "定时清理 24 小时前的宠物照片",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

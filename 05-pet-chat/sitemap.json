@@ -1,0 +1,4 @@
+{
+  "desc": "宠物口吻对话练习",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

@@ -1,0 +1,31 @@
+<view class="page">
+  <input
+    class="nick"
+    value="{{nickname}}"
+    placeholder="你的昵称（可留空）"
+    maxlength="12"
+    bindinput="onNickname"
+  />
+
+  <textarea
+    class="editor"
+    value="{{content}}"
+    placeholder="今天和它发生了什么…"
+    maxlength="300"
+    auto-height
+    bindinput="onContent"
+  />
+
+  <view class="pics">
+    <view class="cell" wx:for="{{images}}" wx:key="*this">
+      <image class="img" src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="preview" />
+      <view class="del" data-idx="{{index}}" catchtap="removeImage">×</view>
+    </view>
+
+    <view wx:if="{{images.length < 9}}" class="cell add" bindtap="chooseImages">＋</view>
+  </view>
+
+  <view class="hint">最多 9 张图，发布前会自动压缩再上传</view>
+
+  <view class="submit {{submitting ? 'disabled' : ''}}" bindtap="submit">发布</view>
+</view>

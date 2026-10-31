@@ -1,0 +1,4 @@
+{
+  "desc": "照片定时清理练习",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

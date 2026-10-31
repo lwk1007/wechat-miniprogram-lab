@@ -1,0 +1,23 @@
+{
+  "description": "04 宠物动效练习",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "appid": "wx9ab8161a49864e29",
+  "projectname": "04-pet-animate",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "packNpmManually": false,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "useCompilerPlugins": false
+  },
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
+}

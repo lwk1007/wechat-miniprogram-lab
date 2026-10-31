@@ -1,0 +1,94 @@
+.header {
+  padding: 8rpx 4rpx 28rpx;
+}
+
+.title {
+  font-size: 42rpx;
+  font-weight: 600;
+}
+
+.sub {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #98897f;
+  line-height: 1.6;
+}
+
+.warn {
+  margin-bottom: 20rpx;
+  padding: 20rpx 24rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #a35a3c;
+  background: #fdeee6;
+  border-radius: 16rpx;
+}
+
+.code {
+  padding: 2rpx 8rpx;
+  font-family: Menlo, Consolas, monospace;
+  font-size: 22rpx;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 6rpx;
+}
+
+.btn {
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #fff;
+  background: #e8855b;
+  border-radius: 24rpx;
+}
+
+.btn:active {
+  opacity: 0.85;
+}
+
+.list-head {
+  margin-bottom: 18rpx;
+  font-size: 24rpx;
+  color: #98897f;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.cell {
+  position: relative;
+  width: calc((100% - 32rpx) / 3);
+  height: 200rpx;
+  border-radius: 18rpx;
+  overflow: hidden;
+  background: #efe6dd;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+}
+
+.del {
+  position: absolute;
+  top: 6rpx;
+  right: 6rpx;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 40rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 50%;
+}
+
+.empty {
+  padding: 120rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #b6a79c;
+}

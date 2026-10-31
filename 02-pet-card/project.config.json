@@ -1,0 +1,24 @@
+{
+  "description": "02 宠物卡片组件练习",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "appid": "wx9ab8161a49864e29",
+  "projectname": "02-pet-card",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "coverView": true,
+    "packNpmManually": false,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "useCompilerPlugins": false
+  },
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
+}

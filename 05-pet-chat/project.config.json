@@ -1,0 +1,23 @@
+{
+  "description": "05 宠物口吻对话练习",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "appid": "wx9ab8161a49864e29",
+  "projectname": "05-pet-chat",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "packNpmManually": false,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "useCompilerPlugins": false
+  },
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
+}

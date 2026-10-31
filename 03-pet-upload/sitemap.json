@@ -1,0 +1,4 @@
+{
+  "desc": "云开发上传练习",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

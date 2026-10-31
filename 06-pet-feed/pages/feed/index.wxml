@@ -1,0 +1,60 @@
+<view class="page">
+  <view wx:if="{{tip}}" class="warn">{{tip}}</view>
+
+  <view wx:if="{{!posts.length && !loading && envReady}}" class="empty">
+    还没有动态，点右下角发一条
+  </view>
+
+  <view class="post" wx:for="{{posts}}" wx:key="_id">
+    <view class="head">
+      <view class="avatar">{{item.nickname ? item.nickname[0] : '宠'}}</view>
+      <view class="who">
+        <view class="name">{{item.nickname || '宠友'}}</view>
+        <view class="time">{{item.timeText}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{item.content}}" class="content">{{item.content}}</view>
+
+    <!-- 图片布局按数量分三种，别指望一套 grid 通吃 -->
+    <view wx:if="{{item.images.length === 1}}" class="pics pics-1">
+      <image
+        wx:for="{{item.images}}"
+        wx:for-item="img"
+        wx:key="*this"
+        class="pic"
+        src="{{img}}"
+        mode="aspectFill"
+        data-src="{{img}}"
+        data-urls="{{item.images}}"
+        bindtap="previewImage"
+      />
+    </view>
+
+    <view wx:elif="{{item.images.length}}" class="pics pics-n {{item.images.length > 4 ? 'cols-3' : 'cols-2'}}">
+      <image
+        wx:for="{{item.images}}"
+        wx:for-item="img"
+        wx:key="*this"
+        class="pic"
+        src="{{img}}"
+        mode="aspectFill"
+        data-src="{{img}}"
+        data-urls="{{item.images}}"
+        bindtap="previewImage"
+      />
+    </view>
+
+    <view class="actions">
+      <view class="like" data-id="{{item._id}}" bindtap="toggleLike">
+        <text class="heart {{myLikes[item._id] ? 'liked' : ''}}">{{myLikes[item._id] ? '♥' : '♡'}}</text>
+        <text class="count">{{item.likeCount || 0}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中…</view>
+  <view wx:if="{{noMore && posts.length}}" class="loading">没有更多了</view>
+
+  <view class="fab" bindtap="goPublish">＋</view>
+</view>
