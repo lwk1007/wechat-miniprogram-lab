@@ -1,0 +1,52 @@
+<view class="page safe-bottom" wx:if="{{!loading}}">
+
+  <view class="card">
+    <view class="h2">照片</view>
+    <view class="sub photo-tip">更换照片后，旧照片会按当前保存模式处理；隐私模式下新照片同样最迟 24 小时删除</view>
+    <view class="photo-wrap" bindtap="choosePhoto">
+      <image class="photo" src="{{newPhoto || photo}}" mode="aspectFill" wx:if="{{newPhoto || photo}}" bindtap="preview" />
+      <view class="photo photo-empty" wx:else>＋</view>
+      <view class="photo-mask">{{newPhoto ? '点按预览 · 再点卡片更换' : (photo ? '点按预览 · 点卡片更换' : '添加照片')}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="h2">基本资料</view>
+    <view class="form-item">
+      <view class="form-label">名字</view>
+      <input class="form-input" maxlength="12" value="{{name}}" bindinput="onNameInput" />
+    </view>
+    <view class="form-item">
+      <view class="form-label">性格</view>
+      <view class="chips">
+        <view
+          wx:for="{{personalities}}"
+          wx:key="key"
+          class="chip {{personality === item.key ? 'chip-on' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="choosePersonality"
+        >{{item.label}}</view>
+      </view>
+    </view>
+    <view class="form-item">
+      <view class="form-label">宠物类型</view>
+      <picker mode="selector" range="{{types}}" range-key="label" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="form-input picker-value">{{types[typeIndex].label}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <view class="form-label">怎么称呼你</view>
+      <input class="form-input" maxlength="12" value="{{ownerName}}" bindinput="onOwnerNameInput" placeholder="可留空" />
+    </view>
+    <view class="form-item">
+      <view class="form-label">开始陪伴的日子</view>
+      <picker mode="date" end="{{today}}" value="{{sinceDate}}" bindchange="onDateChange">
+        <view class="form-input picker-value">{{sinceDate || '选择日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="btn-primary save-btn {{saving ? 'btn-loading' : ''}}" bindtap="save">{{saving ? '保存中…' : '保存'}}</view>
+
+  <privacy-popup show="{{showPrivacy}}" bindagree="onPrivacyAgree" bindcancel="onPrivacyCancel" />
+</view>

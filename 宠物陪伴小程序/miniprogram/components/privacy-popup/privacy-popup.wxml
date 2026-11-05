@@ -1,0 +1,14 @@
+<view wx:if="{{show}}" class="privacy-mask" catchtouchmove="noop">
+  <view class="privacy-sheet">
+    <view class="privacy-title">隐私保护提示</view>
+    <view class="privacy-body">
+      为了把你的照片做成它的形象，我们需要使用你的相册或相机。照片的保存规则见
+      <text class="privacy-link" catchtap="onOpen">《宠物陪伴小程序隐私保护指引》</text>。
+    </view>
+    <view class="privacy-body privacy-sub">默认隐私模式下，照片最迟 24 小时内自动删除；你也可以随时在「我的」里立即删除。</view>
+    <view class="privacy-actions">
+      <view class="privacy-btn privacy-ghost" catchtap="onCancel">暂不</view>
+      <button class="privacy-btn privacy-primary" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="onAgree">同意并继续</button>
+    </view>
+  </view>
+</view>

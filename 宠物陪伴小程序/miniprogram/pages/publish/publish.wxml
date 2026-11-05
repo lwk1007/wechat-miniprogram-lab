@@ -1,0 +1,31 @@
+<view class="page safe-bottom">
+  <view class="card">
+    <textarea
+      class="content-input"
+      placeholder="分享今天的小事…"
+      maxlength="500"
+      value="{{content}}"
+      bindinput="onContentInput"
+      auto-height
+    ></textarea>
+    <view class="sub char-count">{{content.length}}/500</view>
+
+    <view class="image-grid">
+      <view wx:for="{{images}}" wx:key="*this" class="image-item">
+        <image class="image-thumb" src="{{item}}" mode="aspectFill" data-index="{{index}}" bindtap="previewImage" />
+        <view class="image-remove" data-index="{{index}}" catchtap="removeImage">×</view>
+      </view>
+      <view wx:if="{{images.length < 3}}" class="image-item image-add" bindtap="addImage">＋</view>
+    </view>
+  </view>
+
+  <view class="notice">
+    🌿 发布后，文字和图片将公开展示在社区，所有人可见；删除动态时图片会一并删除。宠物私密照片不会自动发布到这里。
+  </view>
+
+  <view class="btn-primary publish-btn {{submitting ? 'btn-loading' : ''}}" bindtap="submit">
+    {{submitting ? '发布中…' : '发布'}}
+  </view>
+
+  <privacy-popup show="{{showPrivacy}}" bindagree="onPrivacyAgree" bindcancel="onPrivacyCancel" />
+</view>

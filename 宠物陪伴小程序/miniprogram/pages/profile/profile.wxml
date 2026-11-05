@@ -1,0 +1,138 @@
+<view class="page safe-bottom">
+
+  <view wx:if="{{isDemo}}" class="demo-banner">
+    演示模式：数据仅保存在本机。配置云环境后自动切换（见项目 README）
+  </view>
+
+  <!-- 宠物卡片 -->
+  <view wx:if="{{pet}}" class="card pet-card">
+    <image wx:if="{{photo}}" class="pet-avatar" src="{{photo}}" mode="aspectFill" />
+    <view wx:else class="pet-avatar pet-avatar-generic">{{typeEmoji}}</view>
+    <view class="pet-info">
+      <view class="pet-name">{{pet.name}}</view>
+      <view class="sub">{{personalityLabel}} · 陪伴始于 {{pet.sinceDate || '今天'}}</view>
+    </view>
+    <view class="edit-link" bindtap="goEdit">编辑资料</view>
+  </view>
+  <view wx:else class="card pet-card">
+    <view class="pet-avatar pet-avatar-generic">🐾</view>
+    <view class="pet-info">
+      <view class="pet-name">还没有宠物</view>
+      <view class="sub">创建一只开始陪伴吧</view>
+    </view>
+    <view class="edit-link" bindtap="goCreate">去创建</view>
+  </view>
+
+  <!-- 隐私与保存设置 -->
+  <view class="card" wx:if="{{pet}}">
+    <view class="section-title">隐私与保存设置</view>
+
+    <view class="mode-row {{mode === 'private' ? 'mode-on' : ''}}" data-mode="private" bindtap="chooseMode">
+      <view class="mode-dot"></view>
+      <view class="mode-body">
+        <view class="mode-name">隐私模式 {{pet.storageMode === 'private' ? '（当前）' : ''}}</view>
+        <view class="sub">照片仅用于生成形象，最迟 24 小时内自动删除，之后使用通用形象；可随时重新上传或提前删除。</view>
+      </view>
+    </view>
+
+    <view class="mode-row {{mode === 'persistent' ? 'mode-on' : ''}}" data-mode="persistent" bindtap="chooseMode">
+      <view class="mode-dot"></view>
+      <view class="mode-body">
+        <view class="mode-name">长期保存模式 {{pet.storageMode === 'persistent' ? '（当前）' : ''}}</view>
+        <view class="sub">照片和宠物形象持续保存，用于陪伴空间展示；可随时切回隐私模式并发起删除。</view>
+      </view>
+    </view>
+
+    <view wx:if="{{mode !== pet.storageMode}}" class="btn-primary mode-save {{savingMode ? 'btn-loading' : ''}}" bindtap="saveMode">
+      {{savingMode ? '切换中…' : '保存设置'}}
+    </view>
+
+    <view wx:if="{{photo}}" class="link-row photo-row">
+      <view>宠物照片</view>
+      <view class="danger-link" bindtap="removePhotoNow">{{photoRemoving ? '删除中…' : '立即删除'}}</view>
+    </view>
+
+    <view class="link-row" bindtap="toggleRules">
+      <view>数据保留规则说明</view>
+      <view class="sub">{{showRules ? '收起' : '查看'}}</view>
+    </view>
+    <view wx:if="{{showRules}}" class="rules sub">
+      <view class="rule-line">1. 隐私模式：宠物照片及衍生素材最迟在上传（或切回隐私模式）后 24 小时内删除（清理任务每小时执行，有效期设为 22 小时以留出重试缓冲）。</view>
+      <view class="rule-line">2. 长期保存模式：宠物照片与形象持续保存，直到你切换回隐私模式或删除档案。</view>
+      <view class="rule-line">3. 换照片：旧照片按当时所在模式处理，隐私模式下会随下一轮清理一并删除，不会留在服务器上。</view>
+      <view class="rule-line">4. 社区动态：属于你主动公开的内容，与宠物私密照片分开存储、互不影响；删除动态时对应图片一并删除。</view>
+      <view class="rule-line">5. 聊天记录保留最近 90 天，到期自动删除；它写的信只保留最近 20 封，每 12 小时最多生成一封。</view>
+      <view class="rule-line">6. 你可以随时删除宠物档案，或一键清空全部数据（含社区内容）。</view>
+    </view>
+  </view>
+
+  <!-- 我的动态 -->
+  <view class="card">
+    <view class="section-title">我的动态</view>
+    <view wx:if="{{postsLoading}}" class="sub center tip">加载中…</view>
+    <view wx:elif="{{myPosts.length === 0}}" class="sub center tip">还没有动态，去社区分享第一件小事吧</view>
+    <view wx:else>
+      <view wx:for="{{myPosts}}" wx:key="_id" class="my-post">
+        <view class="my-post-content">{{item.content || '[图片]'}}</view>
+        <view class="sub">{{item.likeCount}} 赞 · {{item.commentCount}} 评论</view>
+        <view class="my-post-del" data-id="{{item._id}}" bindtap="deleteMyPost">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据管理 -->
+  <view class="card">
+    <view class="section-title">数据管理</view>
+
+    <view class="link-row action-row" bindtap="openPrivacyContract">
+      <view class="action-body">
+        <view class="action-name">隐私保护指引</view>
+        <view class="sub">在小程序后台配置的正式说明，随时可查</view>
+      </view>
+      <view class="action-arrow">›</view>
+    </view>
+
+    <view class="link-row action-row" bindtap="goExport">
+      <view class="action-body">
+        <view class="action-name">查看并导出我的数据</view>
+        <view class="sub">汇总档案、聊天、动态和信，可整份复制保存</view>
+      </view>
+      <view class="action-arrow">›</view>
+    </view>
+
+    <view class="link-row action-row" bindtap="clearLocalCache">
+      <view class="action-body">
+        <view class="action-name">清除本机缓存</view>
+        <view class="sub">只清这台设备上保存的内容，云端数据不受影响</view>
+      </view>
+      <view class="action-arrow">›</view>
+    </view>
+
+    <view class="link-row action-row" bindtap="purgeAll">
+      <view class="action-body">
+        <view class="action-name danger-link">{{purging ? '清空中…' : '清空全部数据'}}</view>
+        <view class="sub">连同社区动态、评论、点赞一起删除，无法恢复</view>
+      </view>
+      <view class="action-arrow">›</view>
+    </view>
+  </view>
+
+  <!-- 使用帮助 -->
+  <view class="card">
+    <view class="link-row" bindtap="toggleHelp">
+      <view>使用帮助</view>
+      <view class="sub">{{showHelp ? '收起' : '查看'}}</view>
+    </view>
+    <view wx:if="{{showHelp}}" class="rules sub">
+      <view class="rule-line">· 陪伴页：点一点宠物，或使用“摸摸、喂食、玩耍”互动。</view>
+      <view class="rule-line">· 聊天：宠物是 AI 陪伴角色，回复由大模型或演示模板生成，不代表真实宠物。</view>
+      <view class="rule-line">· 社区：分享养宠日常，可以点赞、评论；发布前会提示公开展示。</view>
+      <view class="rule-line">· 照片安全：默认隐私模式，24 小时自动删除，不会偷偷保留副本。</view>
+    </view>
+  </view>
+
+  <!-- 删除宠物 -->
+  <view wx:if="{{pet}}" class="btn-danger-ghost delete-pet" bindtap="deletePet">删除宠物及全部数据</view>
+
+  <view class="sub center footer-note">宠物陪伴 · 简单温暖的陪伴</view>
+</view>

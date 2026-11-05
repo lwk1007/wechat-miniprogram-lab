@@ -1,0 +1,104 @@
+<view class="page safe-bottom">
+
+  <!-- 步骤指示 -->
+  <view class="steps">
+    <view class="step-bar">
+      <view class="step-fill" style="width: {{step * 33.3}}%"></view>
+    </view>
+    <view class="sub">第 {{step}} 步 · 共 3 步</view>
+  </view>
+
+  <!-- 第一步：照片 -->
+  <view wx:if="{{step === 1}}" class="card">
+    <view class="h2">给它拍张照</view>
+    <view class="sub step-desc">照片只用于生成它的形象，隐私模式下最迟 24 小时自动删除</view>
+
+    <view wx:if="{{!photo}}" class="photo-box" bindtap="choosePhoto">
+      <view class="photo-add">＋</view>
+      <view class="sub">选择照片</view>
+    </view>
+    <view wx:else class="photo-preview-wrap">
+      <image class="photo-preview" src="{{photo}}" mode="aspectFill" bindtap="previewPhoto" />
+      <view class="photo-ops">
+        <view class="photo-op" bindtap="choosePhoto">重新选择</view>
+        <view class="photo-op photo-op-remove" bindtap="removePhoto">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第二步：名字与性格 -->
+  <view wx:if="{{step === 2}}" class="card">
+    <view class="h2">给它起个名字</view>
+    <view class="form-item name-item">
+      <input class="form-input" placeholder="比如：毛毛" maxlength="12" value="{{name}}" bindinput="onNameInput" />
+    </view>
+
+    <view class="form-label">它的性格是…</view>
+    <view class="personality-grid">
+      <view
+        wx:for="{{personalities}}"
+        wx:key="key"
+        class="personality {{personality === item.key ? 'personality-on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="choosePersonality"
+      >
+        <view class="personality-label">{{item.label}}</view>
+        <view class="sub">{{item.desc}}</view>
+      </view>
+    </view>
+
+    <view class="optional-title sub">以下可跳过</view>
+    <view class="form-item">
+      <view class="form-label">宠物类型</view>
+      <picker mode="selector" range="{{types}}" range-key="label" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="form-input picker-value">{{types[typeIndex].label}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <view class="form-label">怎么称呼你</view>
+      <input class="form-input" placeholder="比如：妈妈" maxlength="12" value="{{ownerName}}" bindinput="onOwnerNameInput" />
+    </view>
+    <view class="form-item">
+      <view class="form-label">开始陪伴的日子</view>
+      <picker mode="date" end="{{today}}" value="{{sinceDate}}" bindchange="onDateChange">
+        <view class="form-input picker-value">{{sinceDate || '选择日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 第三步：保存模式 + 确认 -->
+  <view wx:if="{{step === 3}}" class="card">
+    <view class="h2">照片怎么保存？</view>
+
+    <view class="mode {{mode === 'private' ? 'mode-on' : ''}}" data-mode="private" bindtap="chooseMode">
+      <view class="mode-head">
+        <view class="mode-title">隐私模式</view>
+        <view class="tag" wx:if="{{mode === 'private'}}">已选（推荐）</view>
+      </view>
+      <view class="sub">照片仅用于生成形象，最迟 24 小时内自动删除；之后使用通用形象，你可以随时重新上传。</view>
+    </view>
+
+    <view class="mode {{mode === 'persistent' ? 'mode-on' : ''}}" data-mode="persistent" bindtap="chooseMode">
+      <view class="mode-head">
+        <view class="mode-title">长期保存模式</view>
+        <view class="tag" wx:if="{{mode === 'persistent'}}">已选</view>
+      </view>
+      <view class="sub">照片和宠物形象会一直保存，用于陪伴和社区展示；可随时在“我的”里撤回并发起删除。</view>
+    </view>
+
+    <view class="summary sub">
+      「{{name}}」 · {{types[typeIndex].label}} ·
+      {{personality === 'loyal' ? '忠心' : personality === 'lively' ? '活泼' : personality === 'foodie' ? '贪吃' : '亲人'}}
+    </view>
+
+    <view class="btn-primary {{submitting ? 'btn-loading' : ''}}" bindtap="submit">{{submitText}}</view>
+  </view>
+
+  <!-- 底部操作 -->
+  <view class="nav-btns">
+    <view wx:if="{{step > 1}}" class="btn-ghost nav-btn" bindtap="prev">上一步</view>
+    <view wx:if="{{step < 3}}" class="btn-primary nav-btn" bindtap="next">下一步</view>
+  </view>
+
+  <privacy-popup show="{{showPrivacy}}" bindagree="onPrivacyAgree" bindcancel="onPrivacyCancel" />
+</view>

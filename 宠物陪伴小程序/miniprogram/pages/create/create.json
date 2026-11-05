@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "创建宠物",
+  "usingComponents": {
+    "privacy-popup": "/components/privacy-popup/privacy-popup"
+  }
+}

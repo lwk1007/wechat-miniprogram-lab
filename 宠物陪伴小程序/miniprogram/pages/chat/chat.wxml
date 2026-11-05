@@ -1,0 +1,66 @@
+<view class="page">
+
+  <view wx:if="{{isDemo}}" class="demo-banner chat-banner">
+    演示模式：回复来自本地模板，未接入真实大模型，也不会长期记住聊天内容
+  </view>
+
+  <scroll-view class="msg-list" scroll-y scroll-top="{{scrollTop}}" enhanced show-scrollbar="{{false}}">
+    <view wx:if="{{loading}}" class="empty">正在加载…</view>
+
+    <block wx:else>
+      <view class="empty chat-intro">
+        <view class="empty-icon">{{petEmoji}}</view>
+        <view>这是 AI 宠物陪伴，「{{pet.name}}」会用它的口吻和你聊天</view>
+      </view>
+
+      <view wx:for="{{messages}}" wx:key="_id" class="msg-row {{item.role === 'user' ? 'msg-right' : 'msg-left'}}">
+
+        <view wx:if="{{item.role === 'pet'}}" class="avatar">{{petEmoji}}</view>
+
+        <view class="msg-col">
+          <view class="msg-name" wx:if="{{item.role === 'pet'}}">{{pet.name}}</view>
+
+          <view class="bubble {{item.role === 'user' ? 'bubble-user' : ''}}">
+            <text>{{item.content}}</text>
+            <view wx:if="{{item.isDemo}}" class="demo-tag">演示回复</view>
+          </view>
+
+          <view wx:if="{{item.status === 'sending'}}" class="msg-status">发送中…</view>
+          <view wx:if="{{item.status === 'failed'}}" class="msg-status msg-fail" bindtap="retrySend" data-id="{{item._id}}">
+            {{item.error}} · 点这里重发
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{sending}}" class="msg-row msg-left">
+        <view class="avatar">{{petEmoji}}</view>
+        <view class="bubble typing">
+          <view class="dot"></view><view class="dot"></view><view class="dot"></view>
+        </view>
+      </view>
+
+      <view class="msg-bottom-space"></view>
+    </block>
+  </scroll-view>
+
+  <!-- 快捷话题 -->
+  <view class="topics" wx:if="{{!loading}}">
+    <view class="topic" wx:for="{{['今天过得怎么样', '陪我聊聊天', '我想你了', '最近有点累']}}" wx:key="*this"
+      data-topic="{{item}}" bindtap="onTopic">{{item}}</view>
+  </view>
+
+  <!-- 输入栏 -->
+  <view class="input-bar safe-bottom">
+    <input
+      class="chat-input"
+      placeholder="说点什么…"
+      value="{{input}}"
+      confirm-type="send"
+      bindinput="onInput"
+      bindconfirm="send"
+      cursor-spacing="16"
+      maxlength="300"
+    />
+    <view class="send-btn {{(!input || sending) ? 'send-disabled' : ''}}" bindtap="send">发送</view>
+  </view>
+</view>

@@ -1,0 +1,38 @@
+<view class="page safe-bottom">
+
+  <view wx:if="{{isDemo}}" class="demo-banner">
+    演示模式：以下均为本机保存的数据
+  </view>
+
+  <view class="card intro">
+    <view class="section-title">我的数据</view>
+    <view class="sub">这里汇总了你账号下的全部数据，可以逐项查看，也可以整份复制保存。</view>
+    <view class="sub meta">数据来源：{{scopeText}} · 导出时间：{{exportedAtText}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card center sub tip">读取中…</view>
+  <view wx:elif="{{error}}" class="card center sub tip">{{error}}</view>
+
+  <block wx:else>
+    <view class="stat-row">
+      <view wx:for="{{counts}}" wx:key="label" class="stat">
+        <view class="stat-num">{{item.value}}</view>
+        <view class="stat-label">{{item.label}}</view>
+      </view>
+    </view>
+
+    <view wx:for="{{sections}}" wx:key="key" class="card section">
+      <view class="section-head">
+        <view class="section-title">{{item.title}}</view>
+        <view wx:if="{{item.hint}}" class="sub hint">{{item.hint}}</view>
+      </view>
+      <view wx:if="{{!item.lines.length}}" class="sub empty">（暂无）</view>
+      <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="k" class="line">{{line.text}}</view>
+    </view>
+
+    <view class="btn-primary copy-btn {{copying ? 'btn-loading' : ''}}" bindtap="copyAll">
+      {{copying ? '复制中…' : '复制全部内容'}}
+    </view>
+    <view class="sub center footer-note">复制后可以粘贴到备忘录或发给客服，用于存档或申诉。</view>
+  </block>
+</view>

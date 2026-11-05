@@ -1,0 +1,123 @@
+<view class="desk {{night ? 'night' : ''}}">
+
+  <!-- 壁纸 -->
+  <view class="wall">
+    <view class="sun"></view>
+    <view class="cloud cloud-1"></view>
+    <view class="cloud cloud-2"></view>
+    <view class="cloud cloud-3"></view>
+    <view class="hill hill-back"></view>
+    <view class="hill hill-front"></view>
+  </view>
+
+  <!-- 星星：只在夜里出现，压在暗色蒙层之上 -->
+  <view class="stars">
+    <view class="star" style="left: 12%; top: 150rpx; animation-delay: 0s"></view>
+    <view class="star" style="left: 26%; top: 260rpx; animation-delay: 0.8s"></view>
+    <view class="star" style="left: 44%; top: 120rpx; animation-delay: 1.6s"></view>
+    <view class="star" style="left: 58%; top: 300rpx; animation-delay: 0.4s"></view>
+    <view class="star" style="left: 72%; top: 200rpx; animation-delay: 2.1s"></view>
+    <view class="star" style="left: 86%; top: 360rpx; animation-delay: 1.2s"></view>
+    <view class="star" style="left: 34%; top: 400rpx; animation-delay: 2.6s"></view>
+  </view>
+
+  <!-- 夜幕蒙层：靠 opacity 过渡，切换是淡入淡出而不是硬闪 -->
+  <view class="veil {{night ? 'on' : ''}}"></view>
+
+  <!-- 空白处双击：宠物跑过来 -->
+  <view class="tap-layer" catchtap="onDeskTap"></view>
+
+  <!-- 状态栏（自定义导航） -->
+  <view class="statusbar" style="padding-top: {{statusBarHeight}}px; padding-right: {{navPadRight}}px">
+    <view class="sb-left">
+      <view class="sb-back" catchtap="goBack">‹</view>
+      <text class="sb-clock">{{clock}}</text>
+    </view>
+    <view class="sb-right">
+      <view class="sb-signal">
+        <view class="sig-bar s1"></view>
+        <view class="sig-bar s2"></view>
+        <view class="sig-bar s3"></view>
+        <view class="sig-bar s4"></view>
+      </view>
+      <view class="sb-battery"><view class="bat-fill"></view></view>
+    </view>
+  </view>
+
+  <view class="desk-label">{{night ? '桌面预览 · 小程序内模拟 · 夜间' : '桌面预览 · 小程序内模拟'}}</view>
+
+  <!-- 加载 / 失败 -->
+  <view wx:if="{{loading}}" class="center-tip">正在回到桌面…</view>
+  <view wx:elif="{{error}}" class="center-tip">
+    <view>{{error}}</view>
+    <view class="retry" catchtap="loadRetry">重试</view>
+  </view>
+
+  <!-- 图标网格（装饰）：宠物走到某一列下方时，该列会抖一下 -->
+  <view class="icons">
+    <view class="icon {{shakeCol === item.col ? 'shake' : ''}}" wx:for="{{apps}}" wx:key="name" data-name="{{item.name}}" catchtap="tapIcon">
+      <view class="icon-tile" style="background: {{item.bg}}">{{item.emoji}}</view>
+      <view class="icon-name">{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 宠物：横向位移走 transform（合成层，不触发 layout），姿态分四层各自负责 -->
+  <view
+    wx:if="{{!loading && !error && pet}}"
+    class="pet-layer"
+    style="transform: translate3d({{xPx}}px, 0, 0); transition-duration: {{dragging ? 0 : duration}}ms"
+  >
+    <view class="pet-shadow {{walking || running ? 'walking' : ''}} {{lifted ? 'up' : ''}}"></view>
+
+    <view class="hearts">
+      <view wx:for="{{hearts}}" wx:key="key" class="heart" style="left: {{item.left}}%">💗</view>
+    </view>
+
+    <view
+      class="pet-lift {{lifted ? 'lifted' : ''}} {{dragging ? 'dragging' : ''}}"
+      style="transform: translateY({{liftY}}px)"
+    >
+      <view class="pet-facing" style="transform: scaleX({{facing}})">
+        <view class="pet-bob {{walking ? 'walking' : ''}} {{running ? 'running' : ''}} {{lifted ? 'dangling' : ''}}">
+          <view
+            class="pet-avatar {{anim}}"
+            catchtap="tapPet"
+            catchlongpress="onPetLongPress"
+            bindtouchstart="onPetTouchStart"
+            catchtouchmove="onPetTouchMove"
+            bindtouchend="onPetTouchEnd"
+            bindtouchcancel="onPetTouchEnd"
+          >
+            <image wx:if="{{photo}}" class="pet-photo" src="{{photo}}" mode="aspectFill" />
+            <view wx:else class="pet-emoji">{{typeEmoji}}</view>
+            <view wx:if="{{expression}}" class="pet-face">{{expression}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 零食 / 小球：喂食与玩耍时从脚边冒出来 -->
+    <view wx:if="{{food}}" class="eat-food">🍖</view>
+    <view wx:if="{{ball}}" class="play-ball">🎾</view>
+  </view>
+
+  <!-- 气泡 -->
+  <view
+    wx:if="{{bubble}}"
+    class="bubble"
+    style="transform: translate3d({{bubblePx}}px, 0, 0) translateX(-50%); transition-duration: {{dragging ? 0 : duration}}ms"
+  >{{bubble}}</view>
+
+  <!-- 底部 Dock：原来是四个装饰格，现在换成真功能，不额外占地方也好发现 -->
+  <view class="dock">
+    <view class="dock-item" data-type="chat" catchtap="onDockTap">💬</view>
+    <view class="dock-item {{lifted ? 'dim' : ''}}" data-type="feed" catchtap="onDockTap">🍖</view>
+    <view class="dock-item {{lifted ? 'dim' : ''}}" data-type="play" catchtap="onDockTap">🎾</view>
+    <view class="dock-item" data-type="home" catchtap="onDockTap">🐾</view>
+  </view>
+
+  <!-- 引导 -->
+  <view wx:if="{{showGuide && !loading && pet}}" class="guide">点点它 · 长按能拎起来拖走 · 底部可喂饭陪玩 · 双击聊两句</view>
+
+  <view wx:if="{{isDemo}}" class="demo-tag">演示模式</view>
+</view>

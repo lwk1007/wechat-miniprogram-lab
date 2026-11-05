@@ -1,0 +1,67 @@
+<view class="letter-page">
+
+  <!-- 谁写的 -->
+  <view class="from">
+    <view class="from-avatar">
+      <image wx:if="{{photo}}" class="from-img" src="{{photo}}" mode="aspectFill" />
+      <view wx:else class="from-emoji">{{typeEmoji}}</view>
+    </view>
+    <view class="from-text">
+      <view class="from-title">来自 {{petName}} 的一封信</view>
+      <view class="from-sub">{{dateText || '它还没有写过信'}}</view>
+    </view>
+    <view wx:if="{{letter}}" class="from-copy" bindtap="copy">复制</view>
+  </view>
+
+  <!-- 加载 -->
+  <view wx:if="{{loading}}" class="empty">
+    <view class="empty-icon">✉️</view>
+    <view>正在拆信封…</view>
+  </view>
+
+  <!-- 出错且没有信可看 -->
+  <view wx:elif="{{error && !letter}}" class="empty">
+    <view class="empty-icon">🌧️</view>
+    <view>{{error}}</view>
+    <view class="btn-ghost empty-retry" bindtap="loadRetry">重试</view>
+  </view>
+
+  <!-- 信纸 -->
+  <view wx:elif="{{letter}}" class="paper">
+    <view class="paper-fold"></view>
+    <view
+      wx:for="{{paras}}"
+      wx:key="key"
+      class="para {{item.greet ? 'greet' : ''}} {{item.sign ? 'sign' : ''}}"
+    >{{item.text}}</view>
+
+    <view class="paper-date">{{dateText}}</view>
+
+    <view class="paper-foot">
+      <view class="paper-source">{{sourceText}}</view>
+      <view wx:if="{{letter.isDemo}}" class="paper-demo">
+        演示模式：这封信是按真实互动数据拼出的模板信，接入模型后会写得更具体
+      </view>
+    </view>
+  </view>
+
+  <!-- 还没有信 -->
+  <view wx:else class="blank">
+    <view class="blank-icon">💌</view>
+    <view class="blank-title">{{petName}} 还没给你写过信</view>
+    <view class="sub blank-desc">
+      它会翻一翻最近 30 天你们的互动——喂过几次饭、摸过几下、一起待过哪儿——
+      然后写成一小封信。
+    </view>
+  </view>
+
+  <!-- 底部操作 -->
+  <view class="footer">
+    <view wx:if="{{error && letter}}" class="footer-error">{{error}}</view>
+    <view class="btn-primary {{(!canWrite || writing) ? 'disabled' : ''}}" bindtap="write">
+      {{writing ? '它正在写…' : (letter ? (canWrite ? '再听它说一封' : cooldownText + '后可再写') : '让它写一封信')}}
+    </view>
+    <view class="footer-note">信由 AI 根据你们的互动生成，它并不真的记得你说过的话</view>
+  </view>
+
+</view>

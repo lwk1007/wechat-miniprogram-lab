@@ -1,0 +1,103 @@
+/* 全局样式与设计规范 */
+page {
+  --bg: #F7F8FA;
+  --card: #FFFFFF;
+  --primary: #6FA58A;
+  --primary-light: #EAF3EE;
+  --text: #26312B;
+  --sub: #7B847F;
+  --line: #E9EEEB;
+  --danger: #D97A6C;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+/* 8 点间距体系：基础单位 8rpx 的倍数 */
+.card {
+  background: var(--card);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin: 24rpx;
+}
+
+.h1 { font-size: 44rpx; font-weight: 600; }
+.h2 { font-size: 36rpx; font-weight: 600; }
+.sub { color: var(--sub); font-size: 26rpx; }
+.center { text-align: center; }
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 44rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 30rpx;
+  text-align: center;
+  font-weight: 500;
+}
+.btn-primary.disabled { opacity: 0.5; }
+.btn-primary.btn-loading { opacity: 0.7; }
+
+.btn-ghost {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 44rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 30rpx;
+  text-align: center;
+  font-weight: 500;
+}
+
+.btn-danger-ghost {
+  background: #FBEEEC;
+  color: var(--danger);
+  border-radius: 44rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 30rpx;
+  text-align: center;
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  color: var(--sub);
+  padding: 96rpx 48rpx;
+  font-size: 26rpx;
+}
+.empty-icon { font-size: 80rpx; margin-bottom: 16rpx; }
+
+.divider { height: 1rpx; background: var(--line); }
+
+.tag {
+  display: inline-block;
+  font-size: 20rpx;
+  color: var(--primary);
+  background: var(--primary-light);
+  border-radius: 8rpx;
+  padding: 2rpx 12rpx;
+  margin-left: 8rpx;
+}
+
+.demo-banner {
+  margin: 24rpx;
+  padding: 16rpx 24rpx;
+  background: #FDF6E9;
+  color: #A2834B;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+}
+
+.safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 24rpx); }
+
+.form-item { margin-bottom: 32rpx; }
+.form-label { font-size: 26rpx; color: var(--sub); margin-bottom: 12rpx; }
+.form-input {
+  background: var(--bg);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+}

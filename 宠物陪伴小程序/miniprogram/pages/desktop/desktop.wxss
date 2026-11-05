@@ -1,0 +1,515 @@
+/* 桌面态：在小程序内模拟「手机桌面」，宠物自主走动 */
+/* 用视口固定定位铺满：不依赖 100vh 的具体换算，
+   状态栏/安全区/不同机型都由视口自身负责，底部不会留白 */
+.desk {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #E8F1F4;
+}
+
+/* ---------- 壁纸 ---------- */
+.wall {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: linear-gradient(180deg, #DCEBF5 0%, #E7F2EC 58%, #F0F6F0 100%);
+}
+.sun {
+  position: absolute;
+  top: 120rpx; right: 90rpx;
+  width: 160rpx; height: 160rpx;
+  border-radius: 50%;
+  background: #FCEFC9;
+}
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 100rpx;
+}
+.cloud-1 { width: 180rpx; height: 60rpx; top: 220rpx; left: 60rpx; }
+.cloud-2 { width: 120rpx; height: 48rpx; top: 300rpx; right: 140rpx; opacity: 0.8; }
+.cloud-3 { width: 90rpx; height: 36rpx; top: 160rpx; left: 300rpx; opacity: 0.6; }
+.hill {
+  position: absolute;
+  border-radius: 50%;
+}
+.hill-back {
+  width: 1400rpx; height: 700rpx;
+  left: -320rpx; bottom: -380rpx;
+  background: #DDEBE2;
+}
+.hill-front {
+  width: 1600rpx; height: 760rpx;
+  right: -420rpx; bottom: -460rpx;
+  background: #D2E5D9;
+  opacity: 0.85;
+}
+
+/* ---------- 夜色 ---------- */
+/* 蒙层盖在图标和宠物之上（z 21），状态栏与气泡仍在它之上，保证夜间可读 */
+.veil {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 21;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.9s ease;
+  background: linear-gradient(180deg, rgba(17, 27, 50, 0.74) 0%, rgba(24, 34, 56, 0.68) 48%, rgba(30, 40, 60, 0.62) 100%);
+}
+.veil.on { opacity: 1; }
+
+.stars {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 520rpx;
+  z-index: 22;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+.desk.night .stars { opacity: 1; }
+.star {
+  position: absolute;
+  width: 6rpx; height: 6rpx;
+  border-radius: 50%;
+  background: #F3F7FF;
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* 白天是太阳，夜里换成偏冷的月亮 */
+.sun { transition: background 0.9s ease; }
+.desk.night .sun {
+  background: #E7EDF6;
+  box-shadow: 0 0 60rpx rgba(231, 237, 246, 0.28);
+}
+
+/* 夜间文字反色，否则深色字压在深色壁纸上看不清 */
+.desk.night .sb-clock,
+.desk.night .desk-label { color: rgba(232, 238, 242, 0.82); }
+.desk.night .sb-back {
+  background: rgba(255, 255, 255, 0.16);
+  color: #E8EEF2;
+}
+.desk.night .sig-bar,
+.desk.night .bat-fill { background: #E8EEF2; }
+.desk.night .sb-battery { border-color: rgba(232, 238, 242, 0.78); }
+.desk.night .demo-tag { color: rgba(232, 238, 242, 0.45); }
+.desk.night .center-tip { color: rgba(232, 238, 242, 0.8); }
+
+/* 空白处双击的接收层：在最底下，不挡图标和宠物 */
+.tap-layer {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 2;
+}
+
+/* ---------- 状态栏 ---------- */
+.statusbar {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32rpx 8rpx;
+}
+.sb-left { display: flex; align-items: center; }
+.sb-back {
+  width: 56rpx; height: 56rpx;
+  line-height: 50rpx;
+  text-align: center;
+  font-size: 44rpx;
+  color: #2E3A33;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+}
+.sb-clock {
+  margin-left: 16rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #2E3A33;
+}
+.sb-right { display: flex; align-items: center; }
+.sb-signal { display: flex; align-items: flex-end; height: 24rpx; }
+.sig-bar {
+  width: 6rpx;
+  margin-left: 4rpx;
+  background: #2E3A33;
+  border-radius: 2rpx;
+  opacity: 0.75;
+}
+.s1 { height: 8rpx; }
+.s2 { height: 13rpx; }
+.s3 { height: 18rpx; }
+.s4 { height: 24rpx; }
+.sb-battery {
+  width: 44rpx; height: 22rpx;
+  margin-left: 14rpx;
+  border: 2rpx solid #2E3A33;
+  border-radius: 6rpx;
+  padding: 3rpx;
+  box-sizing: border-box;
+}
+.bat-fill {
+  width: 68%;
+  height: 100%;
+  background: #2E3A33;
+  border-radius: 2rpx;
+}
+
+.desk-label {
+  position: relative;
+  z-index: 20;
+  text-align: center;
+  font-size: 22rpx;
+  letter-spacing: 2rpx;
+  color: rgba(46, 58, 51, 0.5);
+}
+
+/* ---------- 图标网格 ---------- */
+.icons {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 40rpx 40rpx 0;
+}
+.icon {
+  width: 25%;
+  margin-bottom: 32rpx;
+  text-align: center;
+}
+.icon-tile {
+  width: 96rpx; height: 96rpx;
+  margin: 0 auto;
+  border-radius: 26rpx;
+  font-size: 44rpx;
+  line-height: 96rpx;
+  box-shadow: 0 4rpx 14rpx rgba(38, 49, 43, 0.08);
+}
+.icon-name {
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  color: rgba(46, 58, 51, 0.62);
+}
+
+/* 宠物走到这一列下方时，整列图标被顶得抖一下 */
+.icon.shake {
+  animation: icon-shake 0.6s ease;
+}
+@keyframes icon-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(-8rpx) rotate(-4deg); }
+  32% { transform: translateX(8rpx) rotate(4deg); }
+  48% { transform: translateX(-6rpx) rotate(-3deg); }
+  64% { transform: translateX(5rpx) rotate(2deg); }
+  82% { transform: translateX(-2rpx) rotate(-1deg); }
+}
+
+/* ---------- 宠物 ---------- */
+.pet-layer {
+  position: absolute;
+  bottom: 230rpx;
+  left: 0;
+  width: 200rpx;
+  margin-left: -100rpx;
+  z-index: 20;
+  /* 横向位移走 transform：合成层上做，不触发 layout，拖动才跟得住手指 */
+  transition-property: transform;
+  transition-timing-function: linear;
+  will-change: transform;
+}
+/* 提起层：只负责纵向，和横向走动互不干扰 */
+.pet-lift {
+  position: relative;
+  transition: transform 0.34s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+.pet-lift.lifted {
+  transition: transform 0.08s linear;
+}
+/* 拖动中一律不要过渡，手指到哪儿宠物到哪儿 */
+.pet-lift.dragging {
+  transition: none;
+}
+.pet-shadow {
+  position: absolute;
+  left: 32rpx;
+  bottom: -12rpx;
+  width: 136rpx;
+  height: 26rpx;
+  background: rgba(38, 49, 43, 0.13);
+  border-radius: 50%;
+  transition: width 0.3s ease, left 0.3s ease, opacity 0.3s ease;
+}
+/* 被提起来时影子变小变淡：离地越高，影子越弱 */
+.pet-shadow.up {
+  left: 52rpx;
+  width: 96rpx;
+  opacity: 0.45;
+}
+.pet-shadow.walking {
+  animation: shadow-step 0.5s ease-in-out infinite;
+}
+@keyframes shadow-step {
+  0%, 100% { opacity: 0.85; transform: scaleX(1); }
+  50% { opacity: 0.6; transform: scaleX(0.88); }
+}
+.pet-facing {
+  width: 200rpx;
+  transition: transform 0.25s ease;
+}
+.pet-bob {
+  animation: idle-bob 3s ease-in-out infinite;
+}
+.pet-bob.walking {
+  animation: walk-bob 0.5s ease-in-out infinite;
+}
+/* 跑：频率更高、幅度更大，放在 walking 之后覆盖它 */
+.pet-bob.running {
+  animation: run-bob 0.26s ease-in-out infinite;
+}
+/* 被拎在手里：以头顶为轴轻轻晃 */
+.pet-bob.dangling {
+  transform-origin: 50% 4%;
+  animation: dangle 1.15s ease-in-out infinite;
+}
+@keyframes dangle {
+  0%, 100% { transform: rotate(-7deg) translateY(0); }
+  50% { transform: rotate(7deg) translateY(5rpx); }
+}
+.pet-avatar {
+  position: relative;
+  width: 180rpx;
+  height: 180rpx;
+  margin: 0 auto;
+  text-align: center;
+}
+.pet-photo {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 50%;
+  border: 6rpx solid #FFFFFF;
+  box-sizing: border-box;
+  box-shadow: 0 10rpx 26rpx rgba(38, 49, 43, 0.16);
+}
+.pet-emoji {
+  width: 180rpx;
+  height: 180rpx;
+  line-height: 180rpx;
+  font-size: 130rpx;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 10rpx 26rpx rgba(38, 49, 43, 0.12);
+}
+
+/* 待机 / 走动 / 动作反馈：全部只用 transform，避免 setData 每帧刷样式 */
+@keyframes idle-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10rpx); }
+}
+@keyframes walk-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-14rpx) rotate(2deg); }
+}
+.anim-happy { animation: pop 0.7s ease; }
+.anim-eat { animation: eat 0.9s ease; }
+.anim-bounce { animation: bounce 0.9s ease; }
+.anim-bump { animation: bump 0.6s ease; }
+.anim-land { animation: land 0.55s cubic-bezier(0.34, 1.4, 0.64, 1); }
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12) rotate(4deg); }
+  100% { transform: scale(1); }
+}
+@keyframes eat {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(0.94) rotate(-6deg); }
+  50% { transform: scale(1.06) rotate(5deg); }
+  75% { transform: scale(0.96) rotate(-4deg); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-56rpx); }
+  55% { transform: translateY(0); }
+  75% { transform: translateY(-20rpx); }
+}
+/* 顶图标：短促往上一顶，落回时带一点压缩感 */
+@keyframes bump {
+  0%, 100% { transform: translateY(0) scale(1); }
+  26% { transform: translateY(-46rpx) scale(1.06); }
+  46% { transform: translateY(0) scale(1.08, 0.94); }
+  66% { transform: translateY(-14rpx) scale(1.02); }
+}
+@keyframes run-bob {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-24rpx) rotate(5deg); }
+}
+/* 落地：压扁再回弹，配合影子恢复 */
+@keyframes land {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.16, 0.78) translateY(8rpx); }
+  62% { transform: scale(0.94, 1.08) translateY(-8rpx); }
+  100% { transform: scale(1); }
+}
+
+/* 表情脸：动作之外再给一张脸，情绪一眼能看出 */
+.pet-face {
+  position: absolute;
+  right: -8rpx;
+  top: -12rpx;
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
+  font-size: 38rpx;
+  background: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 4rpx 14rpx rgba(38, 49, 43, 0.18);
+  animation: fade-in 0.2s ease;
+}
+
+/* 零食 / 小球：从脚边冒出来 */
+.eat-food, .play-ball {
+  position: absolute;
+  left: 50%;
+  bottom: 6rpx;
+  margin-left: -24rpx;
+  font-size: 46rpx;
+  line-height: 1;
+  pointer-events: none;
+}
+.eat-food { animation: food-fly 1.15s ease-out forwards; }
+.play-ball { animation: ball-hop 1.2s ease-out forwards; }
+@keyframes food-fly {
+  0% { transform: translateY(-24rpx) scale(0.5); opacity: 0; }
+  24% { transform: translateY(-46rpx) scale(1); opacity: 1; }
+  100% { transform: translateY(-128rpx) scale(0.4); opacity: 0; }
+}
+@keyframes ball-hop {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  18% { transform: translate(0, -66rpx) scale(1); opacity: 1; }
+  44% { transform: translate(46rpx, 0); }
+  68% { transform: translate(96rpx, -48rpx); }
+  100% { transform: translate(146rpx, 14rpx) scale(0.6); opacity: 0; }
+}
+
+/* 小心心 */
+.hearts {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 150rpx;
+  height: 200rpx;
+  pointer-events: none;
+}
+.heart {
+  position: absolute;
+  bottom: 0;
+  font-size: 36rpx;
+  animation: heart-up 1.2s ease-out forwards;
+}
+@keyframes heart-up {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-180rpx) scale(1.1); opacity: 0; }
+}
+
+/* ---------- 气泡 / 引导 ---------- */
+.bubble {
+  position: absolute;
+  bottom: 440rpx;
+  transform: translateX(-50%);
+  max-width: 420rpx;
+  z-index: 25;
+  transition-property: transform;
+  transition-timing-function: linear;
+  will-change: transform;
+  padding: 14rpx 26rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  font-size: 26rpx;
+  color: var(--text);
+  box-shadow: 0 6rpx 20rpx rgba(38, 49, 43, 0.14);
+}
+.guide {
+  position: relative;
+  z-index: 25;
+  margin: 8rpx auto 0;
+  padding: 12rpx 28rpx;
+  background: rgba(38, 49, 43, 0.66);
+  color: #FFFFFF;
+  font-size: 22rpx;
+  border-radius: 30rpx;
+  animation: fade-in 0.4s ease;
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- Dock ---------- */
+.dock {
+  position: absolute;
+  left: 40rpx; right: 40rpx;
+  bottom: 28rpx;
+  height: 140rpx;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 44rpx;
+}
+.dock-item {
+  width: 96rpx; height: 96rpx;
+  line-height: 96rpx;
+  text-align: center;
+  font-size: 44rpx;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 26rpx;
+  transition: transform 0.12s ease, opacity 0.2s ease;
+}
+.dock-item:active {
+  transform: scale(0.9);
+}
+/* 抱着宠物的时候，喂饭/陪玩的按钮变淡，暗示"先放下" */
+.dock-item.dim {
+  opacity: 0.4;
+}
+
+.demo-tag {
+  position: absolute;
+  right: 32rpx;
+  bottom: 186rpx;
+  z-index: 25;
+  font-size: 20rpx;
+  color: rgba(46, 58, 51, 0.4);
+}
+
+/* ---------- 加载 / 失败 ---------- */
+.center-tip {
+  position: absolute;
+  left: 0; right: 0;
+  top: 45%;
+  z-index: 30;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--sub);
+}
+.retry {
+  display: inline-block;
+  margin-top: 24rpx;
+  padding: 12rpx 44rpx;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 40rpx;
+  font-size: 26rpx;
+}

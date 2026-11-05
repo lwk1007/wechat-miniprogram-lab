@@ -1,0 +1,118 @@
+.pet-card { display: flex; align-items: center; }
+.pet-avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+}
+.pet-avatar-generic {
+  background: var(--primary-light);
+  font-size: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pet-info { flex: 1; margin-left: 24rpx; }
+.pet-name { font-size: 34rpx; font-weight: 600; }
+.edit-link { color: var(--primary); font-size: 26rpx; }
+
+.section-title { font-size: 32rpx; font-weight: 600; margin-bottom: 24rpx; }
+
+.mode-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  border: 2rpx solid transparent;
+  background: var(--bg);
+}
+.mode-on { background: var(--primary-light); border-color: var(--primary); }
+.mode-dot {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  border: 4rpx solid var(--line);
+  margin: 8rpx 20rpx 0 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.mode-on .mode-dot { border-color: var(--primary); background: var(--primary); }
+.mode-body { flex: 1; }
+.mode-name { font-size: 28rpx; font-weight: 500; margin-bottom: 4rpx; }
+.mode-save { margin-top: 8rpx; }
+
+.link-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+}
+
+.action-row {
+  align-items: center;
+  padding: 20rpx 0;
+  border-top: 1rpx solid var(--line);
+}
+
+.action-row:first-of-type {
+  border-top: none;
+}
+
+.action-body {
+  flex: 1;
+  padding-right: 16rpx;
+}
+
+.action-name {
+  font-size: 28rpx;
+  color: var(--text);
+  margin-bottom: 4rpx;
+}
+
+.action-arrow {
+  font-size: 36rpx;
+  color: #C9D2CC;
+  line-height: 1;
+}
+
+.photo-row {
+  align-items: center;
+  border-top: 1rpx solid var(--line);
+  margin-top: 16rpx;
+}
+
+.danger-link {
+  color: var(--danger);
+}
+.rules {
+  background: var(--bg);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  line-height: 1.8;
+}
+.rule-line { margin-bottom: 8rpx; }
+.rule-line:last-child { margin-bottom: 0; }
+
+.tip { padding: 16rpx 0; }
+.my-post {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--line);
+  position: relative;
+}
+.my-post:last-child { border-bottom: none; }
+.my-post-content {
+  font-size: 28rpx;
+  margin-bottom: 8rpx;
+  word-break: break-all;
+  padding-right: 80rpx;
+}
+.my-post-del {
+  position: absolute;
+  right: 0;
+  top: 16rpx;
+  color: var(--sub);
+  font-size: 24rpx;
+}
+
+.delete-pet { margin: 24rpx; }
+.footer-note { padding: 16rpx 0 32rpx; }

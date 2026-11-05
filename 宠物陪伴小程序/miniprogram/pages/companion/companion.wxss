@@ -1,0 +1,632 @@
+.page {
+  padding-bottom: 48rpx;
+}
+
+/* 新手引导 */
+.onboard {
+  margin-top: 96rpx;
+  padding: 64rpx 48rpx;
+  text-align: center;
+}
+.onboard-icon { font-size: 96rpx; margin-bottom: 24rpx; }
+.onboard-desc { margin-top: 16rpx; }
+.onboard-tips {
+  text-align: left;
+  margin: 40rpx 0 48rpx;
+  font-size: 26rpx;
+  color: var(--text);
+}
+.onboard-tip { padding: 8rpx 0; }
+.onboard-second { margin-top: 24rpx; }
+
+/* ==================================================================
+   场景卡片
+   ================================================================== */
+.scene-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* 场景选择条 */
+.scene-bar {
+  width: 100%;
+  white-space: nowrap;
+  padding: 22rpx 20rpx 6rpx;
+  box-sizing: border-box;
+}
+.scene-chip {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 26rpx;
+  background: #F2F5F3;
+  font-size: 24rpx;
+  color: var(--sub);
+}
+.scene-chip.on {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 500;
+}
+.scene-chip-icon { margin-right: 8rpx; font-size: 26rpx; }
+.scene-chip-name { line-height: 1.2; }
+
+/* 舞台：所有装饰层都绝对定位于此 */
+.stage {
+  position: relative;
+  height: 460rpx;
+  margin: 16rpx 20rpx 0;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.stage > view { position: absolute; }
+
+/* ---------- 草地 ---------- */
+.stage-grass {
+  background: linear-gradient(180deg, #BFE4F7 0%, #DCF1F8 46%, #EAF7EE 100%);
+}
+.sun { border-radius: 50%; }
+.sun-grass {
+  left: 80rpx; top: 56rpx;
+  width: 92rpx; height: 92rpx;
+  background: radial-gradient(circle at 42% 38%, #FFF6CF 0%, #FFE18C 60%, #FFD36B 100%);
+  box-shadow: 0 0 44rpx rgba(255, 214, 120, 0.65);
+}
+.cloud {
+  background: #FFFFFF;
+  border-radius: 60rpx;
+}
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: #FFFFFF;
+  border-radius: 50%;
+}
+.cloud-a {
+  right: 46rpx; top: 104rpx;
+  width: 132rpx; height: 42rpx;
+  opacity: 0.92;
+  animation: cloud-drift 24s ease-in-out infinite;
+}
+.cloud-a::before { left: 14rpx; top: -30rpx; width: 62rpx; height: 62rpx; }
+.cloud-a::after { right: 16rpx; top: -20rpx; width: 46rpx; height: 46rpx; }
+.cloud-b {
+  left: 46rpx; top: 180rpx;
+  width: 92rpx; height: 30rpx;
+  opacity: 0.72;
+  animation: cloud-drift 32s ease-in-out infinite reverse;
+}
+.cloud-b::before { left: 10rpx; top: -20rpx; width: 42rpx; height: 42rpx; }
+
+.hill { border-radius: 50% 50% 0 0; }
+.hill-back {
+  left: -180rpx; bottom: 54rpx;
+  width: 760rpx; height: 300rpx;
+  background: #B9DEB2;
+}
+.hill-front {
+  right: -140rpx; bottom: 30rpx;
+  width: 660rpx; height: 240rpx;
+  background: #93CB8D;
+}
+.tuft {
+  width: 8rpx; height: 26rpx;
+  background: #7CBB76;
+  border-radius: 8rpx;
+}
+.tuft-1 { left: 60rpx; bottom: 74rpx; transform: rotate(-12deg); }
+.tuft-2 { right: 120rpx; bottom: 94rpx; height: 20rpx; transform: rotate(10deg); }
+.ground-grass {
+  left: 0; right: 0; bottom: 0;
+  height: 92rpx;
+  background: linear-gradient(180deg, #86C47F 0%, #6CB066 100%);
+}
+
+/* ---------- 窗台 ---------- */
+.stage-window { background: #F7F0E5; }
+.win-glass {
+  left: 76rpx; right: 76rpx; top: 52rpx;
+  height: 232rpx;
+  box-sizing: border-box;
+  border: 14rpx solid #FFFFFF;
+  border-radius: 10rpx;
+  background: linear-gradient(180deg, #CFEAFA 0%, #EAF7FB 100%);
+  box-shadow: 0 6rpx 22rpx rgba(176, 156, 128, 0.16);
+}
+.win-bar-v {
+  left: 50%; top: 52rpx;
+  width: 12rpx; height: 232rpx;
+  margin-left: -6rpx;
+  background: #FFFFFF;
+}
+.win-bar-h {
+  left: 76rpx; right: 76rpx; top: 166rpx;
+  height: 12rpx;
+  background: #FFFFFF;
+}
+.win-light {
+  left: 96rpx; right: 96rpx; top: 292rpx;
+  height: 130rpx;
+  background: linear-gradient(180deg, rgba(255, 236, 180, 0.6) 0%, rgba(255, 236, 180, 0) 100%);
+}
+.sill {
+  left: 48rpx; right: 48rpx; top: 288rpx;
+  height: 20rpx;
+  border-radius: 10rpx;
+  background: #FFFFFF;
+  box-shadow: 0 8rpx 18rpx rgba(176, 156, 128, 0.2);
+}
+.pot { left: 120rpx; top: 220rpx; width: 84rpx; }
+.pot-leaf {
+  width: 60rpx; height: 54rpx;
+  margin: 0 auto;
+  background: #7FBF8B;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-14deg);
+}
+.pot-body {
+  width: 68rpx; height: 42rpx;
+  margin: -4rpx auto 0;
+  background: #D98E6A;
+  border-radius: 0 0 14rpx 14rpx;
+}
+.ground-floor {
+  left: 0; right: 0; bottom: 0;
+  height: 148rpx;
+  background: linear-gradient(180deg, #E7D2B8 0%, #D9C0A2 100%);
+}
+
+/* ---------- 客厅 ---------- */
+.stage-living {
+  background: linear-gradient(180deg, #F6EEE3 0%, #EFE2D1 100%);
+}
+.ground-wood {
+  left: 0; right: 0; bottom: 0;
+  height: 96rpx;
+  background: linear-gradient(180deg, #E4CFB4 0%, #D6BB9B 100%);
+}
+.lv-rug {
+  left: 40rpx; right: 40rpx; bottom: 18rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  background: #EBD2C1;
+  opacity: 0.85;
+}
+.lv-sofa-back {
+  left: 48rpx; bottom: 178rpx;
+  width: 320rpx; height: 86rpx;
+  border-radius: 26rpx 26rpx 0 0;
+  background: #C3DACC;
+}
+.lv-sofa {
+  left: 62rpx; bottom: 104rpx;
+  width: 292rpx; height: 86rpx;
+  border-radius: 22rpx 22rpx 10rpx 10rpx;
+  background: #A9C7B7;
+}
+.lv-lamp-pole {
+  right: 118rpx; bottom: 96rpx;
+  width: 10rpx; height: 118rpx;
+  background: #CBB69C;
+}
+.lv-lamp-base {
+  right: 92rpx; bottom: 84rpx;
+  width: 62rpx; height: 14rpx;
+  border-radius: 8rpx;
+  background: #CBB69C;
+}
+.lv-lamp {
+  right: 66rpx; bottom: 200rpx;
+  width: 96rpx; height: 96rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 42%, #FFF7D6 0%, #FFE3A6 66%, #FFD287 100%);
+  animation: lamp-glow 4s ease-in-out infinite;
+}
+
+/* ---------- 海边 ---------- */
+.stage-seaside {
+  background: linear-gradient(
+    180deg,
+    #FFEBCB 0%,
+    #FFD99F 30%,
+    #AEE0F2 31%,
+    #8AC9E4 58%,
+    #F5E4C7 59%,
+    #EBD2AC 100%
+  );
+}
+.ss-sun {
+  left: 90rpx; top: 54rpx;
+  width: 88rpx; height: 88rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFF8D9 0%, #FFD98A 100%);
+  box-shadow: 0 0 48rpx rgba(255, 214, 120, 0.7);
+}
+.ss-wave {
+  left: -20rpx; right: -20rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.58);
+}
+.ss-wave-1 { bottom: 196rpx; animation: wave-bob 5s ease-in-out infinite; }
+.ss-wave-2 {
+  bottom: 162rpx;
+  opacity: 0.42;
+  animation: wave-bob 6.6s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+/* ---------- 星空 ---------- */
+.stage-night {
+  background: linear-gradient(180deg, #1B2740 0%, #2A3A57 56%, #1F2B42 100%);
+}
+.nt-moon {
+  right: 78rpx; top: 52rpx;
+  width: 88rpx; height: 88rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #FFFDF3 0%, #F2F4E6 72%, #E3E8D7 100%);
+  box-shadow: 0 0 46rpx rgba(226, 236, 214, 0.5);
+}
+.nt-star {
+  width: 8rpx; height: 8rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+  animation: twinkle 2.8s ease-in-out infinite;
+}
+.nt-hill {
+  left: -80rpx; right: -80rpx; bottom: -40rpx;
+  height: 170rpx;
+  background: #16202F;
+  border-radius: 50% 50% 0 0;
+}
+.nt-fly {
+  width: 10rpx; height: 10rpx;
+  border-radius: 50%;
+  background: #FFE9A8;
+  box-shadow: 0 0 18rpx #FFE9A8;
+}
+.nt-fly-1 { left: 120rpx; bottom: 150rpx; animation: fly-around 7s ease-in-out infinite; }
+.nt-fly-2 { right: 150rpx; bottom: 220rpx; animation: fly-around 9s ease-in-out infinite reverse; }
+
+/* ==================================================================
+   宠物层
+   ================================================================== */
+.pet-layer {
+  left: 0; right: 0; top: 0; bottom: 0;
+  pointer-events: none;
+}
+.pet-anchor {
+  position: absolute;
+  bottom: 52rpx;
+  left: 0;
+  /* 横向位移全部交给 transform：走合成层，不触发 layout / 子树重排，拖动才跟得住手指 */
+  transform: translateX(-50%);
+  transition-property: transform;
+  transition-timing-function: linear;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.pet-wrap {
+  position: relative;
+  width: 220rpx;
+  height: 220rpx;
+  pointer-events: auto;
+}
+.pet-wrap.facing-left { transform: scaleX(-1); }
+.pet-shadow {
+  position: absolute;
+  left: 50%; bottom: -14rpx;
+  width: 148rpx; height: 24rpx;
+  margin-left: -74rpx;
+  border-radius: 50%;
+  background: rgba(28, 40, 34, 0.2);
+  transition: width 0.3s ease, margin-left 0.3s ease, opacity 0.3s ease;
+}
+/* 被提起来时影子变小变淡：离地越高，影子越弱 */
+.pet-shadow.up {
+  width: 92rpx;
+  margin-left: -46rpx;
+  opacity: 0.45;
+}
+
+/* 提起/落下的位移层：只负责纵向，和锚点的横向走动互不干扰 */
+.pet-lift {
+  transition: transform 0.34s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+.pet-lift.lifted {
+  transition: transform 0.08s linear;
+}
+/* 拖动中：一律不要过渡，手指到哪儿宠物到哪儿 */
+.pet-lift.dragging {
+  transition: none;
+}
+
+.pet-wrap {
+  position: relative;
+  width: 220rpx;
+  height: 220rpx;
+  pointer-events: auto;
+}
+.pet-wrap.facing-left { transform: scaleX(-1); }
+
+/* 身体层：所有动作动画都加在这一层，避免和翻转的 transform 打架 */
+.pet-body {
+  width: 220rpx;
+  height: 220rpx;
+  transform-origin: 50% 90%;
+  animation: idle-bob 3s ease-in-out infinite;
+}
+.pet-img {
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 30rpx;
+  box-shadow: 0 10rpx 26rpx rgba(28, 40, 34, 0.22);
+}
+.pet-generic {
+  width: 220rpx;
+  height: 220rpx;
+  line-height: 220rpx;
+  font-size: 116rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+/* 走动 / 互动动效（写在待机之后，优先级更高） */
+.pet-body.walking { animation: walk-bob 0.52s ease-in-out infinite; }
+.pet-body.dangling {
+  transform-origin: 50% 4%;
+  animation: dangle 1.15s ease-in-out infinite;
+}
+.anim-touch { animation: nuzzle 0.95s ease; }
+.anim-feed { animation: chew 1.4s ease; }
+.anim-play { animation: hop 1.05s ease; }
+.anim-catch { animation: wiggle 0.8s ease; }
+.anim-land { animation: land 0.55s cubic-bezier(0.34, 1.4, 0.64, 1); }
+
+/* 表情：动作之外再给一张脸，情绪一眼能看出 */
+.pet-face {
+  position: absolute;
+  top: -26rpx;
+  right: -18rpx;
+  font-size: 46rpx;
+  line-height: 1;
+  animation: face-pop 0.32s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+@keyframes face-pop {
+  0% { transform: scale(0.2) rotate(-16deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* 喂食：零食从下面飞进嘴里 */
+.eat-food {
+  position: absolute;
+  bottom: 66rpx;
+  margin-left: -22rpx;
+  font-size: 44rpx;
+  line-height: 1;
+  pointer-events: none;
+  animation: food-fly 1.1s ease-out forwards;
+}
+@keyframes food-fly {
+  0% { transform: translateY(36rpx) scale(0.5); opacity: 0; }
+  28% { transform: translateY(6rpx) scale(1); opacity: 1; }
+  100% { transform: translateY(-168rpx) scale(0.45); opacity: 0; }
+}
+
+/* 玩耍：小球弹两下跑开 */
+.play-ball {
+  position: absolute;
+  bottom: 70rpx;
+  margin-left: -20rpx;
+  font-size: 40rpx;
+  line-height: 1;
+  pointer-events: none;
+  animation: ball-hop 1.25s ease-out forwards;
+}
+@keyframes ball-hop {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  18% { transform: translate(0, -128rpx) scale(1); opacity: 1; }
+  36% { transform: translate(70rpx, 0); }
+  54% { transform: translate(130rpx, -88rpx); }
+  72% { transform: translate(188rpx, 0); }
+  88% { transform: translate(238rpx, -44rpx); }
+  100% { transform: translate(276rpx, 0); opacity: 0; }
+}
+
+@keyframes idle-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14rpx); }
+}
+@keyframes walk-bob {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-12rpx) rotate(1.5deg); }
+}
+/* 被提着脚离地：绕脖子处小幅度摇摆 */
+@keyframes dangle {
+  0%, 100% { transform: rotate(-7deg) translateY(0); }
+  50% { transform: rotate(7deg) translateY(5rpx); }
+}
+/* 摸头：来回蹭两下 */
+@keyframes nuzzle {
+  0%, 100% { transform: translateX(0) scale(1); }
+  22% { transform: translateX(-8rpx) scale(1.04) rotate(-2deg); }
+  52% { transform: translateX(8rpx) scale(1.05) rotate(2deg); }
+  78% { transform: translateX(-4rpx) scale(1.02); }
+}
+/* 吃东西：反复咀嚼，横向略撑开 */
+@keyframes chew {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  12% { transform: scaleY(0.9) scaleX(1.05); }
+  24% { transform: scaleY(1.03) scaleX(0.98); }
+  36% { transform: scaleY(0.9) scaleX(1.05); }
+  48% { transform: scaleY(1.03) scaleX(0.98); }
+  60% { transform: scaleY(0.92) scaleX(1.04); }
+  74% { transform: scaleY(1.02) scaleX(0.99); }
+}
+/* 玩耍：连着蹦两下，落地有压扁感 */
+@keyframes hop {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  18% { transform: translateY(-72rpx) rotate(-5deg); }
+  36% { transform: translateY(0) scaleY(0.94); }
+  54% { transform: translateY(-48rpx) rotate(4deg); }
+  72% { transform: translateY(0) scaleY(0.96); }
+  88% { transform: translateY(-16rpx); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(8deg); }
+  75% { transform: rotate(-8deg); }
+}
+/* 落地：先压扁再回弹 */
+@keyframes land {
+  0% { transform: scaleY(1) scaleX(1); }
+  22% { transform: scaleY(0.78) scaleX(1.12); }
+  48% { transform: scaleY(1.08) scaleX(0.94); }
+  72% { transform: scaleY(0.96) scaleX(1.02); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+
+/* 说话气泡：跟着宠物横向位置走 */
+.bubble-mini {
+  position: absolute;
+  bottom: 296rpx;
+  left: 0;
+  /* 和宠物同一条位移轨迹，气泡才不会落在原地 */
+  transform: translateX(-50%);
+  transition-property: transform;
+  transition-timing-function: linear;
+  will-change: transform;
+  max-width: 340rpx;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 22rpx;
+  font-size: 24rpx;
+  line-height: 1.4;
+  color: var(--text);
+  box-shadow: 0 6rpx 18rpx rgba(28, 40, 34, 0.14);
+  word-break: break-all;
+}
+
+/* 小心心 */
+.hearts {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  pointer-events: none;
+}
+.heart {
+  position: absolute;
+  bottom: 0;
+  font-size: 40rpx;
+  animation: heart-up 1.3s ease-out forwards;
+}
+@keyframes heart-up {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-260rpx) scale(1.2); opacity: 0; }
+}
+
+/* 场景环境动效 */
+@keyframes cloud-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-36rpx); }
+}
+@keyframes wave-bob {
+  0%, 100% { transform: translateX(-14rpx) scaleY(1); }
+  50% { transform: translateX(14rpx) scaleY(0.65); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+@keyframes fly-around {
+  0%, 100% { transform: translate(0, 0); opacity: 0.5; }
+  50% { transform: translate(30rpx, -40rpx); opacity: 1; }
+}
+@keyframes lamp-glow {
+  0%, 100% { box-shadow: 0 0 42rpx rgba(255, 212, 138, 0.6); }
+  50% { box-shadow: 0 0 62rpx rgba(255, 212, 138, 0.85); }
+}
+
+/* ==================================================================
+   宠物信息
+   ================================================================== */
+.scene-info {
+  padding: 26rpx 32rpx 32rpx;
+  text-align: center;
+}
+.pet-name {
+  font-size: 40rpx;
+  font-weight: 600;
+}
+.pet-status { margin-top: 8rpx; font-size: 26rpx; color: var(--sub); }
+.pet-greeting { margin-top: 16rpx; font-size: 26rpx; color: var(--primary); }
+.photo-hint { margin-top: 16rpx; }
+
+/* 互动入口 */
+.actions {
+  display: flex;
+  margin: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx 0;
+}
+.action {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--text);
+}
+.action:active { opacity: 0.6; }
+.action-icon { font-size: 48rpx; margin-bottom: 8rpx; }
+
+/* 桌面态入口 */
+.desk-entry {
+  display: flex;
+  align-items: center;
+  margin: 0 24rpx;
+  padding: 28rpx 32rpx;
+  background: #fff;
+  border-radius: 24rpx;
+}.desk-entry:active { opacity: 0.7; }
+.desk-entry-icon {
+  width: 76rpx; height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  font-size: 40rpx;
+  background: var(--primary-light);
+  border-radius: 20rpx;
+}
+.desk-entry-text { flex: 1; margin-left: 24rpx; }
+.desk-entry-title { font-size: 30rpx; font-weight: 500; }
+.desk-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: var(--sub); }
+.desk-entry-arrow { font-size: 40rpx; color: #C9D2CC; }
+
+/* 一封信入口：暖色卡片，和下面的桌面入口区分开 */
+.letter-entry {
+  display: flex;
+  align-items: center;
+  margin: 0 24rpx 16rpx;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #FFFAF0 0%, #FDF2E1 100%);
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(192, 139, 78, 0.18);
+}
+.letter-entry:active { opacity: 0.75; }
+.letter-entry-icon {
+  width: 76rpx; height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  font-size: 40rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 14rpx rgba(160, 120, 70, 0.12);
+}
+.letter-entry-text { flex: 1; margin-left: 24rpx; }
+.letter-entry-title { font-size: 30rpx; font-weight: 500; color: #4A3B28; }
+.letter-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #A08B6C; }
+.letter-entry-arrow { font-size: 40rpx; color: #D8C3A5; }
+
+.companion-note { margin-top: 8rpx; }
+.retry-btn { margin: 32rpx auto 0; width: 240rpx; }

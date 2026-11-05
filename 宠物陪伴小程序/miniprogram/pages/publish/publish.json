@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "分享小事",
+  "usingComponents": {
+    "privacy-popup": "/components/privacy-popup/privacy-popup"
+  }
+}

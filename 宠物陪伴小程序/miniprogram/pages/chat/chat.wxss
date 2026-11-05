@@ -1,0 +1,123 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.chat-banner { margin: 16rpx 24rpx; }
+
+.msg-list {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+}
+
+.chat-intro { padding: 32rpx 48rpx; }
+
+.msg-row {
+  display: flex;
+  margin-top: 32rpx;
+}
+.msg-right { flex-direction: row-reverse; }
+.msg-col { max-width: 76%; }
+.avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: var(--primary-light);
+  font-size: 40rpx;
+  line-height: 72rpx;
+  text-align: center;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+.msg-name { font-size: 22rpx; color: var(--sub); margin: 0 8rpx 8rpx; }
+
+.bubble {
+  background: #fff;
+  border-radius: 4rpx 24rpx 24rpx 24rpx;
+  padding: 20rpx 28rpx;
+  font-size: 28rpx;
+  word-break: break-all;
+  position: relative;
+}
+.bubble-user {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 24rpx 4rpx 24rpx 24rpx;
+}
+.demo-tag {
+  font-size: 18rpx;
+  color: var(--sub);
+  margin-top: 8rpx;
+}
+.bubble-user .demo-tag { color: rgba(255, 255, 255, 0.75); }
+
+.msg-status {
+  font-size: 22rpx;
+  color: var(--sub);
+  margin: 8rpx;
+}
+.msg-right .msg-status { text-align: right; }
+.msg-fail { color: var(--danger); }
+
+/* 等待中气泡 */
+.typing { display: flex; gap: 10rpx; align-items: center; padding: 28rpx; }
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: 0.5;
+  animation: typing 1.2s infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-8rpx); opacity: 0.9; }
+}
+
+.msg-bottom-space { height: 32rpx; }
+
+/* 快捷话题 */
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  padding: 16rpx 24rpx 0;
+}
+.topic {
+  background: #fff;
+  color: var(--primary);
+  font-size: 24rpx;
+  border-radius: 32rpx;
+  padding: 10rpx 28rpx;
+}
+.topic:active { opacity: 0.7; }
+
+/* 输入栏 */
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 24rpx;
+  background: #fff;
+}
+.chat-input {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 40rpx;
+  padding: 18rpx 32rpx;
+  font-size: 28rpx;
+}
+.send-btn {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 40rpx;
+  padding: 16rpx 40rpx;
+  font-size: 28rpx;
+}
+.send-disabled { opacity: 0.5; }

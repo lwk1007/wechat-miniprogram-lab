@@ -1,0 +1,205 @@
+<view class="page safe-bottom">
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="empty">
+    <view class="empty-icon">🐾</view>
+    <view>正在唤它回来…</view>
+  </view>
+
+  <!-- 加载失败 -->
+  <view wx:elif="{{error}}" class="empty">
+    <view class="empty-icon">🌧️</view>
+    <view>{{error}}</view>
+    <view class="btn-ghost retry-btn" bindtap="loadRetry">重试</view>
+  </view>
+
+  <!-- 首次进入：简短新手引导 -->
+  <view wx:elif="{{!pet}}" class="onboard card">
+    <view class="onboard-icon">🐾</view>
+    <view class="h1">欢迎来到宠物陪伴</view>
+    <view class="sub onboard-desc">
+      上传一张照片，创建属于你的宠物。它会在这里陪伴你，也可以和它说说话。
+    </view>
+    <view class="onboard-tips">
+      <view class="onboard-tip">🌱 无需注册，免费体验</view>
+      <view class="onboard-tip">🔒 照片默认 24 小时内自动删除</view>
+      <view class="onboard-tip">💬 可以用宠物口吻和它聊天</view>
+    </view>
+    <view class="btn-primary {{creating ? 'btn-loading' : ''}}" bindtap="quickStart">
+      {{creating ? '正在创建…' : '免费体验（一键领养）'}}
+    </view>
+    <view class="btn-ghost onboard-second" bindtap="goCreate">上传照片，创建我的宠物</view>
+  </view>
+
+  <!-- 陪伴空间 -->
+  <block wx:else>
+    <view wx:if="{{isDemo}}" class="demo-banner">
+      演示模式：数据仅保存在本机，配置云环境后自动切换为真实服务
+    </view>
+
+    <view class="scene-card card">
+
+      <!-- 场景选择 -->
+      <scroll-view class="scene-bar" scroll-x enable-flex>
+        <view
+          wx:for="{{scenes}}"
+          wx:key="id"
+          class="scene-chip {{item.id === scene ? 'on' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="switchScene"
+        >
+          <text class="scene-chip-icon">{{item.icon}}</text>
+          <text class="scene-chip-name">{{item.name}}</text>
+        </view>
+      </scroll-view>
+
+      <!-- 场景舞台：全部用 WXSS 绘制 -->
+      <view class="stage stage-{{scene}}">
+
+        <!-- 草地 -->
+        <block wx:if="{{scene === 'grass'}}">
+          <view class="sun sun-grass"></view>
+          <view class="cloud cloud-a"></view>
+          <view class="cloud cloud-b"></view>
+          <view class="hill hill-back"></view>
+          <view class="hill hill-front"></view>
+          <view class="tuft tuft-1"></view>
+          <view class="tuft tuft-2"></view>
+          <view class="ground ground-grass"></view>
+        </block>
+
+        <!-- 窗台 -->
+        <block wx:elif="{{scene === 'window'}}">
+          <view class="win-glass"></view>
+          <view class="win-bar-v"></view>
+          <view class="win-bar-h"></view>
+          <view class="win-light"></view>
+          <view class="sill"></view>
+          <view class="pot">
+            <view class="pot-leaf"></view>
+            <view class="pot-body"></view>
+          </view>
+          <view class="ground ground-floor"></view>
+        </block>
+
+        <!-- 客厅 -->
+        <block wx:elif="{{scene === 'living'}}">
+          <view class="ground ground-wood"></view>
+          <view class="lv-rug"></view>
+          <view class="lv-sofa-back"></view>
+          <view class="lv-sofa"></view>
+          <view class="lv-lamp-pole"></view>
+          <view class="lv-lamp-base"></view>
+          <view class="lv-lamp"></view>
+        </block>
+
+        <!-- 海边 -->
+        <block wx:elif="{{scene === 'seaside'}}">
+          <view class="ss-sun"></view>
+          <view class="ss-wave ss-wave-1"></view>
+          <view class="ss-wave ss-wave-2"></view>
+        </block>
+
+        <!-- 星空 -->
+        <block wx:else>
+          <view class="nt-moon"></view>
+          <view
+            wx:for="{{stars}}"
+            wx:key="key"
+            class="nt-star"
+            style="left: {{item.left}}%; top: {{item.top}}%; animation-delay: {{item.delay}}s"
+          ></view>
+          <view class="nt-hill"></view>
+          <view class="nt-fly nt-fly-1"></view>
+          <view class="nt-fly nt-fly-2"></view>
+        </block>
+
+        <!-- 宠物层：走动 + 气泡 -->
+        <view class="pet-layer">
+          <view wx:if="{{bubble}}" class="bubble-mini" style="transform: translate3d({{xPx}}px, 0, 0) translateX(-50%); transition-duration: {{dragging ? 0 : walkMs}}ms">{{bubble}}</view>
+
+          <!-- 零食 / 小球：喂食与玩耍时飞进来 -->
+          <view wx:if="{{food}}" class="eat-food" style="left: {{petX}}%">🍖</view>
+          <view wx:if="{{ball}}" class="play-ball" style="left: {{petX}}%">🎾</view>
+
+          <view
+            class="pet-anchor"
+            style="transform: translate3d({{xPx}}px, 0, 0) translateX(-50%); transition-duration: {{dragging ? 0 : walkMs}}ms"
+          >
+            <view class="pet-shadow {{lifted ? 'up' : ''}}"></view>
+            <view class="pet-lift {{lifted ? 'lifted' : ''}} {{dragging ? 'dragging' : ''}}" style="transform: translateY({{liftY}}px)">
+              <view
+                class="pet-wrap {{facing === 'left' ? 'facing-left' : ''}}"
+                bindtap="tapPet"
+                bindlongpress="onPetLongPress"
+                bindtouchstart="onPetTouchStart"
+                catchtouchmove="onPetTouchMove"
+                bindtouchend="onPetTouchEnd"
+                bindtouchcancel="onPetTouchEnd"
+              >
+                <view class="pet-body {{walking ? 'walking' : ''}} {{anim}} {{lifted ? 'dangling' : ''}}">
+                  <image wx:if="{{photo}}" class="pet-img" src="{{photo}}" mode="aspectFill" />
+                  <view wx:else class="pet-generic">{{typeEmoji}}</view>
+                </view>
+                <view wx:if="{{expression}}" class="pet-face">{{expression}}</view>
+                <view class="hearts">
+                  <view wx:for="{{hearts}}" wx:key="key" class="heart" style="left: {{item.left}}%">💗</view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 宠物信息 -->
+      <view class="scene-info">
+        <view class="pet-name">{{pet.name}}</view>
+        <view class="pet-status">{{status}}</view>
+        <view class="pet-greeting">{{greeting}}</view>
+        <view wx:if="{{!photo}}" class="sub photo-hint">
+          {{pet.storageMode === 'private' ? '照片已按隐私模式清理，可在“我的”中重新上传' : '还没有照片，去“我的”上传一张吧'}}
+        </view>
+      </view>
+    </view>
+
+    <view class="actions">
+      <view class="action" data-type="touch" bindtap="interact">
+        <view class="action-icon">🤚</view>
+        <view>摸摸它</view>
+      </view>
+      <view class="action" data-type="feed" bindtap="interact">
+        <view class="action-icon">🍖</view>
+        <view>喂食</view>
+      </view>
+      <view class="action" data-type="play" bindtap="interact">
+        <view class="action-icon">🎾</view>
+        <view>玩耍</view>
+      </view>
+      <view class="action" bindtap="goChat">
+        <view class="action-icon">💬</view>
+        <view>聊聊天</view>
+      </view>
+    </view>
+
+    <!-- AI 总结：以宠物口吻写的一封信 -->
+    <view class="letter-entry" bindtap="goLetter">
+      <view class="letter-entry-icon">💌</view>
+      <view class="letter-entry-text">
+        <view class="letter-entry-title">它给你写了一封信</view>
+        <view class="letter-entry-desc">最近你们一起做的事，它都记在信里了</view>
+      </view>
+      <view class="letter-entry-arrow">›</view>
+    </view>
+
+    <view class="desk-entry" bindtap="goDesktop">
+      <view class="desk-entry-icon">🖥️</view>
+      <view class="desk-entry-text">
+        <view class="desk-entry-title">去它的桌面看看</view>
+        <view class="desk-entry-desc">宠物会在桌面自己走动、发呆</view>
+      </view>
+      <view class="desk-entry-arrow">›</view>
+    </view>
+
+    <view class="sub center companion-note">点它会回应 · 长按能把它提起来</view>
+  </block>
+</view>

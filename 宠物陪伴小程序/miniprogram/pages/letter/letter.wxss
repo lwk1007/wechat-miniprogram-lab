@@ -1,0 +1,198 @@
+/* 一封信：暖色信纸，和别的页面刻意区分开 */
+.letter-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24rpx 0 calc(32rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #FBF5E9 0%, #F6EFE3 100%);
+}
+
+/* ---------- 顶部 ---------- */
+.from {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 40rpx 24rpx;
+}
+.from-avatar {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #FFFFFF;
+  box-shadow: 0 6rpx 18rpx rgba(120, 96, 60, 0.14);
+  flex-shrink: 0;
+}
+.from-img {
+  width: 84rpx;
+  height: 84rpx;
+  display: block;
+}
+.from-emoji {
+  width: 84rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  font-size: 48rpx;
+}
+.from-text {
+  flex: 1;
+  margin-left: 20rpx;
+  min-width: 0;
+}
+.from-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #4A3B28;
+}
+.from-sub {
+  font-size: 22rpx;
+  color: #A08B6C;
+  margin-top: 4rpx;
+}
+.from-copy {
+  padding: 10rpx 22rpx;
+  font-size: 22rpx;
+  color: #8A7455;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 30rpx;
+}
+
+/* ---------- 信纸 ---------- */
+.paper {
+  position: relative;
+  margin: 0 32rpx;
+  padding: 52rpx 44rpx 40rpx;
+  background: #FFFDF8;
+  border-radius: 12rpx;
+  box-shadow: 0 12rpx 40rpx rgba(120, 96, 60, 0.12), 0 2rpx 6rpx rgba(120, 96, 60, 0.06);
+}
+/* 左侧那道装订线 */
+.paper-fold {
+  position: absolute;
+  left: 26rpx;
+  top: 0;
+  bottom: 0;
+  width: 2rpx;
+  background: rgba(196, 160, 108, 0.28);
+}
+.para {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 31rpx;
+  line-height: 2.05;
+  color: #3F3529;
+  text-indent: 2em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.para + .para {
+  margin-top: 26rpx;
+}
+.para.greet {
+  text-indent: 0;
+  font-size: 33rpx;
+  font-weight: 600;
+  padding-bottom: 8rpx;
+}
+.para.sign {
+  text-indent: 0;
+  text-align: right;
+  color: #6B5A42;
+  margin-top: 34rpx;
+}
+
+.paper-date {
+  margin-top: 18rpx;
+  text-align: right;
+  font-size: 22rpx;
+  color: #B3A085;
+}
+
+.paper-foot {
+  margin-top: 32rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx dashed rgba(196, 160, 108, 0.35);
+}
+.paper-source {
+  font-size: 21rpx;
+  color: #A99274;
+  line-height: 1.7;
+}
+.paper-demo {
+  margin-top: 10rpx;
+  font-size: 20rpx;
+  color: #BD9E6E;
+  line-height: 1.7;
+}
+
+/* ---------- 空态 ---------- */
+.blank {
+  margin: 20rpx 40rpx;
+  padding: 56rpx 40rpx;
+  background: rgba(255, 253, 248, 0.8);
+  border-radius: 16rpx;
+  text-align: center;
+}
+.blank-icon {
+  font-size: 76rpx;
+  line-height: 1.2;
+}
+.blank-title {
+  margin-top: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #4A3B28;
+}
+.blank-desc {
+  margin-top: 14rpx;
+  color: #A08B6C;
+  line-height: 1.8;
+}
+
+/* ---------- 空/错状态 ---------- */
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 40rpx;
+  color: #A08B6C;
+  font-size: 28rpx;
+}
+.empty-icon {
+  font-size: 72rpx;
+  margin-bottom: 20rpx;
+}
+.empty-retry {
+  margin-top: 30rpx;
+}
+
+/* ---------- 底部 ---------- */
+.footer {
+  margin-top: auto;
+  padding: 40rpx 40rpx 0;
+}
+.footer-error {
+  margin-bottom: 18rpx;
+  padding: 16rpx 24rpx;
+  background: rgba(217, 122, 108, 0.1);
+  color: #C0695B;
+  border-radius: 14rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+.footer .btn-primary {
+  background: #C08B4E;
+}
+.footer .btn-primary.disabled {
+  background: #D8C3A5;
+  color: #FFFDF8;
+}
+.footer-note {
+  margin-top: 18rpx;
+  text-align: center;
+  font-size: 21rpx;
+  color: #B3A085;
+  line-height: 1.7;
+}
