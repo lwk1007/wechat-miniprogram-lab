@@ -12,10 +12,11 @@
     mood="{{item.mood}}"
     days="{{item.days}}"
     color="{{item.color}}"
+    species="{{item.species}}"
     bind:cardtap="onCardTap"
   />
 
   <view wx:if="{{lastTap}}" class="hint">刚才点的是：{{lastTap}}</view>
 
-  <view class="btn" bindtap="addPet">+ 加一只宠物（只改 data，不碰 DOM）</view>
+  <view class="btn" bindtap="addPet">+ 新加一只宠物（只改 data，不碰 DOM）</view>
 </view>

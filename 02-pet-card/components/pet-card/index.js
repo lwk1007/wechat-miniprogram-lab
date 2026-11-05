@@ -7,7 +7,8 @@ Component({
     name: { type: String, value: '未命名' },
     mood: { type: String, value: '发呆' },
     days: { type: Number, value: 0 },
-    color: { type: String, value: '#e8855b' }
+    color: { type: String, value: '#e8855b' },
+    species:{type: String, value:'缅因'}
   },
 
   data: {
@@ -33,7 +34,8 @@ Component({
       // 关键：把 detail 抛出去，父页面通过 bind:cardtap 接收
       this.triggerEvent('cardtap', {
         name: this.data.name,
-        days: this.data.days
+        days: this.data.days,
+        species:this.data.species
       })
     }
   }

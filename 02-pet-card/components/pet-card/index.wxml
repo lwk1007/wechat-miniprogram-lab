@@ -6,7 +6,7 @@
 
   <view class="info">
     <view class="name">{{name}}</view>
-    <view class="meta">心情：{{mood}} · 陪伴 {{days}} 天</view>
+    <view class="meta">心情：{{mood}} · 陪伴 {{days*2}} 天，品种是：{{species}}</view>
   </view>
 
   <view class="arrow">›</view>
