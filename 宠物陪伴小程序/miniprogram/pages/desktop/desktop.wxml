@@ -44,7 +44,10 @@
     </view>
   </view>
 
-  <view class="desk-label">{{night ? '桌面预览 · 小程序内模拟 · 夜间' : '桌面预览 · 小程序内模拟'}}</view>
+  <view class="desk-label">
+    {{night ? '桌面预览 · 小程序内模拟 · 夜间' : '桌面预览 · 小程序内模拟'}}
+    <text wx:if="{{moodLabel}}" class="desk-mood">{{moodFace}} {{moodLabel}}</text>
+  </view>
 
   <!-- 加载 / 失败 -->
   <view wx:if="{{loading}}" class="center-tip">正在回到桌面…</view>

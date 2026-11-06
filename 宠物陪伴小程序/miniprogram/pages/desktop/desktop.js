@@ -1,5 +1,6 @@
 const api = require('../../utils/api');
 const moments = require('../../utils/moments');
+const petLife = require('../../utils/pet-life');
 const { randomFrom } = require('../../utils/format');
 
 const TOUCH_PHRASES = ['呼噜噜…', '别戳啦，痒～', '你终于来看我了', '我一直在等你哦'];
@@ -70,7 +71,10 @@ Page({
     hearts: [],
     shakeCol: -1,
     night: false,
-    showGuide: true
+    showGuide: true,
+    // 心情跟着陪伴页的互动走，桌面这层只负责显示
+    moodLabel: '',
+    moodFace: ''
   },
 
   onLoad() {
@@ -97,8 +101,17 @@ Page({
   },
 
   onShow() {
+    // 心情可能被上一页的互动改过，回来时同步一次
+    this.syncMood();
     // 回到本页时继续走动（onHide 时已停止）
     if (!this.data.loading && this.data.pet && !this.data.lifted) this.startRoaming();
+  },
+
+  syncMood() {
+    try {
+      const m = petLife.summary();
+      this.setData({ moodLabel: m.moodLabel, moodFace: m.moodFace });
+    } catch (e) { /* 本机状态读不到时保持上一次显示 */ }
   },
 
   onHide() {
@@ -235,9 +248,30 @@ Page({
       if (!this._roamAlive) return;
       this._walk = null;
       this.setData({ walking: false });
-      // 停下来东张西望一会儿，再继续走
-      this._restTimer = setTimeout(() => this.walkOnce(), 1800 + Math.random() * 2600);
+      // 停下来东张西望一会儿，再继续走。偶尔它也会自己找点事做
+      this._restTimer = setTimeout(() => {
+        if (Math.random() < 0.4) this.lifeTick();
+        this.walkOnce();
+      }, 1800 + Math.random() * 2600);
     }, duration + 120);
+  },
+
+  // 桌面这层只演氛围：挑一个活动，改表情和心情，冒一句。
+  // 场景固定按「室内」算，桌面本身就是室内环境。
+  lifeTick() {
+    if (!this.data.pet || this.data.lifted || this._dragging || this.data.bubble) return;
+    try {
+      const pick = petLife.pickActivity('living', this.data.pet.personality);
+      const act = pick.activity;
+      this.setData({
+        expression: act.face,
+        moodLabel: pick.mood.label,
+        moodFace: pick.mood.face
+      });
+      this.showBubble(act.emoji + ' ' + act.label, 2400);
+      clearTimeout(this._faceTimer);
+      this._faceTimer = setTimeout(() => this.setData({ expression: '' }), 2600);
+    } catch (e) { /* 本机状态异常时跳过这一轮，不影响走动 */ }
   },
 
   // 这一趟会经过哪几列图标？走到那一列时停下顶一下，图标跟着抖
@@ -315,6 +349,12 @@ Page({
     const pool = this.reactionPool(type, fallback);
     // 记一笔互动，给「一封信」当素材
     moments.bump(type);
+    // 你的动作会改它的心情，心情再带到对话里去
+    try {
+      const live = petLife.onInteraction(type);
+      const meta = petLife.moodMeta(live.mood);
+      this.setData({ moodLabel: meta.label, moodFace: meta.face });
+    } catch (e) { /* ignore */ }
     // 走到半路被叫停：先把位置冻结到画面真值，否则零食/小球会飞到走路的终点去
     const visualX = this.currentVisualX();
     this._walk = null;

@@ -37,6 +37,16 @@
       演示模式：数据仅保存在本机，配置云环境后自动切换为真实服务
     </view>
 
+    <!-- 你不在的时候它也在生活：回来时告诉你它做了什么 -->
+    <view wx:if="{{recap.length}}" class="recap-card card">
+      <view class="recap-title">🐾 你不在的时候…</view>
+      <view wx:for="{{recap}}" wx:key="text" class="recap-line">
+        <text class="recap-emoji">{{item.emoji}}</text>
+        <text class="recap-text">{{item.text}}</text>
+        <text class="recap-time">{{item.agoText}}</text>
+      </view>
+    </view>
+
     <view class="scene-card card">
 
       <!-- 场景选择 -->
@@ -122,6 +132,9 @@
           <view wx:if="{{food}}" class="eat-food" style="left: {{petX}}%">🍖</view>
           <view wx:if="{{ball}}" class="play-ball" style="left: {{petX}}%">🎾</view>
 
+          <!-- 自主活动的短特效：打盹💤 打理✨ 零食🍪 蝴蝶🦋 音符🎵 -->
+          <view wx:if="{{effectEmoji}}" class="pet-effect" style="left: {{petX}}%">{{effectEmoji}}</view>
+
           <view
             class="pet-anchor"
             style="transform: translate3d({{xPx}}px, 0, 0) translateX(-50%); transition-duration: {{dragging ? 0 : walkMs}}ms"
@@ -153,7 +166,10 @@
 
       <!-- 宠物信息 -->
       <view class="scene-info">
-        <view class="pet-name">{{pet.name}}</view>
+        <view class="info-row">
+          <view class="pet-name">{{pet.name}}</view>
+          <view class="mood-chip">{{moodFace}} {{moodLabel}}</view>
+        </view>
         <view class="pet-status">{{status}}</view>
         <view class="pet-greeting">{{greeting}}</view>
         <view wx:if="{{!photo}}" class="sub photo-hint">
@@ -198,6 +214,26 @@
         <view class="desk-entry-desc">宠物会在桌面自己走动、发呆</view>
       </view>
       <view class="desk-entry-arrow">›</view>
+    </view>
+
+    <!-- 足迹日记：它自己过日子留下的痕迹，不是你的操作记录 -->
+    <view class="diary-card card">
+      <view class="diary-head" bindtap="toggleDiary">
+        <view class="diary-title">📖 它的小日子</view>
+        <view class="sub">{{diaryOpen ? '收起' : '看看它最近在做什么'}}</view>
+      </view>
+      <view wx:if="{{diaryOpen}}" class="diary-list">
+        <view wx:if="{{diary.length === 0}}" class="sub center diary-empty">
+          它的小世界刚开始运转，过一会儿再来看看它的足迹吧
+        </view>
+        <view wx:for="{{diary}}" wx:key="_id" class="diary-item">
+          <text class="diary-emoji">{{item.emoji}}</text>
+          <view class="diary-body">
+            <view class="diary-text">{{item.text}}</view>
+            <view class="diary-time">{{item.timeText}}</view>
+          </view>
+        </view>
+      </view>
     </view>
 
     <view class="sub center companion-note">点它会回应 · 长按能把它提起来</view>

@@ -1,6 +1,7 @@
 const api = require('../../utils/api');
 const voice = require('../../utils/voice');
 const privacy = require('../../utils/privacy');
+const petLife = require('../../utils/pet-life');
 
 // #4 对话升级：
 //   - 文本侧：逐字输出（打字机），让「等模型」变成「看它说」
@@ -162,7 +163,13 @@ Page({
   async requestReply(userMsg) {
     const idx = this.data.messages.findIndex((m) => m._id === userMsg._id);
     try {
-      const reply = await api.sendChat(userMsg.content);
+      // 带上它此刻的状态：云端接了模型时进 system prompt，没接模型时影响规则引擎的选词
+      let life = {};
+      try {
+        const s = petLife.summary();
+        life = { mood: s.mood, activityLabel: s.activityLabel };
+      } catch (e) { /* 读不到本机状态就按默认回，不影响发送 */ }
+      const reply = await api.sendChat(userMsg.content, life);
       if (idx >= 0) this.setData({ ['messages[' + idx + '].status']: 'ok' });
 
       // 先插入一条空气泡，再把文字逐字填进去。

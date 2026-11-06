@@ -33,7 +33,7 @@ function str(v, max) {
   return max ? s.slice(0, max) : s;
 }
 
-function buildSystemPrompt(pet) {
+function buildSystemPrompt(pet, life) {
   const p = pet || {};
   const base = PERSONALITY_TEXT[p.personality] || PERSONALITY_TEXT.friendly;
   const persona = p.persona || {};
@@ -76,6 +76,15 @@ function buildSystemPrompt(pet) {
     lines.push(`【小怪癖】${quirk}`);
   }
 
+  // 此刻的状态：心情、刚才在做什么、在哪个场景。
+  // 这几句让模型知道「它是有自己生活的」，而不是一台随时待机的应答机。
+  const lifeLine = str(life, 120);
+  if (lifeLine) {
+    lines.push('');
+    lines.push(`【此刻】${lifeLine}`);
+    lines.push('可以自然带出这个状态（比如刚睡醒就有点迷糊），但不要每句都提，也不要复述成流水账。');
+  }
+
   lines.push('');
   lines.push('【必须遵守】');
   lines.push('1. 用第一人称“我”，像宠物在说话，不用书面语，不写完整的长句。');
@@ -93,18 +102,7 @@ function buildSystemPrompt(pet) {
   return lines.join('\n');
 }
 
-// 演示模式（未接模型）时的降级回复也要有性格差异，否则 #9 在白模下完全看不出来。
-// 只做轻量区分：口头禅 / 语气词前置，不假装懂上下文。
-// 返回的是可以直接拼在句首的前缀（带标点），没有就是空串。
-function flavor(pet, random) {
-  const p = pet || {};
-  const rand = random || Math.random;
-  const personaData = p.persona || {};
-  const catchphrase = str(personaData.catchphrase, 12);
-  const sound = p.type === 'cat' ? '喵～' : p.type === 'dog' ? '汪！' : '';
-  if (catchphrase && rand() < 0.35) return catchphrase + '，';
-  if (sound && rand() < 0.3) return sound;
-  return '';
-}
+// 演示模式（未接模型）已改由 chat-brain.js 接管，那里能识别意图、接住上文、
+// 按心情分档，比原来「口头禅 + 通用模板」强得多，所以这里不再保留 flavor()。
 
-module.exports = { buildSystemPrompt, flavor, PERSONALITY_TEXT, TYPE_TEXT };
+module.exports = { buildSystemPrompt, PERSONALITY_TEXT, TYPE_TEXT };

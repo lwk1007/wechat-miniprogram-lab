@@ -1,8 +1,10 @@
 // 演示模式本地数据层：与云函数保持同一套接口语义
 // 数据仅保存在本机 Storage，用于在未配置云环境时体验完整流程
-const { randomFrom, timeAgo } = require('./format');
+const { timeAgo } = require('./format');
 const { composeLetter } = require('./letter-template');
 const moments = require('./moments');
+const brain = require('./chat-brain');
+const petLife = require('./pet-life');
 
 const K = {
   pet: 'demo_pet',
@@ -109,9 +111,10 @@ async function updatePet(patch) {
 async function deletePet() {
   set(K.pet, null);
   set(K.messages, []);
-  // 删宠物 = 删干净：信和互动统计不能留下来
+  // 删宠物 = 删干净：信、互动统计、它的心情和日记都不能留下来
   set(K.letters, []);
   moments.reset();
+  petLife.reset();
 }
 
 // 立即删除照片（不等 22 小时自动过期）
@@ -150,6 +153,7 @@ async function purgeAll() {
   set(K.reports, []);
   set(K.likeDelta, {});
   moments.reset();
+  petLife.reset();
   return { purged: true, summary };
 }
 
@@ -209,33 +213,9 @@ async function getChatHistory() {
   return get(K.messages, []);
 }
 
-function demoReply(text, pet) {
-  const t = text || '';
-  const sound = pet && pet.type === 'cat' ? '喵～' : pet && pet.type === 'dog' ? '汪！' : '';
-  let pool;
-  if (/想你|想念|思念/.test(t)) {
-    pool = ['我也一直在呀，从来没有走远。你想我的时候就来看看我吧。', '我也很想你。摸摸屏幕，就当摸摸我的头，好吗？'];
-  } else if (/累|难过|不开心|烦|委屈|哭/.test(t)) {
-    pool = ['辛苦啦。趴在我旁边休息一会儿吧，我陪着你。', '不开心的话就说出来，我会认真听的。'];
-  } else if (/开心|高兴|哈哈|好玩|有趣/.test(t)) {
-    pool = ['听到你开心，我的尾巴都要摇起来啦！', '嘿嘿，好事情要多多分享给我呀。'];
-  } else if (/吃|饿|饭|零食/.test(t)) {
-    pool = ['说到吃的我就来精神了！你也要按时吃饭哦。', '咕噜咕噜…我这边有小鱼干，分你一半！'];
-  } else if (/晚安|睡觉|睡了/.test(t)) {
-    pool = ['晚安，做个好梦，梦里我们一起玩。', '快去睡吧，我守着这里等你明天来。'];
-  } else {
-    pool = [
-      '嗯嗯，我在听呢，然后呢？',
-      '你说的我都记住啦（演示模式下我不会真的记住哦）。',
-      '和你聊天的时光最开心了。',
-      '嗯…我想想怎么回答。总之，我一直陪着你！'
-    ];
-  }
-  let reply = randomFrom(pool);
-  if (sound && Math.random() < 0.3) reply = sound + reply;
-  return { content: reply, isDemo: true };
-}
-
+// 演示模式的回复引擎换成 chat-brain：它和云函数里那份是同一份代码（scripts/sync-shared.js 同步），
+// 所以「没配云开发」和「配了云开发但没配模型」两种情况下，对话表现是一致的。
+// 心情取 petLife 的实时状态，让它刚睡醒时说话就带点迷糊。
 async function sendChat(text) {
   const pet = get(K.pet, null);
   if (!pet) throw new Error('请先创建宠物');
@@ -243,7 +223,18 @@ async function sendChat(text) {
   const now = Date.now();
   messages.push({ _id: 'u' + now, role: 'user', content: text, createdAt: now });
   await new Promise((r) => setTimeout(r, 400 + Math.random() * 400));
-  const reply = demoReply(text, pet);
+
+  let live = { mood: 'happy', lastActivityId: '' };
+  try { live = petLife.getState(); } catch (e) { /* 读不到就用默认心情，不影响回复 */ }
+
+  const out = brain.reply(text, {
+    pet,
+    history: messages.slice(-24),
+    mood: live.mood,
+    activityLabel: petLife.activityLabelOf(live)
+  });
+  const reply = { content: out.content, isDemo: true, emotion: out.emotion };
+
   messages.push({ _id: 'p' + Date.now(), role: 'pet', content: reply.content, isDemo: true, createdAt: Date.now() });
   set(K.messages, messages);
   return reply;

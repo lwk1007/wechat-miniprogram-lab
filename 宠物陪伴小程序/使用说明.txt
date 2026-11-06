@@ -144,6 +144,8 @@ miniprogram/                 小程序代码
     moments.js               近期互动统计（一封信的素材）
     letter-template.js       模板信（模型不可用时兜底）
     persona.js               性格定义（底色 x 自定义 x 场景反应）
+    pet-life.js              自主生命：心情 / 12 种活动 / 足迹日记 / 离线补记
+    chat-brain.js            对话大脑（云端共用同一份，靠脚本同步）
     voice.js                 语音输入/播报（同声传译插件，默认关闭）
     privacy.js               微信隐私授权封装（相册/相机前置校验）
     format.js                时间、问候语等工具

@@ -630,3 +630,73 @@
 
 .companion-note { margin-top: 8rpx; }
 .retry-btn { margin: 32rpx auto 0; width: 240rpx; }
+
+/* ---------------- 自主生命：心情 / 特效 / 补记 / 日记 ---------------- */
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+}
+.mood-chip {
+  padding: 4rpx 16rpx;
+  font-size: 22rpx;
+  color: var(--primary);
+  background: var(--primary-light);
+  border-radius: 999rpx;
+  line-height: 1.7;
+}
+
+/* 活动特效跟着宠物横向位置走，不占布局。
+   定位用 left 百分比、动画只做透明度：如果动画里也写 transform，
+   会把模板上的内联 transform 覆盖掉，特效就跑到屏幕左边去了。 */
+.pet-effect {
+  position: absolute;
+  bottom: 132rpx;
+  margin-left: -14rpx;
+  width: 28rpx;
+  text-align: center;
+  font-size: 32rpx;
+  pointer-events: none;
+  animation: effect-fade 4.2s ease-out both;
+}
+@keyframes effect-fade {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  72% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.recap-card { padding: 26rpx 32rpx; }
+.recap-title { font-size: 28rpx; font-weight: 500; color: var(--primary); }
+.recap-line {
+  display: flex;
+  align-items: baseline;
+  margin-top: 14rpx;
+  font-size: 25rpx;
+  color: var(--text);
+}
+.recap-emoji { margin-right: 12rpx; }
+.recap-text { flex: 1; line-height: 1.6; }
+.recap-time { margin-left: 12rpx; font-size: 22rpx; color: var(--sub); white-space: nowrap; }
+
+.diary-card { padding: 26rpx 32rpx; }
+.diary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.diary-title { font-size: 28rpx; font-weight: 500; }
+.diary-list { margin-top: 18rpx; }
+.diary-empty { padding: 24rpx 0 8rpx; }
+.diary-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 16rpx 0;
+  border-top: 1rpx solid var(--line);
+}
+.diary-emoji { margin-right: 16rpx; font-size: 26rpx; }
+.diary-body { flex: 1; }
+.diary-text { font-size: 25rpx; line-height: 1.65; color: var(--text); }
+.diary-time { margin-top: 4rpx; font-size: 22rpx; color: var(--sub); }

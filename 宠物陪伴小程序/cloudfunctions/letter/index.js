@@ -84,7 +84,7 @@ async function collectTalks(openid) {
   return { total: list.length, userCount: users.length, excerpts, users };
 }
 
-function buildPrompt(pet, stats, ownerTitle, talks) {
+function buildPrompt(pet, stats, ownerTitle, talks, lifeLabel) {
   const personaData = pet.persona || {};
   const bits = [];
   bits.push(`你是一只名叫「${pet.name}」的${PERSONALITY_TEXT[pet.personality] || '亲人'}的${TYPE_TEXT[pet.type] || '小可爱'}。`);
@@ -99,6 +99,8 @@ function buildPrompt(pet, stats, ownerTitle, talks) {
   bits.push(`- 这段时间「${ownerTitle}」来看过你 ${stats.activeDays || 1} 天，你们一共聊过 ${talks.userCount || 0} 句话`);
   bits.push(`- 你被喂了 ${stats.feed || 0} 次、被摸了 ${stats.touch || 0} 下、一起玩了 ${stats.play || 0} 回、被拎起来 ${stats.lift || 0} 次`);
   if (stats.scenes && stats.scenes.length) bits.push(`- 你们待过的地方：${stats.scenes.join('、')}`);
+  // 「你最近常在做的事」：让它有自己的生活，而不只是被动等你来
+  if (lifeLabel) bits.push(`- 你最近常在做的事：${lifeLabel}`);
   if (talks.excerpts.length) {
     bits.push(`- 「${ownerTitle}」最近说过：${talks.excerpts.map((e) => '「' + e + '」').join('、')}`);
   }
@@ -173,12 +175,12 @@ function fallbackLetter(pet, stats, ownerTitle, talks) {
   return ownerTitle + '：\n\n' + paras.join('\n\n') + '\n\n' + pet.name;
 }
 
-async function generateWithModel(pet, stats, ownerTitle, talks) {
+async function generateWithModel(pet, stats, ownerTitle, talks, lifeLabel) {
   const messages = [
     // 人设必须放在 system 层：写成「写作助手」会盖掉下面 user 里的宠物身份，
     // 模型最终产出一封编辑腔的信——这是角色一致性最常见的一种崩法。
     { role: 'system', content: '你正在扮演一只宠物，用它自己的口吻给主人写一封短短的私信。只输出信的正文，不写标题、不加引号、不解释。温暖但克制，不煽情。' },
-    { role: 'user', content: buildPrompt(pet, stats, ownerTitle, talks) }
+    { role: 'user', content: buildPrompt(pet, stats, ownerTitle, talks, lifeLabel) }
   ];
   const res = await httpsPostJSON(
     MODEL_BASE_URL.replace(/\/$/, '') + '/chat/completions',
@@ -219,12 +221,14 @@ async function generate(openid, payload) {
   const ownerTitle = (payload && payload.ownerTitle) || '妈妈';
   const stats = normalizeStats(payload && payload.stats);
   const talks = await collectTalks(openid);
+  // 它最近自己在做什么。客户端当不可信输入处理：只留短词，不拼接任何自由文本
+  const lifeLabel = String((payload && payload.activityLabel) || '').slice(0, 16);
 
   let content = '';
   let isDemo = true;
   if (isRealModel) {
     try {
-      content = await generateWithModel(pet, stats, ownerTitle, talks);
+      content = await generateWithModel(pet, stats, ownerTitle, talks, lifeLabel);
       isDemo = false;
     } catch (e) {
       // 模型挂了别让用户白等：降级成模板信，标记演示

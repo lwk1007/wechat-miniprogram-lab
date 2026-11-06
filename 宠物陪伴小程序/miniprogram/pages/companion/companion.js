@@ -1,6 +1,7 @@
 const api = require('../../utils/api');
 const voice = require('../../utils/voice');
 const moments = require('../../utils/moments');
+const petLife = require('../../utils/pet-life');
 const { randomFrom, greetingByHour } = require('../../utils/format');
 
 const PERSONALITY_LABEL = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
@@ -45,6 +46,9 @@ const REACTION_FACE = {
 const ROAM_MIN = 24;
 const ROAM_MAX = 76;
 
+// 自主活动的短特效（petLife 里给的是语义 key，具体表情在这里定，方便换）
+const EFFECT_EMOJI = { zzz: '💤', sparkle: '✨', snack: '🍪', butterfly: '🦋', note: '🎵' };
+
 Page({
   data: {
     loading: true,
@@ -68,6 +72,14 @@ Page({
     liftY: 0,
     ownerTitle: '妈妈',
     voiceOn: false,
+
+    // 自主生命：心情徽章、活动特效、离线补记、足迹日记
+    moodLabel: '开心',
+    moodFace: '😊',
+    effectEmoji: '',
+    recap: [],
+    diary: [],
+    diaryOpen: false,
 
     // 场景
     scenes: SCENES,
@@ -106,16 +118,21 @@ Page({
   onHide() {
     this.stopRoam();
     voice.stop();
+    // 记下离开的时间点，回来时才算得出「你走了多久」
+    try { petLife.markLeave(); } catch (e) { /* ignore */ }
   },
 
   onUnload() {
     this.stopRoam();
     voice.destroy();
+    try { petLife.markLeave(); } catch (e) { /* ignore */ }
     clearTimeout(this._animTimer);
     clearTimeout(this._heartTimer);
     clearTimeout(this._dropTimer);
     clearTimeout(this._faceTimer);
     clearTimeout(this._propTimer);
+    clearTimeout(this._lifeTimer);
+    clearTimeout(this._effectTimer);
   },
 
   // 默认场景跟着时间走：早上窗台、白天草地、傍晚海边、夜里星空
@@ -155,6 +172,8 @@ Page({
   switchScene(e) {
     const id = e.currentTarget.dataset.id;
     if (!id || id === this.data.scene) return;
+    // 记下「你刚亲手换过」，两分钟内它不会自作主张再换走
+    this._lastUserSceneAt = Date.now();
     this.stopRoam();
     this.applyScene(id, true);
     this.setData({ bubble: '', anim: '', expression: '' });
@@ -177,7 +196,22 @@ Page({
       }
       // 它怎么称呼你：宠物身上有就用宠物的，否则用本机记住的，再否则「妈妈」
       const title = (pet && pet.ownerTitle) || wx.getStorageSync(TITLE_KEY) || '妈妈';
-      this.setData({
+
+      // 生命状态：只在这次进入页面算一次离线补记，
+      // 否则从别的页面返回时时间差是 0，卡片会被反复清空又出现
+      const patch = { recap: [], diary: [], moodLabel: '开心', moodFace: '😊' };
+      if (pet) {
+        const live = petLife.summary();
+        patch.moodLabel = live.moodLabel;
+        patch.moodFace = live.moodFace;
+        patch.diary = petLife.decorateDiary(8);
+        if (!this._recapDone) {
+          this._recapDone = true;
+          patch.recap = petLife.offlineRecap();
+        }
+      }
+
+      this.setData(Object.assign({
         pet: pet || null,
         photo,
         isDemo: api.isDemo(),
@@ -187,7 +221,7 @@ Page({
         greeting: pet ? this.makeGreeting(pet) : '',
         status: pet ? this.petStatus(this.data.scene) : '',
         loading: false
-      });
+      }, patch));
     } catch (e) {
       this.setData({ loading: false, error: (e && e.message) || '加载失败，请重试' });
     }
@@ -241,13 +275,12 @@ Page({
       if (!this._roamAlive) return;
       this._walk = null;
       this.setData({ walking: false });
-      // 停下休息，偶尔自己换个心情文案
+      // 停下休息：这段时间它自己做点事，而不是换个环境文案糊过去。
+      // 不是每次休息都在「做事」——有时候就是单纯站着，否则状态和表情每三秒一跳，很假。
       const rest = 1600 + Math.random() * 2400;
       this._restTimer = setTimeout(() => {
         if (!this._roamAlive) return;
-        if (Math.random() < 0.4) {
-          this.setData({ status: this.petStatus(this.data.scene) });
-        }
+        if (Math.random() < 0.45) this.activityTick();
         this.walkOnce();
       }, rest);
     }, duration);
@@ -258,10 +291,62 @@ Page({
     clearTimeout(this._walkTimer);
     clearTimeout(this._restTimer);
     clearTimeout(this._sceneTimer);
+    clearTimeout(this._lifeTimer);
+    clearTimeout(this._effectTimer);
     this._walkTimer = null;
     this._restTimer = null;
     this._sceneTimer = null;
+    this._lifeTimer = null;
+    this._effectTimer = null;
     this._walk = null;
+  },
+
+  // 一次自主活动：改状态文案 / 表情 / 特效，写日记，必要时自己换个场景。
+  // 它在休息期做这件事，所以不会和走动、拖动抢同一套动画。
+  activityTick() {
+    if (!this.data.pet || this.data.lifted || this._dragging) return;
+    const pick = petLife.pickActivity(this.data.scene, this.data.pet.personality);
+    const act = pick.activity;
+
+    this.setData({
+      status: act.emoji + ' ' + act.label,
+      expression: act.face,
+      effectEmoji: EFFECT_EMOJI[act.effect] || '',
+      moodLabel: pick.mood.label,
+      moodFace: pick.mood.face
+    });
+
+    // 打盹/啃零食冒个短气泡，其余只改状态文案，避免气泡一直挂着
+    if (pick.bubble) {
+      this.setData({ bubble: pick.bubble });
+      clearTimeout(this._lifeTimer);
+      this._lifeTimer = setTimeout(() => this.setData({ bubble: '' }), 2600);
+    }
+
+    clearTimeout(this._faceTimer);
+    clearTimeout(this._effectTimer);
+    this._faceTimer = setTimeout(() => this.setData({ expression: '' }), 3200);
+    this._effectTimer = setTimeout(() => this.setData({ effectEmoji: '' }), 4200);
+
+    if (pick.wroteDiary) this.setData({ diary: petLife.decorateDiary(8) });
+
+    // 你两分钟没手动换场景，它可能自己溜达过去（有自己的主意，但不抢你的选择）
+    if (Date.now() - (this._lastUserSceneAt || 0) > 120000 && Math.random() < 0.14) {
+      const others = SCENES.filter((s) => s.id !== this.data.scene);
+      const to = randomFrom(others);
+      this.stopRoam();
+      this.applyScene(to.id, false);
+      petLife.writeRoamDiary(to);
+      this.setData({ diary: petLife.decorateDiary(8), effectEmoji: '', expression: '' });
+      this._sceneTimer = setTimeout(() => {
+        this._sceneTimer = null;
+        if (this.data.pet) this.startRoam();
+      }, 320);
+    }
+  },
+
+  toggleDiary() {
+    this.setData({ diaryOpen: !this.data.diaryOpen });
   },
 
   // 百分比 → 逻辑像素。横向位置统一用 transform 驱动（合成层，无 layout），
@@ -343,12 +428,23 @@ Page({
     // 记一笔互动，给「一封信」当素材（catch 不在统计范围内，会被忽略）
     moments.bump(animType);
 
+    // 你的动作会改变它的心情：喂食会开心、被拎会委屈。
+    // 心情再反哺对话语气和下一个自主活动的选择，形成闭环。
+    let moodPatch = null;
+    if (animType !== 'catch') {
+      try {
+        const live = petLife.onInteraction(animType);
+        const meta = petLife.moodMeta(live.mood);
+        moodPatch = { moodLabel: meta.label, moodFace: meta.face };
+      } catch (e) { /* 本机存储异常不影响互动 */ }
+    }
+
     // 走到半路被叫停：位置先冻结到画面真值，否则零食/小球按 petX 的终点定位，
     // 会飞到宠物前面去（道具层用的是 left 百分比，没有过渡）
     const visualX = this.currentVisualX();
     this._walk = null;
 
-    this.setData({
+    const patch = {
       anim: 'anim-' + animType,
       bubble: text,
       expression: REACTION_FACE[animType] || '',
@@ -359,7 +455,8 @@ Page({
       walkMs: 0,
       walking: false,
       ['hearts[' + this.data.hearts.length + ']']: { key, left: 20 + Math.random() * 60 }
-    });
+    };
+    this.setData(Object.assign(patch, moodPatch || {}));
     this.say(text);
 
     clearTimeout(this._animTimer);
@@ -407,8 +504,15 @@ Page({
     this._dragging = true;
     this.stopRoam();
     moments.bump('lift');
+    // 被拎起来会不高兴，这个心情会带到之后的对话里
+    let moodPatch = null;
+    try {
+      const live = petLife.onInteraction('lift');
+      const meta = petLife.moodMeta(live.mood);
+      moodPatch = { moodLabel: meta.label, moodFace: meta.face };
+    } catch (e) { /* ignore */ }
     const liftLine = this.liftLine();
-    this.setData({
+    this.setData(Object.assign({
       lifted: true,
       walking: false,
       anim: '',
@@ -418,8 +522,9 @@ Page({
       walkMs: 0,
       liftY: -70,
       expression: '😾',
-      bubble: liftLine
-    });
+      bubble: liftLine,
+      effectEmoji: ''
+    }, moodPatch || {}));
     this.say(liftLine);
     // 抓起时基准高度变了（离地 70px），基准位置也换成冻结后的真值，
     // 否则手指一动，宠物会先掉回地面 / 跳到走动终点再被拉起来

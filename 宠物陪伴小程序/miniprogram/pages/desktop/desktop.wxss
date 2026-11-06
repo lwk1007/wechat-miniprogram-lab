@@ -173,6 +173,17 @@
   letter-spacing: 2rpx;
   color: rgba(46, 58, 51, 0.5);
 }
+.desk-mood {
+  margin-left: 12rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0;
+}
+.desk.night .desk-mood {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(232, 238, 242, 0.9);
+}
 
 /* ---------- 图标网格 ---------- */
 .icons {

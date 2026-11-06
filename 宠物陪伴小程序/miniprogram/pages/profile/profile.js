@@ -1,6 +1,7 @@
 const api = require('../../utils/api');
 const privacy = require('../../utils/privacy');
 const personaUtil = require('../../utils/persona');
+const petLife = require('../../utils/pet-life');
 
 const PERSONALITY_LABEL = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
 
@@ -123,6 +124,9 @@ Page({
         if (!r.confirm) return;
         try {
           await api.deletePet();
+          // 心情和足迹日记存在本机，云端删宠物时清不到，这里补一刀，
+          // 否则删了宠物再领养一只，它还记得上一只的心情
+          try { petLife.reset(); } catch (e2) { /* ignore */ }
           getApp().globalData.communityDirty = true;
           wx.showToast({ title: '已删除', icon: 'success' });
           this.load();
@@ -179,6 +183,7 @@ Page({
             this.setData({ purging: true });
             try {
               const res = await api.purgeAll();
+              try { petLife.reset(); } catch (e2) { /* ignore */ }
               getApp().globalData.communityDirty = true;
               const s = (res && res.summary) || {};
               wx.showModal({

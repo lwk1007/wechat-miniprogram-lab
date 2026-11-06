@@ -52,8 +52,11 @@ module.exports = {
   getChatHistory() {
     return useCloud() ? cloudSvc.call('chat', 'history') : local.getChatHistory();
   },
-  sendChat(text) {
-    return useCloud() ? cloudSvc.call('chat', 'send', { text }) : local.sendChat(text);
+  // life: { mood, activityLabel, sceneName } —— 云端据此让它「带着此刻的状态」回话
+  sendChat(text, life) {
+    if (!useCloud()) return local.sendChat(text);
+    const payload = Object.assign({ text }, life || {});
+    return cloudSvc.call('chat', 'send', payload);
   },
 
   // ---------- 一封信（AI 总结近期生活事件）----------

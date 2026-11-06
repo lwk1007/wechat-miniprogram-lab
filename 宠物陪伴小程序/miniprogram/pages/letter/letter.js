@@ -1,5 +1,6 @@
 const api = require('../../utils/api');
 const moments = require('../../utils/moments');
+const petLife = require('../../utils/pet-life');
 
 const TITLE_KEY = 'pet_owner_title';
 
@@ -149,7 +150,10 @@ Page({
     try {
       // 只上传汇总结论：次数、天数、场景名，不传聊天原文
       const stats = moments.summary();
-      const res = await api.generateLetter({ ownerTitle: this.data.ownerTitle, stats });
+      // 它最近自己在做什么。云端只用来给信加一句生活细节，不上传别的本机数据
+      let activityLabel = '';
+      try { activityLabel = petLife.summary().activityLabel; } catch (e2) { /* ignore */ }
+      const res = await api.generateLetter({ ownerTitle: this.data.ownerTitle, stats, activityLabel });
       if (!res || !res.letter) throw new Error('它好像走神了，再试一次吧');
       this.applyLetter(res.letter, res.nextAt);
       wx.vibrateShort && wx.vibrateShort({ type: 'light' });

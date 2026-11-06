@@ -112,6 +112,8 @@ MODEL_API_KEY  = 你的密钥
 │   │   ├── moments.js           # 近期互动统计（一封信的素材）
 │   │   ├── letter-template.js   # 模板信（模型不可用时兜底）
 │   │   ├── persona.js           # 性格定义（底色 × 自定义 × 场景反应）
+│   │   ├── pet-life.js          # 自主生命：心情状态机 / 12 种活动 / 足迹日记 / 离线补记
+│   │   ├── chat-brain.js        # 对话大脑（意图 + 心情分档 + 语境记忆，云端共用）
 │   │   ├── voice.js             # 语音输入/播报（同声传译插件，默认关闭）
 │   │   ├── privacy.js           # 微信隐私授权封装（相册/相机前置校验）
 │   │   └── format.js            # 时间、问候语等工具
@@ -128,6 +130,8 @@ MODEL_API_KEY  = 你的密钥
 │       ├── desktop/             # 桌面态（仿手机桌面，宠物自主走动）
 │       ├── letter/              # 一封信（AI 总结近期互动）
 │       └── data-export/         # 我的数据（查阅 / 复制）
+├── scripts/
+│   └── sync-shared.js           # 生成/校验云端共享模块副本（chat-brain）
 └── cloudfunctions/
     ├── login/                   # 静默登录
     ├── pet/                     # 宠物档案 CRUD + 素材生命周期
@@ -137,8 +141,10 @@ MODEL_API_KEY  = 你的密钥
     ├── account/                 # 数据管理：立即删照片 / 清空全部数据 / 导出
     └── cleanup/                 # 定时清理（每小时，含 config.json 触发器）
 
-docs/                            # 隐私与数据管理专项测试用例
-tests/privacy.test.js            # 演示模式自动化断言（53 项）
+docs/                            # 专项测试用例与实施说明
+tests/privacy.test.js            # 隐私与数据管理断言（53 项）
+tests/dialogue.test.js           # 性格自定义与对话升级断言（50 项）
+tests/life-brain.test.js         # 自主生命与对话大脑断言（69 项）
 ```
 
 ## 六、数据保留规则（重要）
@@ -161,7 +167,12 @@ tests/privacy.test.js            # 演示模式自动化断言（53 项）
 
 **查阅与导出**：「我的 → 数据管理 → 查看并导出我的数据」汇总档案、聊天、动态、评论、信与素材记录，可整份复制保存。
 
-**专项测试**：用例见 `docs/隐私与数据管理专项测试.md`；演示模式自动化断言 `node tests/privacy.test.js`（53 项）。
+**专项测试**：用例见 `docs/隐私与数据管理专项测试.md`；自动化断言 `node tests/privacy.test.js`（53 项）、
+`node tests/dialogue.test.js`（50 项）、`node tests/life-brain.test.js`（69 项），共 172 项。
+
+**共享模块**：`miniprogram/utils/chat-brain.js` 会被复制到 `cloudfunctions/chat/chat-brain.js`（云函数是独立部署包，
+不能跨目录 require）。改完源文件执行 `node scripts/sync-shared.js`，`node scripts/sync-shared.js --check` 或
+`tests/life-brain.test.js` 会校验两份是否漂移。
 
 ## 七、功能清单
 
