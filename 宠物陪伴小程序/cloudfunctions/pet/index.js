@@ -9,6 +9,47 @@ const PRIVATE_TTL = 22 * 60 * 60 * 1000;
 const PERSONALITIES = ['loyal', 'lively', 'foodie', 'friendly'];
 const TYPES = ['cat', 'dog', 'other'];
 
+// 性格自定义（#9）：用户可覆盖/补充的项目。
+// 服务端必须自己清洗，不能信前端——prompt 是要塞进模型的，超长或异常字符会直接搞坏请求。
+const PERSONA_SCENES = ['touch', 'feed', 'play', 'lift'];
+const PERSONA_LIMITS = { speech: 40, catchphrase: 12, quirk: 40, trait: 8, scene: 40 };
+
+function clipText(v, max) {
+  if (v === undefined || v === null) return '';
+  const s = String(v).trim();
+  return s ? s.slice(0, max) : '';
+}
+
+function sanitizePersona(input) {
+  if (!input || typeof input !== 'object') return null;
+  const out = {};
+
+  const traits = Array.isArray(input.traits)
+    ? input.traits
+      .map((t) => clipText(t, PERSONA_LIMITS.trait))
+      .filter(Boolean)
+      .slice(0, 3)
+    : [];
+  if (traits.length) out.traits = traits;
+
+  const speech = clipText(input.speech, PERSONA_LIMITS.speech);
+  const catchphrase = clipText(input.catchphrase, PERSONA_LIMITS.catchphrase);
+  const quirk = clipText(input.quirk, PERSONA_LIMITS.quirk);
+  if (speech) out.speech = speech;
+  if (catchphrase) out.catchphrase = catchphrase;
+  if (quirk) out.quirk = quirk;
+
+  const scenes = {};
+  PERSONA_SCENES.forEach((k) => {
+    const v = clipText((input.scenes || {})[k], PERSONA_LIMITS.scene);
+    if (v) scenes[k] = v;
+  });
+  if (Object.keys(scenes).length) out.scenes = scenes;
+
+  // 全空就存 null，别在文档里留一个空对象占位
+  return Object.keys(out).length ? out : null;
+}
+
 function ok(data) {
   return { ok: true, data };
 }
@@ -74,11 +115,13 @@ async function createPet(openid, p) {
     assetId = asset._id;
   }
 
+  const personaDoc = sanitizePersona(p.persona);
   const pet = await db.collection('pets').add({
     data: {
       _openid: openid,
       name,
       personality: p.personality,
+      persona: personaDoc,
       type: p.type || 'other',
       ownerName: (p.ownerName || '').trim().slice(0, 12),
       sinceDate: p.sinceDate || '',
@@ -104,6 +147,11 @@ async function updatePet(openid, p) {
   if (p.personality !== undefined) {
     if (!PERSONALITIES.includes(p.personality)) throw new Error('性格不合法');
     patch.personality = p.personality;
+  }
+  // 传 persona 就整份替换（前端每次提交的是完整编辑结果，不做部分合并，
+  // 否则用户清空某个字段时无法表达「清空」意图）
+  if (p.persona !== undefined) {
+    patch.persona = sanitizePersona(p.persona);
   }
   if (p.type !== undefined && TYPES.includes(p.type)) patch.type = p.type;
   if (p.ownerName !== undefined) patch.ownerName = p.ownerName.trim().slice(0, 12);

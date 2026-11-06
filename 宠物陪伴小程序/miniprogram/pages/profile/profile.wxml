@@ -10,7 +10,7 @@
     <view wx:else class="pet-avatar pet-avatar-generic">{{typeEmoji}}</view>
     <view class="pet-info">
       <view class="pet-name">{{pet.name}}</view>
-      <view class="sub">{{personalityLabel}} · 陪伴始于 {{pet.sinceDate || '今天'}}</view>
+      <view class="sub">{{personaSummary || personalityLabel}} · 陪伴始于 {{pet.sinceDate || '今天'}}</view>
     </view>
     <view class="edit-link" bindtap="goEdit">编辑资料</view>
   </view>

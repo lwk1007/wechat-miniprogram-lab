@@ -323,7 +323,17 @@ Page({
     if (!this.data.pet) return;
     if (this.data.lifted) return;
     const type = e.currentTarget.dataset.type || 'touch';
-    this.playReaction(type, PHRASES[type] || PHRASES.touch);
+    this.playReaction(type, this.reactionPool(type));
+  },
+
+  // #9：用户为某个场景写过的反应，直接用那句话；没写过就回到通用文案池。
+  // 这样「自定义」不是摆设，喂食/摸摸时真的会说出你写的内容。
+  reactionPool(type) {
+    const pet = this.data.pet || {};
+    const scenes = (pet.persona && pet.persona.scenes) || {};
+    const text = String(scenes[type] || '').trim();
+    if (text) return [text];
+    return PHRASES[type] || PHRASES.touch;
   },
 
   playReaction(animType, pool) {
@@ -380,6 +390,15 @@ Page({
     this._lastDragX = null;
   },
 
+  // #9：被拎起来时它说的话
+  liftLine() {
+    const pet = this.data.pet || {};
+    const scenes = (pet.persona && pet.persona.scenes) || {};
+    const text = String(scenes.lift || '').trim();
+    if (text) return text;
+    return this.data.ownerTitle + '你怎么把我提起来了…';
+  },
+
   // 长按 350ms 触发：被抓起来，脚离地
   onPetLongPress() {
     if (!this.data.pet || this.data.lifted) return;
@@ -388,6 +407,7 @@ Page({
     this._dragging = true;
     this.stopRoam();
     moments.bump('lift');
+    const liftLine = this.liftLine();
     this.setData({
       lifted: true,
       walking: false,
@@ -398,9 +418,9 @@ Page({
       walkMs: 0,
       liftY: -70,
       expression: '😾',
-      bubble: this.data.ownerTitle + '你怎么把我提起来了…'
+      bubble: liftLine
     });
-    this.say(this.data.ownerTitle + '你怎么把我提起来了');
+    this.say(liftLine);
     // 抓起时基准高度变了（离地 70px），基准位置也换成冻结后的真值，
     // 否则手指一动，宠物会先掉回地面 / 跳到走动终点再被拉起来
     if (this._dragFrom) {

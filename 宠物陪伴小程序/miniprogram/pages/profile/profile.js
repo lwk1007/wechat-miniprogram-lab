@@ -1,5 +1,6 @@
 const api = require('../../utils/api');
 const privacy = require('../../utils/privacy');
+const personaUtil = require('../../utils/persona');
 
 const PERSONALITY_LABEL = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
 
@@ -10,6 +11,7 @@ Page({
     photo: '',
     typeEmoji: '🐾',
     personalityLabel: '',
+    personaSummary: '',
     mode: 'private',
     savingMode: false,
     photoRemoving: false,
@@ -41,7 +43,9 @@ Page({
         photo,
         mode: pet ? pet.storageMode : 'private',
         typeEmoji: pet && pet.type === 'cat' ? '🐱' : pet && pet.type === 'dog' ? '🐶' : '🐾',
-        personalityLabel: pet ? PERSONALITY_LABEL[pet.personality] || '' : ''
+        personalityLabel: pet ? PERSONALITY_LABEL[pet.personality] || '' : '',
+        // #9：把自定义过的内容显示出来，否则用户填了也不知道有没有生效
+        personaSummary: pet ? personaUtil.summary(pet) : ''
       });
       this.loadMyPosts();
     } catch (e) {

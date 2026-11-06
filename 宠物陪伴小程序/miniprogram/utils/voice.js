@@ -1,36 +1,39 @@
-// 语音播报（可选能力）
+// 语音能力（#4 语音对话）
 //
-// 小程序没有系统级 TTS，想让它「说话」只有三条路：
-//   1. 自带音频文件（要自己录或买，包体也会变大）
-//   2. 接第三方在线 TTS（要服务器、要费用、有延迟）
-//   3. 用「微信同声传译」插件（免费、免服务器、文本直接转语音）
-// 这里走第 3 条，并且做成「可选开关」：没启用时所有调用静默返回 false，
-// 气泡文字和动作照常工作，不会报错、不会影响演示。
+// 两条链路都依赖「微信同声传译」插件，这是唯一免费、免服务器的小程序语音方案：
+//   1. 语音输入 ASR：plugin.getRecordRecognitionManager()，按下录音、松手出文字
+//   2. 语音输出 TTS：plugin.textToSpeech()，文本转音频再用 InnerAudioContext 播放
 //
-// 启用步骤（三步，都在小程序后台 + 本地配置里完成）：
-//   1. 小程序后台 → 设置 → 第三方设置 → 插件管理 → 搜索「微信同声传译」→ 添加
-//   2. app.json 里增加一段（version 用插件页显示的当前版本号）：
-//        "plugins": {
-//          "WechatSI": { "version": "0.3.5", "provider": "wx069ba97219f66d99" }
-//        }
+// 设计原则：插件没启用时全部静默降级。麦克风按钮照常显示，点了会告诉用户怎么开，
+// 打字聊天完全不受影响。这样功能「看得见、解释得清」，而不是藏起来让人以为没做。
+//
+// 启用三步（缺一不可）：
+//   1. 小程序后台 → 设置 → 第三方设置 → 插件管理 → 搜「微信同声传译」→ 添加
+//   2. app.json 增加：
+//        "plugins": { "WechatSI": { "version": "0.3.5", "provider": "wx069ba97219f66d99" } }
 //   3. 把下面的 ENABLED 改成 true，重新编译
 //
-// 注意：插件未在后台添加就写进 app.json，小程序会直接编译失败，
-// 所以这里默认关闭，代码保持可用。
+// 注意：插件没在后台添加就写进 app.json，小程序会直接编译失败，所以默认关闭。
 
 const ENABLED = false;
 
+const RECOGNIZE_LANG = 'zh_CN';     // 可选 zh_CN / en_US / zh_HK / sichuanhua
+const RECOGNIZE_DURATION = 60000;   // 单次录音上限，插件要求传
+const TTS_MAX_CHARS = 120;          // 单次播报字数上限，太长听起来像播报器
+const TTS_AUTO_KEY = 'pet_tts_auto'; // 自动播报开关的本地存储键
+
 let plugin = null;
-let audio = null;
 let pluginTried = false;
+let audio = null;
 let speaking = false;
+let recognizer = null;   // 当前页持有的识别器，离开页面必须释放
 
 function getPlugin() {
   if (!ENABLED) return null;
   if (pluginTried) return plugin;
   pluginTried = true;
   try {
-    // 只有 app.json 声明了 WechatSI 插件，这一句才拿得到对象
+    // 只有 app.json 声明了 WechatSI，这一句才拿得到对象
     plugin = requirePlugin('WechatSI');
   } catch (e) {
     plugin = null;
@@ -39,6 +42,22 @@ function getPlugin() {
   return plugin;
 }
 
+// 给 UI 用：决定麦克风按钮要不要置灰、点击提示什么
+function status() {
+  if (!ENABLED) return 'disabled';
+  const si = getPlugin();
+  if (!si) return 'error';
+  return 'ok';
+}
+
+function unavailableTip() {
+  return status() === 'disabled'
+    ? '语音功能还没启用：需要在小程序后台添加「微信同声传译」插件'
+    : '语音插件加载失败，请重新编译或检查插件配置';
+}
+
+// ---------- 语音输出 TTS ----------
+
 function getAudio() {
   if (audio) return audio;
   audio = wx.createInnerAudioContext();
@@ -46,6 +65,22 @@ function getAudio() {
   audio.onEnded(() => { speaking = false; });
   audio.onError(() => { speaking = false; });
   return audio;
+}
+
+function isAutoTts() {
+  try {
+    return wx.getStorageSync(TTS_AUTO_KEY) === true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function setAutoTts(on) {
+  try {
+    wx.setStorageSync(TTS_AUTO_KEY, !!on);
+  } catch (e) {
+    // 存储失败不影响本次会话，只是下次进来要重新开
+  }
 }
 
 /**
@@ -66,7 +101,7 @@ function speak(text, opts) {
     si.textToSpeech({
       lang: 'zh_CN',
       tts: true,
-      content: String(text).slice(0, 120),
+      content: String(text).slice(0, TTS_MAX_CHARS),
       success: (res) => {
         if (!res || !res.filename) {
           resolve(false);
@@ -92,6 +127,10 @@ function speak(text, opts) {
   });
 }
 
+function isSpeaking() {
+  return speaking;
+}
+
 function stop() {
   speaking = false;
   if (audio) {
@@ -99,12 +138,108 @@ function stop() {
   }
 }
 
+// ---------- 语音输入 ASR ----------
+
+// 录音权限：初次会弹系统授权框；之前明确拒绝过则只能引导去设置页
+// 返回值：true / 'denied' / 'unknown'
+function ensureRecordPermission() {
+  return new Promise((resolve) => {
+    if (typeof wx === 'undefined') return resolve('unknown');
+    wx.getSetting({
+      success: (res) => {
+        const auth = (res && res.authSetting) || {};
+        if (auth['scope.record'] === true) return resolve(true);
+        if (auth['scope.record'] === false) return resolve('denied');
+        wx.authorize({
+          scope: 'scope.record',
+          success: () => resolve(true),
+          fail: () => resolve('denied')
+        });
+      },
+      fail: () => resolve('unknown')
+    });
+  });
+}
+
+/**
+ * 创建一个语音识别器。页面 onLoad 里建，onUnload 里 destroy。
+ * 插件的 manager 是全局单例，回调会被后注册的覆盖，所以同一时间只应存在一个识别器。
+ * @param {object} handlers { onPartial(text), onStop(text, res), onError(res) }
+ * @returns {object|null} { start, stop, destroy }
+ */
+function createRecognizer(handlers) {
+  const si = getPlugin();
+  if (!si || typeof si.getRecordRecognitionManager !== 'function') return null;
+
+  const mgr = si.getRecordRecognitionManager();
+  const h = handlers || {};
+
+  // 有新的中间识别结果，用于边录边显示
+  mgr.onRecognize = (res) => {
+    if (h.onPartial) h.onPartial((res && res.result) || '');
+  };
+  // 录音结束（或达到时长上限）
+  mgr.onStop = (res) => {
+    const text = (res && res.result) || '';
+    if (h.onStop) h.onStop(text, res);
+  };
+  mgr.onError = (res) => {
+    if (h.onError) h.onError(res);
+  };
+
+  const handle = {
+    start() {
+      try {
+        // 必须在页面渲染完成后调用，否则部分基础库会报错
+        mgr.start({ lang: RECOGNIZE_LANG, duration: RECOGNIZE_DURATION });
+        return true;
+      } catch (e) {
+        if (h.onError) h.onError(e);
+        return false;
+      }
+    },
+    stop() {
+      try { mgr.stop(); } catch (e) { /* 已经停了 */ }
+    },
+    destroy() {
+      // 摘掉回调，避免页面销毁后仍然被触发
+      try {
+        mgr.onRecognize = null;
+        mgr.onStop = null;
+        mgr.onError = null;
+      } catch (e) { /* 忽略 */ }
+      if (recognizer === handle) recognizer = null;
+    }
+  };
+
+  recognizer = handle;
+  return handle;
+}
+
 function destroy() {
   stop();
+  if (recognizer) {
+    recognizer.destroy();
+    recognizer = null;
+  }
   if (audio) {
     try { audio.destroy(); } catch (e) { /* 忽略 */ }
     audio = null;
   }
 }
 
-module.exports = { speak, stop, destroy, enabled: ENABLED };
+module.exports = {
+  status,
+  unavailableTip,
+  // TTS
+  speak,
+  stop,
+  isSpeaking,
+  isAutoTts,
+  setAutoTts,
+  // ASR
+  ensureRecordPermission,
+  createRecognizer,
+  destroy,
+  enabled: ENABLED
+};

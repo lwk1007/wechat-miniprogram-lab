@@ -17,18 +17,6 @@
       <input class="form-input" maxlength="12" value="{{name}}" bindinput="onNameInput" />
     </view>
     <view class="form-item">
-      <view class="form-label">性格</view>
-      <view class="chips">
-        <view
-          wx:for="{{personalities}}"
-          wx:key="key"
-          class="chip {{personality === item.key ? 'chip-on' : ''}}"
-          data-key="{{item.key}}"
-          bindtap="choosePersonality"
-        >{{item.label}}</view>
-      </view>
-    </view>
-    <view class="form-item">
       <view class="form-label">宠物类型</view>
       <picker mode="selector" range="{{types}}" range-key="label" value="{{typeIndex}}" bindchange="onTypeChange">
         <view class="form-input picker-value">{{types[typeIndex].label}}</view>
@@ -43,6 +31,101 @@
       <picker mode="date" end="{{today}}" value="{{sinceDate}}" bindchange="onDateChange">
         <view class="form-input picker-value">{{sinceDate || '选择日期'}}</view>
       </picker>
+    </view>
+  </view>
+
+  <!-- #9 性格自定义 -->
+  <view class="card">
+    <view class="h2">性格</view>
+    <view class="sub">先选一个底色，它会决定说话的语气和互动时的反应。想更贴近它，再往下补充细节。</view>
+
+    <view class="chips persona-base">
+      <view
+        wx:for="{{personalities}}"
+        wx:key="key"
+        class="chip {{personality === item.key ? 'chip-on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="choosePersonality"
+      >{{item.label}}</view>
+    </view>
+
+    <view class="persona-preview">
+      <view class="persona-preview-label">被摸摸时</view>
+      <view class="persona-preview-text">它会{{personaPreview}}</view>
+    </view>
+
+    <view class="persona-toggle" bindtap="togglePersona">
+      <text>{{personaOpen ? '收起补充' : '按你的印象再补充（可选）'}}</text>
+      <text class="persona-arrow">{{personaOpen ? '∧' : '∨'}}</text>
+    </view>
+
+    <view class="persona-body" wx:if="{{personaOpen}}">
+
+      <view class="form-item">
+        <view class="form-label">它是什么样<text class="form-hint">最多 3 个</text></view>
+        <view class="chips">
+          <view
+            wx:for="{{traitOptions}}"
+            wx:key="name"
+            class="chip chip-sm {{item.on ? 'chip-on' : ''}}"
+            data-name="{{item.name}}"
+            bindtap="toggleTrait"
+          >{{item.name}}</view>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">口头禅</view>
+        <input
+          class="form-input"
+          maxlength="12"
+          value="{{persona.catchphrase}}"
+          data-field="catchphrase"
+          bindinput="onPersonaInput"
+          placeholder="例：抱抱嘛"
+        />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">说话方式</view>
+        <input
+          class="form-input"
+          maxlength="40"
+          value="{{persona.speech}}"
+          data-field="speech"
+          bindinput="onPersonaInput"
+          placeholder="例：句子很短，爱用叠词"
+        />
+      </view>
+
+      <view class="form-divider">不同时候它会怎样</view>
+
+      <view class="form-item" wx:for="{{sceneList}}" wx:key="key">
+        <view class="form-label">{{item.label}}</view>
+        <textarea
+          class="form-textarea"
+          maxlength="40"
+          value="{{persona.scenes[item.key]}}"
+          data-scene="{{item.key}}"
+          bindinput="onSceneInput"
+          placeholder="{{item.placeholder}}"
+          auto-height
+        />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">小怪癖</view>
+        <input
+          class="form-input"
+          maxlength="40"
+          value="{{persona.quirk}}"
+          data-field="quirk"
+          bindinput="onPersonaInput"
+          placeholder="例：你一开冰箱它就到"
+        />
+      </view>
+
+      <view class="persona-note">这些会用在它说话的语气、喂食和摸摸时的反应上。</view>
     </view>
   </view>
 

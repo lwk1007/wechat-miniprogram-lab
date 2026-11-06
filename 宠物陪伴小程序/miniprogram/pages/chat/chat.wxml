@@ -4,7 +4,23 @@
     演示模式：回复来自本地模板，未接入真实大模型，也不会长期记住聊天内容
   </view>
 
-  <scroll-view class="msg-list" scroll-y scroll-top="{{scrollTop}}" enhanced show-scrollbar="{{false}}">
+  <!-- 播报开关：只在语音可用时才值得占位置，但禁用态也显示，让人知道有这个能力 -->
+  <view class="chat-tools">
+    <view class="tool {{ttsAuto ? 'tool-on' : ''}}" bindtap="toggleTts">
+      <text class="tool-dot"></text>
+      <text>{{ttsAuto ? '自动播报已开' : '自动播报'}}</text>
+    </view>
+    <view class="tool-hint" wx:if="{{!voiceReady}}">语音未启用</view>
+  </view>
+
+  <scroll-view
+    class="msg-list"
+    scroll-y
+    scroll-top="{{scrollTop}}"
+    enhanced
+    show-scrollbar="{{false}}"
+    bindscroll="onScroll"
+  >
     <view wx:if="{{loading}}" class="empty">正在加载…</view>
 
     <block wx:else>
@@ -20,7 +36,12 @@
         <view class="msg-col">
           <view class="msg-name" wx:if="{{item.role === 'pet'}}">{{pet.name}}</view>
 
-          <view class="bubble {{item.role === 'user' ? 'bubble-user' : ''}}">
+          <view
+            class="bubble {{item.role === 'user' ? 'bubble-user' : ''}} {{item.typing ? 'bubble-typing' : ''}}"
+            bindlongpress="replay"
+            data-role="{{item.role}}"
+            data-content="{{item.content}}"
+          >
             <text>{{item.content}}</text>
             <view wx:if="{{item.isDemo}}" class="demo-tag">演示回复</view>
           </view>
@@ -32,6 +53,7 @@
         </view>
       </view>
 
+      <!-- 等待模型返回：三个点 -->
       <view wx:if="{{sending}}" class="msg-row msg-left">
         <view class="avatar">{{petEmoji}}</view>
         <view class="bubble typing">
@@ -43,24 +65,57 @@
     </block>
   </scroll-view>
 
+  <!-- 用户翻历史时新消息不抢滚动，给个提示条 -->
+  <view wx:if="{{hasNew}}" class="new-tip" bindtap="jumpToBottom">有新消息 ∨</view>
+
   <!-- 快捷话题 -->
-  <view class="topics" wx:if="{{!loading}}">
-    <view class="topic" wx:for="{{['今天过得怎么样', '陪我聊聊天', '我想你了', '最近有点累']}}" wx:key="*this"
+  <view class="topics" wx:if="{{!loading && !voiceMode}}">
+    <view class="topic" wx:for="{{quickTopics}}" wx:key="*this"
       data-topic="{{item}}" bindtap="onTopic">{{item}}</view>
   </view>
 
   <!-- 输入栏 -->
   <view class="input-bar safe-bottom">
-    <input
-      class="chat-input"
-      placeholder="说点什么…"
-      value="{{input}}"
-      confirm-type="send"
-      bindinput="onInput"
-      bindconfirm="send"
-      cursor-spacing="16"
-      maxlength="300"
-    />
-    <view class="send-btn {{(!input || sending) ? 'send-disabled' : ''}}" bindtap="send">发送</view>
+    <view class="mode-btn" bindtap="toggleVoiceMode">{{voiceMode ? '⌨' : '🎤'}}</view>
+
+    <block wx:if="{{voiceMode}}">
+      <view
+        class="voice-hold {{recording ? 'voice-hold-on' : ''}}"
+        bindtouchstart="onVoiceStart"
+        bindtouchend="onVoiceEnd"
+        bindtouchcancel="onVoiceCancel"
+      >{{recording ? '松开 结束' : '按住 说话'}}</view>
+    </block>
+
+    <block wx:else>
+      <input
+        class="chat-input"
+        placeholder="说点什么…"
+        value="{{input}}"
+        confirm-type="send"
+        bindinput="onInput"
+        bindconfirm="send"
+        cursor-spacing="16"
+        maxlength="300"
+      />
+      <view class="send-btn {{(!input || sending) ? 'send-disabled' : ''}}" bindtap="send">发送</view>
+    </block>
   </view>
+
+  <!-- 录音浮层：实时显示识别到的字，让人知道它在听 -->
+  <view wx:if="{{recording}}" class="rec-mask">
+    <view class="rec-box">
+      <view class="rec-wave">
+        <view class="rec-bar"></view>
+        <view class="rec-bar"></view>
+        <view class="rec-bar"></view>
+        <view class="rec-bar"></view>
+        <view class="rec-bar"></view>
+      </view>
+      <view class="rec-text">{{partial || '在听…'}}</view>
+      <view class="rec-hint">松开结束并发送</view>
+    </view>
+  </view>
+
+  <privacy-popup show="{{showPrivacy}}" bindagree="onPrivacyAgree" bindcancel="onPrivacyCancel" />
 </view>

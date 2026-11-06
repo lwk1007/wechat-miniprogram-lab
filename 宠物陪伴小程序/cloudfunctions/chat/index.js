@@ -3,6 +3,7 @@ const https = require('https');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const _ = db.command;
+const persona = require('./persona');
 
 // ===== 模型适配层（可替换 Provider）=====
 // 通过云函数环境变量配置，密钥只存在于服务端：
@@ -17,33 +18,64 @@ const MODEL_API_KEY = process.env.MODEL_API_KEY || '';
 const MODEL_NAME = process.env.MODEL_NAME || '';
 const isRealModel = MODEL_PROVIDER === 'openai-compatible' && !!(MODEL_BASE_URL && MODEL_API_KEY && MODEL_NAME);
 
-const CONTEXT_LIMIT = 10;   // 携带的历史上下文条数
+const CONTEXT_LIMIT = 10;   // 携带的历史上下文条数上限
+// 很多便宜模型的上下文窗口不大，条数够但字数超了一样报错。
+// 按字数从最近往前累加，超了就停，比单纯按条数稳。
+const CONTEXT_MAX_CHARS = 1200;
 const MIN_INTERVAL = 1500;  // 两次发送最小间隔（毫秒），基础频率限制
 const HISTORY_KEEP_MS = 90 * 24 * 3600 * 1000; // 对话历史保留 90 天
-
-const PERSONALITY_TEXT = {
-  loyal: '忠心',
-  lively: '活泼',
-  foodie: '贪吃',
-  friendly: '亲人'
-};
-const TYPE_TEXT = { cat: '小猫', dog: '小狗', other: '小可爱' };
 
 function ok(data) { return { ok: true, data }; }
 function fail(e) { return { ok: false, error: (e && e.message) || '服务异常，请稍后重试' }; }
 
-function buildSystemPrompt(pet) {
-  const owner = pet.ownerName ? `主人${pet.ownerName}` : '主人';
-  return [
-    `你是一只名叫「${pet.name}」的${PERSONALITY_TEXT[pet.personality] || '亲人'}的${TYPE_TEXT[pet.type] || '小可爱'}，正在“另一个世界”陪伴${owner}。`,
-    '请遵守：',
-    '1. 这是 AI 宠物陪伴，回复保持宠物口吻，简短温暖，50 字以内。',
-    '2. 可以偶尔用“汪”“喵”等语气词，但不要每句都用。',
-    '3. 不声称自己是真实宠物、真实复活或拥有真实意识。',
-    '4. 主人提到思念离世宠物时，温和回应，不放大悲伤，不诱导依赖或付费。',
-    '5. 不询问个人隐私，不发送链接，不说教。'
-  ].join('\n');
+// 上下文裁剪：从最近一条往前累加，条数和字数双上限
+function trimContext(desc) {
+  const picked = [];
+  let chars = 0;
+  for (let i = 0; i < desc.length && picked.length < CONTEXT_LIMIT; i++) {
+    const m = desc[i];
+    const len = String(m.content || '').length;
+    if (chars + len > CONTEXT_MAX_CHARS && picked.length > 0) break;
+    chars += len;
+    picked.push(m);
+  }
+  return picked.reverse();
 }
+
+// 性格影响随机度：活泼/贪吃说得更跳一点，忠心/亲人更稳
+function temperatureOf(pet) {
+  const t = { loyal: 0.7, friendly: 0.8, lively: 0.95, foodie: 0.9 };
+  return t[pet && pet.personality] || 0.8;
+}
+
+// 演示模式（无模型）下每个性格的专属应答池。
+// 这是 #9 在没有接大模型时唯一能被感知到的差异，所以文案要能体现性格本身。
+const DEMO_POOL = {
+  loyal: [
+    '我在呢，你说吧。',
+    '嗯，我听着。',
+    '我一直在这儿，你不用叫我。',
+    '不用说什么，我来陪你坐一会儿。'
+  ],
+  lively: [
+    '来来来，说点有意思的！',
+    '你今天有没有遇到好玩的事？快说快说！',
+    '我刚刚自己追着尾巴转了三圈！',
+    '好好好，你说，我竖着耳朵听！'
+  ],
+  foodie: [
+    '你说这个的时候…是不是在吃什么东西？',
+    '我闻到一点点香味了，真的！',
+    '等一下再说，我先咽下口水。',
+    '聊点别的也行的，只要别聊减肥。'
+  ],
+  friendly: [
+    '抱抱嘛，先抱一下再说。',
+    '你说什么我都爱听。',
+    '今天也想挨着你坐着。',
+    '嗯…我在想你有没有想我。'
+  ]
+};
 
 function httpsPostJSON(urlStr, body, headers) {
   return new Promise((resolve, reject) => {
@@ -79,14 +111,14 @@ function httpsPostJSON(urlStr, body, headers) {
 // 统一出口：真实模型或演示模板，调用方无需关心差异
 async function generateReply(pet, contextMessages) {
   if (isRealModel) {
-    const messages = [{ role: 'system', content: buildSystemPrompt(pet) }]
+    const messages = [{ role: 'system', content: persona.buildSystemPrompt(pet) }]
       .concat(contextMessages.map((m) => ({
         role: m.role === 'user' ? 'user' : 'assistant',
         content: m.content
       })));
     const res = await httpsPostJSON(
       MODEL_BASE_URL.replace(/\/$/, '') + '/chat/completions',
-      { model: MODEL_NAME, messages, max_tokens: 120, temperature: 0.8 },
+      { model: MODEL_NAME, messages, max_tokens: 160, temperature: temperatureOf(pet) },
       { Authorization: 'Bearer ' + MODEL_API_KEY }
     );
     const content = res && res.choices && res.choices[0] && res.choices[0].message && res.choices[0].message.content;
@@ -108,16 +140,11 @@ async function generateReply(pet, contextMessages) {
   } else if (/晚安|睡觉|睡了/.test(t)) {
     pool = ['晚安，做个好梦，梦里我们一起玩。', '快去睡吧，我守着这里等你明天来。'];
   } else {
-    pool = [
-      '嗯嗯，我在听呢，然后呢？',
-      '你说的我都记住啦（演示模式下我不会真的记住哦）。',
-      '和你聊天的时光最开心了。',
-      '嗯…总之，我一直陪着你！'
-    ];
+    // 没匹配到关键词时走性格专属池——这是 #9 在演示模式下唯一能被感知到的差异
+    pool = DEMO_POOL[pet.personality] || DEMO_POOL.friendly;
   }
-  const sound = pet.type === 'cat' ? '喵～' : pet.type === 'dog' ? '汪！' : '';
   let reply = pool[Math.floor(Math.random() * pool.length)];
-  if (sound && Math.random() < 0.3) reply = sound + reply;
+  reply = persona.flavor(pet) + reply;
   return { content: reply, isDemo: true };
 }
 
@@ -160,10 +187,10 @@ async function send(openid, { text }) {
   const ctxMsgs = await db.collection('messages')
     .where({ _openid: openid })
     .orderBy('createdAt', 'desc')
-    .limit(CONTEXT_LIMIT)
+    .limit(24)
     .get();
 
-  const reply = await generateReply(pet, ctxMsgs.data.slice().reverse());
+  const reply = await generateReply(pet, trimContext(ctxMsgs.data));
 
   await db.collection('messages').add({
     data: {

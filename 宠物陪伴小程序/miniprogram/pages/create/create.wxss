@@ -68,6 +68,12 @@
 }
 .personality-label { font-size: 30rpx; font-weight: 500; margin-bottom: 4rpx; }
 
+.persona-hint {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
 .optional-title {
   margin: 24rpx 0 8rpx;
   padding-top: 24rpx;

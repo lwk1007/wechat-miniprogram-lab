@@ -85,8 +85,14 @@ async function collectTalks(openid) {
 }
 
 function buildPrompt(pet, stats, ownerTitle, talks) {
+  const personaData = pet.persona || {};
   const bits = [];
   bits.push(`你是一只名叫「${pet.name}」的${PERSONALITY_TEXT[pet.personality] || '亲人'}的${TYPE_TEXT[pet.type] || '小可爱'}。`);
+  // #9：信是它自己写的，语气必须和聊天里一致，否则同一只宠物两副嘴脸会很出戏。
+  // 只取说话方式/口头禅/怪癖三项——场景反应属于互动瞬间，写进信里会变成流水账。
+  if (personaData.speech) bits.push(`你平时说话的样子：${personaData.speech}。`);
+  if (personaData.catchphrase) bits.push(`你常挂在嘴边的是「${personaData.catchphrase}」。`);
+  if (personaData.quirk) bits.push(`你的小怪癖：${personaData.quirk}。`);
   bits.push(`你要给你最爱的「${ownerTitle}」写一封短短的信。`);
   bits.push('');
   bits.push('可用素材（只能用这些，不要编造别的经历）：');
@@ -103,6 +109,7 @@ function buildPrompt(pet, stats, ownerTitle, talks) {
   bits.push('3. 温暖克制，不煽情、不承诺做不到的事、不提付费、不说自己是 AI');
   bits.push(`4. 最后单独一行署名「${pet.name}」`);
   bits.push('5. 只输出信的正文，不要标题、不要解释、不要加引号');
+  bits.push('6. 全程保持平时说话的语气，不要突然变得文绉绉，不要用“时光荏苒”“岁月如梭”这类句子');
   return bits.join('\n');
 }
 
@@ -168,7 +175,9 @@ function fallbackLetter(pet, stats, ownerTitle, talks) {
 
 async function generateWithModel(pet, stats, ownerTitle, talks) {
   const messages = [
-    { role: 'system', content: '你是一个温柔、克制的中文写作助手，只按用户给的结构写信。' },
+    // 人设必须放在 system 层：写成「写作助手」会盖掉下面 user 里的宠物身份，
+    // 模型最终产出一封编辑腔的信——这是角色一致性最常见的一种崩法。
+    { role: 'system', content: '你正在扮演一只宠物，用它自己的口吻给主人写一封短短的私信。只输出信的正文，不写标题、不加引号、不解释。温暖但克制，不煽情。' },
     { role: 'user', content: buildPrompt(pet, stats, ownerTitle, talks) }
   ];
   const res = await httpsPostJSON(

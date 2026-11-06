@@ -47,6 +47,8 @@
       </view>
     </view>
 
+    <view class="persona-hint sub">创建后可以在「编辑档案」里补充它的口头禅、小怪癖和不同时候的反应，互动会更像它。</view>
+
     <view class="optional-title sub">以下可跳过</view>
     <view class="form-item">
       <view class="form-label">宠物类型</view>

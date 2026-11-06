@@ -301,8 +301,18 @@ Page({
     this.playAction(type);
   },
 
+  // #9：用户为这个场景写过的反应，优先用它；没写过就回到通用文案池
+  reactionPool(type, fallback) {
+    const pet = this.data.pet || {};
+    const scenes = (pet.persona && pet.persona.scenes) || {};
+    const text = String(scenes[type] || '').trim();
+    if (text) return [text];
+    return fallback;
+  },
+
   playAction(type) {
-    const pool = type === 'feed' ? FEED_PHRASES : type === 'play' ? PLAY_PHRASES : TOUCH_PHRASES;
+    const fallback = type === 'feed' ? FEED_PHRASES : type === 'play' ? PLAY_PHRASES : TOUCH_PHRASES;
+    const pool = this.reactionPool(type, fallback);
     // 记一笔互动，给「一封信」当素材
     moments.bump(type);
     // 走到半路被叫停：先把位置冻结到画面真值，否则零食/小球会飞到走路的终点去
@@ -368,7 +378,7 @@ Page({
       this._dragFrom.liftY = -70;
       this._dragFrom.petX = visualX;
     }
-    this.showBubble(randomFrom(LIFT_PHRASES), 2600);
+    this.showBubble(randomFrom(this.reactionPool('lift', LIFT_PHRASES)), 2600);
     if (wx.vibrateShort) {
       try { wx.vibrateShort({ type: 'light' }); } catch (err) { /* 部分机型不支持 */ }
     }

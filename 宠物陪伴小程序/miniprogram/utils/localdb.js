@@ -73,6 +73,8 @@ async function createPet(data) {
     _id: 'demo-pet-' + Date.now(),
     name: data.name,
     personality: data.personality || 'friendly',
+    // 性格自定义（#9）：与云端 pets.persona 同结构，null 表示全用预设
+    persona: data.persona || null,
     type: data.type || 'other',
     ownerName: data.ownerName || '',
     sinceDate: data.sinceDate || '',
@@ -90,7 +92,7 @@ async function createPet(data) {
 async function updatePet(patch) {
   const pet = get(K.pet, null);
   if (!pet) throw new Error('还没有宠物档案');
-  ['name', 'personality', 'type', 'ownerName', 'sinceDate', 'storageMode', 'photo'].forEach((k) => {
+  ['name', 'personality', 'persona', 'type', 'ownerName', 'sinceDate', 'storageMode', 'photo'].forEach((k) => {
     if (patch[k] !== undefined) pet[k] = patch[k];
   });
   if (patch.photo !== undefined) {
@@ -173,6 +175,7 @@ async function exportAll() {
     pet: pet ? {
       name: pet.name,
       personality: pet.personality,
+      persona: pet.persona || null,
       type: pet.type,
       ownerName: pet.ownerName,
       sinceDate: pet.sinceDate,

@@ -1,6 +1,7 @@
 const api = require('../../utils/api');
 const cloudSvc = require('../../utils/cloud');
 const privacy = require('../../utils/privacy');
+const personaUtil = require('../../utils/persona');
 
 const PERSONALITIES = [
   { key: 'loyal', label: '忠心' },
@@ -28,7 +29,17 @@ Page({
     sinceDate: '',
     today: '',
     saving: false,
-    showPrivacy: false
+    showPrivacy: false,
+    // #9 性格自定义：折叠区默认收起，已有自定义内容时自动展开
+    persona: personaUtil.emptyPersona(),
+    traitOptions: personaUtil.TRAIT_OPTIONS.map((name) => ({ name, on: false })),
+    sceneList: personaUtil.SCENES.map((key) => ({
+      key,
+      label: personaUtil.SCENE_LABEL[key],
+      placeholder: personaUtil.SCENE_PLACEHOLDER[key]
+    })),
+    personaOpen: false,
+    personaPreview: ''
   },
 
   onLoad() {
@@ -65,6 +76,11 @@ Page({
         });
         return;
       }
+      const saved = pet.persona || {};
+      const savedTraits = Array.isArray(saved.traits) ? saved.traits : [];
+      const savedScenes = saved.scenes || {};
+      const hasCustom = !!(savedTraits.length || saved.speech || saved.catchphrase || saved.quirk || Object.keys(savedScenes).length);
+
       this.setData({
         loading: false,
         photo: pet.photo || '',
@@ -72,8 +88,18 @@ Page({
         personality: pet.personality,
         ownerName: pet.ownerName || '',
         sinceDate: pet.sinceDate || '',
-        typeIndex: Math.max(0, TYPES.findIndex((t) => t.key === pet.type))
+        typeIndex: Math.max(0, TYPES.findIndex((t) => t.key === pet.type)),
+        persona: {
+          traits: savedTraits.slice(),
+          speech: saved.speech || '',
+          catchphrase: saved.catchphrase || '',
+          quirk: saved.quirk || '',
+          scenes: Object.assign({}, personaUtil.emptyPersona().scenes, savedScenes)
+        },
+        traitOptions: personaUtil.TRAIT_OPTIONS.map((name) => ({ name, on: savedTraits.indexOf(name) >= 0 })),
+        personaOpen: hasCustom
       });
+      this.refreshPreview();
     } catch (e) {
       wx.showToast({ title: e.message || '加载失败', icon: 'none' });
     }
@@ -103,7 +129,53 @@ Page({
   onOwnerNameInput(e) { this.setData({ ownerName: e.detail.value }); },
   onTypeChange(e) { this.setData({ typeIndex: Number(e.detail.value) }); },
   onDateChange(e) { this.setData({ sinceDate: e.detail.value }); },
-  choosePersonality(e) { this.setData({ personality: e.currentTarget.dataset.key }); },
+  choosePersonality(e) {
+    this.setData({ personality: e.currentTarget.dataset.key });
+    // 换底色后，没自定义过的场景文案要跟着变
+    this.refreshPreview();
+  },
+
+  togglePersona() {
+    this.setData({ personaOpen: !this.data.personaOpen });
+  },
+
+  // 特质最多 3 个：再多模型也抓不住重点，反而互相打架
+  toggleTrait(e) {
+    const name = e.currentTarget.dataset.name;
+    const next = this.data.traitOptions.map((t) => ({
+      name: t.name,
+      on: t.name === name ? !t.on : t.on
+    }));
+    const picked = next.filter((t) => t.on);
+    if (picked.length > 3) {
+      wx.showToast({ title: '最多选 3 个', icon: 'none' });
+      return;
+    }
+    this.setData({
+      traitOptions: next,
+      'persona.traits': picked.map((t) => t.name)
+    });
+  },
+
+  onPersonaInput(e) {
+    const field = e.currentTarget.dataset.field;
+    this.setData({ ['persona.' + field]: e.detail.value });
+  },
+
+  onSceneInput(e) {
+    const scene = e.currentTarget.dataset.scene;
+    this.setData({ ['persona.scenes.' + scene]: e.detail.value });
+    if (scene === 'touch') this.refreshPreview();
+  },
+
+  // 实时预览：让用户立刻看到「填的东西真的会变成它的反应」
+  refreshPreview() {
+    const line = personaUtil.normalize({
+      personality: this.data.personality,
+      persona: this.data.persona
+    }).scenes.touch;
+    this.setData({ personaPreview: line });
+  },
 
   async save() {
     if (this.data.saving) return;
@@ -120,6 +192,7 @@ Page({
       const patch = {
         name: this.data.name,
         personality: this.data.personality,
+        persona: personaUtil.sanitize(this.data.persona),
         type: this.data.types[this.data.typeIndex].key,
         ownerName: this.data.ownerName,
         sinceDate: this.data.sinceDate
