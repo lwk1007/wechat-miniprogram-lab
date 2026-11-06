@@ -2,6 +2,7 @@ const api = require('../../utils/api');
 const moments = require('../../utils/moments');
 const petLife = require('../../utils/pet-life');
 const timeline = require('../../utils/timeline');
+const together = require('../../utils/together');
 const { randomFrom } = require('../../utils/format');
 
 const TOUCH_PHRASES = ['呼噜噜…', '别戳啦，痒～', '你终于来看我了', '我一直在等你哦'];
@@ -11,6 +12,18 @@ const CHAT_PHRASES = ['我们去说说话吧', '有好多话想跟你说'];
 const COME_PHRASES = ['我来啦！', '这就到～', '叫我干嘛呀'];
 const LIFT_PHRASES = ['你怎么把我提起来了…', '欸欸，我恐高！', '放我下来啦'];
 const DROP_PHRASES = ['呼…吓我一跳', '安全着陆！', '下次轻点儿…'];
+
+// 图标点下去的台词。只有「日历」是真功能，其余是装饰——
+// 但装饰也可以有回应，比弹一句「这是装饰」有生气得多
+const ICON_LINES = {
+  相册: '你手机里有没有我的照片呀？',
+  天气: '今天太阳好，想出去玩',
+  音乐: '放首歌吧，我给你打拍子',
+  备忘: '别忘了给我留一口饭',
+  时钟: '你今天回来得好晚…',
+  相机: '拍我拍我，侧脸更好看',
+  设置: '我的窝，还能再软一点吗'
+};
 
 // 动作 → 表情 / 动画（动画类名 wxss 里已有，表情是新加的一层）
 const ACTION_FACE = { touch: '😌', feed: '🤤', play: '😸' };
@@ -72,7 +85,10 @@ Page({
     showGuide: true,
     // 心情跟着陪伴页的互动走，桌面这层只负责显示
     moodLabel: '',
-    moodFace: ''
+    moodFace: '',
+    // 日历弹层：数字在 js 里算好，wxml 里不调函数
+    togetherOpen: false,
+    together: null
   },
 
   onLoad() {
@@ -578,11 +594,58 @@ Page({
     this._heartTimer = setTimeout(() => this.setData({ hearts: [] }), 1300);
   },
 
-  // 桌面图标是装饰，点它如实告知，不假装是系统桌面
+  // 图标里只有「日历」是真的：算一起生活的第 N 天。
+  // 其余保持装饰定位，但点下去由宠物自己接一句，而不是弹「这是装饰」
   tapIcon(e) {
     const name = (e.currentTarget.dataset || {}).name || '';
-    wx.showToast({ title: name + '是装饰，只有它是真的', icon: 'none' });
+    if (name === '日历') {
+      this.openTogether();
+      return;
+    }
+    const line = ICON_LINES[name];
+    if (line) {
+      this.showBubble(line, 2600);
+      return;
+    }
+    wx.showToast({ title: name + '还没接通', icon: 'none' });
   },
+
+  openTogether() {
+    if (!this.data.pet) {
+      this.showBubble('我还没记住我们认识多久…');
+      return;
+    }
+    // 弹层盖住桌面时先停下，别让宠物在下面继续走
+    this.stopRoaming();
+    let view = null;
+    try {
+      const info = together.summary(this.data.pet);
+      view = {
+        days: info.days,
+        startText: info.startText,
+        total: info.total,
+        activeDays: info.activeDays,
+        streak: info.streak,
+        nextText: info.milestone.next
+          ? '再 ' + info.milestone.toNext + ' 天，是第 ' + info.milestone.next + ' 天'
+          : '里程碑都走完了',
+        barPct: Math.round(info.milestone.progress * 100)
+      };
+    } catch (e) {
+      // 本机存储读不出来时不要弹一个空卡片
+      this.showBubble('我还没记住我们认识多久…');
+      return;
+    }
+    this.setData({ togetherOpen: true, together: view, bubble: '' });
+  },
+
+  closeTogether() {
+    this.setData({ togetherOpen: false });
+    if (!this.data.loading && this.data.pet && !this.data.lifted) this.startRoaming();
+  },
+
+  // 点卡片内部时挡住冒泡，别把弹层一起关掉
+  noop() {},
 
   goBack() {
     wx.navigateBack({

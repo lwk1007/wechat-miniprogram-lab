@@ -68,7 +68,8 @@
     <view class="retry" catchtap="loadRetry">重试</view>
   </view>
 
-  <!-- 图标网格（装饰）：宠物走到某一列下方时，该列会抖一下 -->
+  <!-- 图标网格：只有「日历」是真功能，其余是装饰。
+       宠物走到某一列下方时，该列会抖一下 -->
   <view class="icons">
     <view class="icon {{shakeCol === item.col ? 'shake' : ''}}" wx:for="{{apps}}" wx:key="name" data-name="{{item.name}}" catchtap="tapIcon">
       <view class="icon-tile" style="background: {{item.bg}}">{{item.emoji}}</view>
@@ -135,4 +136,41 @@
   <view wx:if="{{showGuide && !loading && pet}}" class="guide">点点它 · 长按能拎起来拖走 · 底部可喂饭陪玩 · 双击聊两句</view>
 
   <view wx:if="{{isDemo}}" class="demo-tag">演示模式</view>
+
+  <!-- 日历弹层：一起生活的第 N 天。
+       数字、进度百分比、日期文案都在 js 里算好，wxml 只负责显示 -->
+  <view wx:if="{{togetherOpen}}" class="tg-mask" catchtap="closeTogether">
+    <view class="tg-card" catchtap="noop">
+      <view class="tg-eyebrow">一起生活的</view>
+      <view class="tg-big">
+        <text class="tg-day">{{together.days}}</text>
+        <text class="tg-unit">天</text>
+      </view>
+      <view class="tg-since">{{together.startText}} 开始</view>
+
+      <view class="tg-stats">
+        <view class="tg-stat">
+          <text class="tg-num">{{together.total}}</text>
+          <text class="tg-cap">次互动</text>
+        </view>
+        <view class="tg-stat">
+          <text class="tg-num">{{together.activeDays}}</text>
+          <text class="tg-cap">天陪它</text>
+        </view>
+        <view class="tg-stat">
+          <text class="tg-num">{{together.streak}}</text>
+          <text class="tg-cap">天连续</text>
+        </view>
+      </view>
+
+      <view class="tg-mile">
+        <text class="tg-mile-txt">{{together.nextText}}</text>
+        <view class="tg-bar">
+          <view class="tg-bar-fill" style="width: {{together.barPct}}%"></view>
+        </view>
+      </view>
+
+      <view class="tg-close" catchtap="closeTogether">收起来</view>
+    </view>
+  </view>
 </view>

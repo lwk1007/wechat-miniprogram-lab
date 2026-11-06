@@ -579,3 +579,148 @@
   border-radius: 40rpx;
   font-size: 26rpx;
 }
+
+/* ---------- 日历：一起生活的第 N 天 ---------- */
+.tg-mask {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(18, 24, 28, 0.44);
+  animation: tg-fade 0.2s ease;
+}
+/* 只做一次入场淡入，不是 infinite 循环——这一页已经有 18 个循环动画了 */
+@keyframes tg-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tg-card {
+  width: 540rpx;
+  max-height: 84vh;
+  overflow-y: auto;
+  padding: 48rpx 44rpx 36rpx;
+  border-radius: 34rpx;
+  background: #FFFFFF;
+  box-shadow: 0 24rpx 64rpx rgba(20, 30, 26, 0.2);
+  text-align: center;
+}
+
+.tg-eyebrow {
+  font-size: 24rpx;
+  color: var(--sub);
+  letter-spacing: 2rpx;
+}
+
+.tg-big {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-top: 10rpx;
+}
+.tg-day {
+  font-size: 96rpx;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--text);
+}
+.tg-unit {
+  margin-left: 8rpx;
+  font-size: 28rpx;
+  color: var(--sub);
+}
+
+.tg-since {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--sub);
+}
+
+.tg-stats {
+  display: flex;
+  margin-top: 36rpx;
+  padding: 24rpx 0;
+  border-top: 1rpx solid #EEF1EE;
+  border-bottom: 1rpx solid #EEF1EE;
+}
+.tg-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tg-num {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: var(--text);
+}
+.tg-cap {
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: var(--sub);
+}
+
+.tg-mile {
+  margin-top: 32rpx;
+}
+.tg-mile-txt {
+  font-size: 22rpx;
+  color: var(--sub);
+}
+.tg-bar {
+  margin-top: 14rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #EDF1EE;
+  overflow: hidden;
+}
+.tg-bar-fill {
+  height: 100%;
+  border-radius: 4rpx;
+  background: var(--primary);
+  transition: width 0.4s ease;
+}
+
+.tg-close {
+  margin-top: 34rpx;
+  padding: 20rpx 0;
+  border-radius: 40rpx;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 27rpx;
+}
+
+/* 夜里弹层不能还是一张白纸，否则跟刚做完的夜色打架 */
+.desk.night .tg-card {
+  background: rgba(26, 36, 54, 0.97);
+  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.5);
+}
+.desk.night .tg-day,
+.desk.night .tg-num {
+  color: #E8EFF8;
+}
+.desk.night .tg-eyebrow,
+.desk.night .tg-since,
+.desk.night .tg-cap,
+.desk.night .tg-mile-txt {
+  color: rgba(214, 226, 240, 0.62);
+}
+.desk.night .tg-unit {
+  color: rgba(214, 226, 240, 0.72);
+}
+.desk.night .tg-stats {
+  border-top-color: rgba(255, 255, 255, 0.09);
+  border-bottom-color: rgba(255, 255, 255, 0.09);
+}
+.desk.night .tg-bar {
+  background: rgba(255, 255, 255, 0.12);
+}
+.desk.night .tg-bar-fill {
+  background: #8FC7AB;
+}
+.desk.night .tg-close {
+  background: rgba(143, 199, 171, 0.16);
+  color: #9FD4B8;
+}

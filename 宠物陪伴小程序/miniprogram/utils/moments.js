@@ -85,6 +85,8 @@ function summary() {
     lift: s.lift || 0,
     total: (s.feed || 0) + (s.play || 0) + (s.touch || 0) + (s.lift || 0),
     activeDays: Object.keys(s.days || {}).length,
+    // 按天的原始记录，给「连续陪伴天数」用；只在本机，不上报
+    dayMap: s.days || {},
     sceneCount: sceneIds.length,
     scenes: sceneIds.slice(0, 3).map((id) => SCENE_NAME[id] || id),
     firstAt: s.firstAt || 0,
@@ -104,4 +106,6 @@ function todayText() {
   return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
 }
 
-module.exports = { bump, bumpScene, summary, reset, todayText, SCENE_NAME };
+// dayKey 导出给 together.js 复用：日期键格式只能有一处定义，
+// 两处各写一份迟早会漂移，连续天数就会算错
+module.exports = { bump, bumpScene, summary, reset, todayText, dayKey, SCENE_NAME };
