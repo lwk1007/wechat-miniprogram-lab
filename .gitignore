@@ -20,3 +20,9 @@ Thumbs.db
 
 # Office 打开文件时生成的临时锁文件（~$xxx.xlsx）
 ~$*
+
+# 文档流水线的中间产物（stage1 md / stage2 html / 溯源 yaml），不入库
+宠物陪伴小程序/output/
+
+# 手工打包的整包压缩文件，不入库
+宠物陪伴小程序.zip

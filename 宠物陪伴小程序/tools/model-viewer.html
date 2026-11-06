@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3D 模型体检台 · 宠物陪伴小程序</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #14161a; color: #e8eaed;
+    display: flex;
+  }
+
+  #stage { flex: 1; position: relative; min-width: 0; }
+  #stage canvas { display: block; }
+
+  #drop {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; padding: 32px; text-align: center;
+    border: 2px dashed #2e3238; border-radius: 14px;
+    margin: 20px; transition: border-color .15s, background .15s;
+    cursor: pointer;
+  }
+  #drop.hot { border-color: #6fa58a; background: rgba(111,165,138,.06); }
+  #drop h1 { font-size: 19px; font-weight: 600; letter-spacing: .3px; }
+  #drop p { font-size: 13px; color: #8b9198; line-height: 1.7; }
+  #drop kbd {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px;
+    background: #22262b; border: 1px solid #33383f; border-radius: 4px;
+    padding: 1px 6px; color: #b9c0c7;
+  }
+  .tip { font-size: 12px; color: #6b7278; max-width: 460px; line-height: 1.8; }
+
+  #panel {
+    width: 336px; flex: 0 0 336px;
+    background: #191c21; border-left: 1px solid #262a30;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  #panel.hidden { display: none; }
+
+  .phead {
+    padding: 16px 18px 14px; border-bottom: 1px solid #262a30;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .phead .name {
+    font-size: 13px; font-weight: 600; word-break: break-all; line-height: 1.4;
+  }
+  .pclose {
+    flex: 0 0 auto; background: none; border: 1px solid #33383f; color: #8b9198;
+    border-radius: 6px; padding: 4px 9px; font-size: 12px; cursor: pointer;
+  }
+  .pclose:hover { color: #e8eaed; border-color: #4a5057; }
+
+  .sect { padding: 14px 18px; border-bottom: 1px solid #21252a; }
+  .sect h2 {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
+    color: #6b7278; text-transform: uppercase; margin-bottom: 10px;
+  }
+
+  .verdict {
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 11px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.6;
+  }
+  .verdict .dot {
+    flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; margin-top: 6px;
+  }
+  .v-ok   { background: rgba(111,165,138,.1);  color: #9ed0b5; }
+  .v-ok   .dot { background: #6fa58a; }
+  .v-warn { background: rgba(200,150,70,.1);   color: #dfb87e; }
+  .v-warn .dot { background: #c89646; }
+  .v-bad  { background: rgba(214,90,90,.1);    color: #e09595; }
+  .v-bad  .dot { background: #d65a5a; }
+
+  .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; padding: 7px 0; font-size: 12.5px;
+    border-bottom: 1px solid #1f2328;
+  }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: #8b9198; flex: 0 0 auto; }
+  .row .v {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 12.5px; text-align: right; word-break: break-all;
+  }
+  .v.good { color: #7fc4a0; }
+  .v.mid  { color: #dfb87e; }
+  .v.bad  { color: #e09595; }
+  .v.dim  { color: #6b7278; }
+
+  .ctrl { display: flex; flex-wrap: wrap; gap: 7px; }
+  .ctrl button {
+    background: #22262b; border: 1px solid #33383f; color: #b9c0c7;
+    border-radius: 6px; padding: 6px 11px; font-size: 12px; cursor: pointer;
+    transition: all .12s;
+  }
+  .ctrl button:hover { border-color: #4a5057; color: #e8eaed; }
+  .ctrl button.on {
+    background: rgba(111,165,138,.16); border-color: #6fa58a; color: #a8d9bf;
+  }
+
+  .filelist { display: flex; flex-direction: column; gap: 4px; }
+  .filelist button {
+    text-align: left; background: none; border: 1px solid transparent;
+    color: #8b9198; border-radius: 6px; padding: 6px 9px;
+    font-size: 12px; cursor: pointer; word-break: break-all; line-height: 1.5;
+  }
+  .filelist button:hover { background: #22262b; }
+  .filelist button.on {
+    background: #22262b; border-color: #33383f; color: #e8eaed;
+  }
+
+  #loading {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    font-size: 13px; color: #8b9198; background: #191c21;
+    padding: 12px 20px; border-radius: 8px; border: 1px solid #262a30;
+  }
+  #loading.hidden { display: none; }
+
+  #err {
+    position: absolute; left: 24px; right: 24px; bottom: 24px;
+    background: #2a1a1c; border: 1px solid #5c2f33; color: #e09595;
+    border-radius: 8px; padding: 11px 14px; font-size: 12.5px;
+    line-height: 1.6; word-break: break-all;
+  }
+  #err.hidden { display: none; }
+
+  .foot {
+    padding: 12px 18px; font-size: 11.5px;
+    color: #5d6369; line-height: 1.8; margin-top: auto;
+  }
+  .foot code {
+    font-family: ui-monospace, Consolas, monospace;
+    color: #8b9198; background: #22262b; padding: 1px 5px; border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="drop">
+    <h1>把 .glb / .gltf 拖进来</h1>
+    <p>或者点击选择文件，可以一次拖多个对比</p>
+    <p class="tip">
+      这里算出来的「体积 / 三角面 / 材质数」就是你小程序里真正要付的代价。
+      xr-frame 能吃的是标准 glTF，所以这里能打开，小程序里基本也能打开；
+      但手机上跑得动跑不动，最后还是要在真机上验一次。
+    </p>
+    <p class="tip">
+      双击打开如果一直白屏或转圈，是浏览器拦了 CDN 脚本。在这个目录执行
+      <kbd>python -m http.server 8899</kbd>，再访问 <kbd>localhost:8899/model-viewer.html</kbd>。
+    </p>
+  </div>
+  <div id="loading" class="hidden">解析中…</div>
+  <div id="err" class="hidden"></div>
+</div>
+
+<div id="panel" class="hidden">
+  <div class="phead">
+    <div class="name" id="fname">—</div>
+    <button class="pclose" id="btnClose">换文件</button>
+  </div>
+
+  <div class="sect">
+    <div class="verdict v-ok" id="verdict"><span class="dot"></span><span id="verdictText"></span></div>
+  </div>
+
+  <div class="sect">
+    <h2>能不能进小程序</h2>
+    <div class="row"><span class="k">文件体积</span><span class="v" id="mSize">—</span></div>
+    <div class="row"><span class="k">三角面数</span><span class="v" id="mTris">—</span></div>
+    <div class="row"><span class="k">顶点数</span><span class="v" id="mVerts">—</span></div>
+    <div class="row"><span class="k">网格数量</span><span class="v" id="mMeshes">—</span></div>
+    <div class="row"><span class="k">材质数量</span><span class="v" id="mMats">—</span></div>
+    <div class="row"><span class="k">贴图数量</span><span class="v" id="mTex">—</span></div>
+  </div>
+
+  <div class="sect">
+    <h2>能不能做动作</h2>
+    <div class="row"><span class="k">骨骼数量</span><span class="v" id="mBones">—</span></div>
+    <div class="row"><span class="k">动画片段</span><span class="v" id="mAnims">—</span></div>
+    <div class="row"><span class="k">动画时长</span><span class="v" id="mAnimDur">—</span></div>
+  </div>
+
+  <div class="sect">
+    <h2>尺寸</h2>
+    <div class="row"><span class="k">包围盒</span><span class="v" id="mBox">—</span></div>
+    <div class="row"><span class="k">最长边</span><span class="v" id="mLongest">—</span></div>
+  </div>
+
+  <div class="sect">
+    <h2>显示</h2>
+    <div class="ctrl">
+      <button id="btnSpin" class="on">自动旋转</button>
+      <button id="btnGrid">地面网格</button>
+      <button id="btnWire">线框</button>
+      <button id="btnReset">重置视角</button>
+    </div>
+  </div>
+
+  <div class="sect" id="sectFiles" style="display:none">
+    <h2>已载入</h2>
+    <div class="filelist" id="filelist"></div>
+  </div>
+
+  <div class="foot">
+    体积压不下来就过一遍<br />
+    <code>npx gltf-transform optimize 输入.glb 输出.glb --compress draco</code>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+const stage    = document.getElementById('stage');
+const drop     = document.getElementById('drop');
+const panel    = document.getElementById('panel');
+const loading  = document.getElementById('loading');
+const errBox   = document.getElementById('err');
+const filelist = document.getElementById('filelist');
+const sectFiles= document.getElementById('sectFiles');
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x14161a);
+
+const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 2000);
+camera.position.set(0, 1.4, 4);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+stage.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.6;
+controls.target.set(0, 1, 0);
+
+scene.add(new THREE.HemisphereLight(0xdfe8f5, 0x2a2f36, 1.5));
+const key = new THREE.DirectionalLight(0xffffff, 2.0);
+key.position.set(3, 6, 4);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x9fc4e8, 0.7);
+fill.position.set(-4, 2, -3);
+scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 1.1);
+rim.position.set(0, 3, -6);
+scene.add(rim);
+
+const grid = new THREE.GridHelper(10, 20, 0x2e3238, 0x22262b);
+grid.visible = false;
+scene.add(grid);
+
+const draco = new DRACOLoader();
+draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
+
+const loader = new GLTFLoader();
+loader.setDRACOLoader(draco);
+loader.setMeshoptDecoder(MeshoptDecoder);
+
+let current = null;
+let wire = false;
+const loaded = [];
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+function tick() {
+  requestAnimationFrame(tick);
+  controls.update();
+  renderer.render(scene, camera);
+}
+tick();
+
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(2) + ' MB';
+}
+
+function fmtNum(n) {
+  return n.toLocaleString('zh-CN');
+}
+
+function setRow(id, text, grade) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'v' + (grade ? ' ' + grade : '');
+}
+
+function grade(ok, mid, bad) {
+  return ok ? 'good' : (mid ? 'mid' : 'bad');
+}
+
+function showErr(msg) {
+  errBox.textContent = msg;
+  errBox.classList.remove('hidden');
+}
+
+function clearErr() {
+  errBox.classList.add('hidden');
+  errBox.textContent = '';
+}
+
+function disposeObj(obj) {
+  obj.traverse((o) => {
+    if (o.isMesh) {
+      o.geometry?.dispose();
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      mats.forEach((m) => {
+        if (!m) return;
+        Object.keys(m).forEach((k) => {
+          const v = m[k];
+          if (v && v.isTexture) v.dispose();
+        });
+        m.dispose();
+      });
+    }
+  });
+}
+
+function inspect(gltf, file) {
+  const root = gltf.scene || gltf.scenes[0];
+  let tris = 0, verts = 0, meshes = 0;
+  const matSet = new Set();
+  const texSet = new Set();
+  let bones = 0;
+
+  root.traverse((o) => {
+    if (o.isBone) bones++;
+    if (!o.isMesh) return;
+    meshes++;
+    const g = o.geometry;
+    if (g) {
+      if (g.index) tris += g.index.count / 3;
+      else if (g.attributes.position) tris += g.attributes.position.count / 3;
+      verts += g.attributes.position ? g.attributes.position.count : 0;
+    }
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    mats.forEach((m) => {
+      if (!m) return;
+      matSet.add(m.uuid);
+      Object.keys(m).forEach((k) => {
+        const v = m[k];
+        if (v && v.isTexture) texSet.add(v.uuid);
+      });
+    });
+  });
+
+  tris = Math.round(tris);
+  const size = file.size;
+
+  // 体积
+  if (size < 1.5 * 1048576) setRow('mSize', fmtBytes(size), 'good');
+  else if (size < 4 * 1048576) setRow('mSize', fmtBytes(size) + '  偏大', 'mid');
+  else setRow('mSize', fmtBytes(size) + '  必须压', 'bad');
+
+  // 面数
+  if (tris < 50000) setRow('mTris', fmtNum(tris), 'good');
+  else if (tris < 150000) setRow('mTris', fmtNum(tris) + '  偏多', 'mid');
+  else setRow('mTris', fmtNum(tris) + '  要减面', 'bad');
+
+  setRow('mVerts', fmtNum(verts));
+  setRow('mMeshes', fmtNum(meshes));
+
+  if (matSet.size <= 4) setRow('mMats', fmtNum(matSet.size), 'good');
+  else if (matSet.size <= 10) setRow('mMats', fmtNum(matSet.size) + '  偏多', 'mid');
+  else setRow('mMats', fmtNum(matSet.size) + '  合批困难', 'bad');
+
+  setRow('mTex', fmtNum(texSet.size), texSet.size > 8 ? 'mid' : '');
+
+  // 骨骼动画
+  const anims = gltf.animations || [];
+  if (bones > 0) setRow('mBones', fmtNum(bones), 'good');
+  else setRow('mBones', '0  静态网格', 'bad');
+
+  if (anims.length > 0) {
+    setRow('mAnims', fmtNum(anims.length), 'good');
+    const dur = Math.max(...anims.map((a) => a.duration));
+    setRow('mAnimDur', dur.toFixed(2) + ' 秒', 'good');
+  } else {
+    setRow('mAnims', '0  无内置动作', anims.length ? 'good' : 'bad');
+    setRow('mAnimDur', '—', 'dim');
+  }
+
+  // 包围盒
+  const box = new THREE.Box3().setFromObject(root);
+  const s = new THREE.Vector3();
+  box.getSize(s);
+  const c = new THREE.Vector3();
+  box.getCenter(c);
+  setRow('mBox', `${s.x.toFixed(2)} × ${s.y.toFixed(2)} × ${s.z.toFixed(2)}`);
+  const longest = Math.max(s.x, s.y, s.z);
+  setRow('mLongest', longest.toFixed(2));
+
+  // 结论
+  const vd = document.getElementById('verdict');
+  const vt = document.getElementById('verdictText');
+  vd.className = 'verdict';
+  if (size >= 4 * 1048576 || tris >= 150000) {
+    vd.classList.add('v-bad');
+    vt.textContent = '这个尺寸直接进小程序会卡首屏，先压缩减面再谈接入。';
+  } else if (size >= 1.5 * 1048576 || tris >= 50000 || bones === 0) {
+    vd.classList.add('v-warn');
+    vt.textContent = bones === 0
+      ? '体积可控，但它是静态网格，没有骨骼，接进陪伴页只能整体位移，做不出走动和反应动作。'
+      : '体积或面数偏大，压缩后可以用，但要在低端安卓机上验一次帧率。';
+  } else {
+    vd.classList.add('v-ok');
+    vt.textContent = bones > 0
+      ? '尺寸和结构都健康，带骨骼，可以直接进小程序试。'
+      : '尺寸和结构健康，但无骨骼，只能做静态展示或伪动作。';
+  }
+
+  return { root, box, center: c, longest };
+}
+
+function frameObject(root, box, center, longest) {
+  const d = Math.max(longest, 0.4);
+  const dist = d * 2.2;
+  controls.target.copy(center);
+  camera.position.set(
+    center.x + dist * 0.42,
+    center.y + dist * 0.28,
+    center.z + dist * 0.86
+  );
+  camera.near = d / 100;
+  camera.far = d * 100;
+  camera.updateProjectionMatrix();
+  controls.update();
+
+  grid.scale.setScalar(Math.max(1, d / 2));
+  grid.position.y = box.min.y;
+}
+
+function applyWire(root, on) {
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    mats.forEach((m) => {
+      if (m) m.wireframe = on;
+    });
+  });
+}
+
+function renderFileList() {
+  if (loaded.length < 2) {
+    sectFiles.style.display = 'none';
+    return;
+  }
+  sectFiles.style.display = 'block';
+  filelist.innerHTML = '';
+  loaded.forEach((item, i) => {
+    const b = document.createElement('button');
+    b.textContent = `${i + 1}. ${item.name}`;
+    if (current && current.name === item.name) b.classList.add('on');
+    b.onclick = () => select(i);
+    filelist.appendChild(b);
+  });
+}
+
+function clearScene() {
+  if (current) {
+    scene.remove(current.root);
+    disposeObj(current.root);
+    current = null;
+  }
+}
+
+function select(i) {
+  const item = loaded[i];
+  if (!item) return;
+  clearErr();
+  clearScene();
+  current = item;
+  scene.add(item.root);
+  frameObject(item.root, item.box, item.center, item.longest);
+  applyWire(item.root, wire);
+  document.getElementById('fname').textContent = item.name;
+  item.renderStats();
+  renderFileList();
+}
+
+function handleFiles(files) {
+  const list = Array.from(files).filter((f) => /\.(glb|gltf)$/i.test(f.name));
+  if (!list.length) {
+    showErr('只认 .glb 和 .gltf。如果拿到的是 .obj / .fbx / .stl，先转成 glb 再拖进来。');
+    return;
+  }
+
+  clearErr();
+  drop.style.display = 'none';
+  panel.classList.remove('hidden');
+  loading.classList.remove('hidden');
+  resize();
+
+  let pending = list.length;
+
+  list.forEach((file) => {
+    const url = URL.createObjectURL(file);
+    loader.load(
+      url,
+      (gltf) => {
+        URL.revokeObjectURL(url);
+        const info = inspect(gltf, file);
+
+        const rec = {
+          name: file.name,
+          root: info.root,
+          box: info.box,
+          center: info.center,
+          longest: info.longest,
+          renderStats: () => inspect(gltf, file)
+        };
+
+        const exist = loaded.findIndex((x) => x.name === file.name);
+        if (exist >= 0) {
+          if (loaded[exist].root !== info.root) {
+            disposeObj(loaded[exist].root);
+          }
+          loaded[exist] = rec;
+        } else {
+          loaded.push(rec);
+        }
+
+        if (--pending === 0) {
+          loading.classList.add('hidden');
+          select(loaded.length - 1);
+        }
+      },
+      undefined,
+      (e) => {
+        URL.revokeObjectURL(url);
+        if (--pending === 0) loading.classList.add('hidden');
+        const msg = (e && (e.message || e.type)) || '未知错误';
+        showErr(`打不开 ${file.name}。${/json|parse|unexpected/i.test(msg)
+          ? '如果是 .gltf，它需要配套的 .bin 和贴图文件，单独一个文件读不了 —— 让接口直接给 .glb。'
+          : msg}`);
+      }
+    );
+  });
+}
+
+drop.addEventListener('click', () => {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.glb,.gltf';
+  inp.multiple = true;
+  inp.onchange = () => inp.files && handleFiles(inp.files);
+  inp.click();
+});
+
+['dragenter', 'dragover'].forEach((ev) => {
+  window.addEventListener(ev, (e) => {
+    e.preventDefault();
+    drop.classList.add('hot');
+  });
+});
+['dragleave', 'drop'].forEach((ev) => {
+  window.addEventListener(ev, (e) => {
+    e.preventDefault();
+    if (ev === 'dragleave' && e.relatedTarget) return;
+    drop.classList.remove('hot');
+  });
+});
+window.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files);
+});
+
+document.getElementById('btnSpin').addEventListener('click', (e) => {
+  controls.autoRotate = !controls.autoRotate;
+  e.currentTarget.classList.toggle('on', controls.autoRotate);
+});
+
+document.getElementById('btnGrid').addEventListener('click', (e) => {
+  grid.visible = !grid.visible;
+  e.currentTarget.classList.toggle('on', grid.visible);
+});
+
+document.getElementById('btnWire').addEventListener('click', (e) => {
+  wire = !wire;
+  e.currentTarget.classList.toggle('on', wire);
+  if (current) applyWire(current.root, wire);
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (current) frameObject(current.root, current.box, current.center, current.longest);
+});
+
+document.getElementById('btnClose').addEventListener('click', () => {
+  clearScene();
+  panel.classList.add('hidden');
+  drop.style.display = 'flex';
+  clearErr();
+  resize();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.getElementById('btnClose').click();
+});
+
+const autoModel = new URLSearchParams(location.search).get('model');
+if (autoModel) {
+  fetch(autoModel)
+    .then((r) => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.blob();
+    })
+    .then((blob) => {
+      const name = decodeURIComponent(autoModel.split('/').pop());
+      handleFiles([new File([blob], name, { type: 'model/gltf-binary' })]);
+    })
+    .catch((e) => showErr('没法加载 ' + autoModel + '：' + e.message + '（同目录文件才走 URL 参数，否则直接拖进来）'));
+}
+</script>
+</body>
+</html>
