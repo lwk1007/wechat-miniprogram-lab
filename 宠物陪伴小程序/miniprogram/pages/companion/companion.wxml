@@ -54,7 +54,7 @@
         <view
           wx:for="{{scenes}}"
           wx:key="id"
-          class="scene-chip {{item.id === scene ? 'on' : ''}}"
+          class="scene-chip {{item.id === scene ? 'on' : ''}} {{item.id === nowScene && item.id !== scene ? 'now' : ''}}"
           data-id="{{item.id}}"
           bindtap="switchScene"
         >
@@ -63,8 +63,8 @@
         </view>
       </scroll-view>
 
-      <!-- 场景舞台：全部用 WXSS 绘制 -->
-      <view class="stage stage-{{scene}}">
+      <!-- 场景舞台：全部用 WXSS 绘制。is-night 只换光，不换布局 -->
+      <view class="stage stage-{{scene}} {{isNight ? 'is-night' : ''}}">
 
         <!-- 草地 -->
         <block wx:if="{{scene === 'grass'}}">
@@ -83,13 +83,15 @@
           <view class="win-glass"></view>
           <view class="win-bar-v"></view>
           <view class="win-bar-h"></view>
-          <view class="win-light"></view>
           <view class="sill"></view>
           <view class="pot">
             <view class="pot-leaf"></view>
             <view class="pot-body"></view>
           </view>
           <view class="ground ground-floor"></view>
+          <!-- 这层光必须压在地板之上：原来放在地板之前，被一层地面整个盖掉，
+               白天看不出来，夜里它就是唯一的光源，盖住等于屋里全黑 -->
+          <view class="win-light"></view>
         </block>
 
         <!-- 客厅 -->

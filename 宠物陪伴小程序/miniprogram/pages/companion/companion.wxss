@@ -49,6 +49,18 @@
   color: var(--primary);
   font-weight: 500;
 }
+/* 此刻该去的地方：文字后跟一个小点。
+   做成 flex 里的行内元素而不是右上角角标——角标贴在圆角边上，
+   看起来像颗脏点，也不跟文字走。已在选中态时不显示，避免和绿底重复提示。 */
+.scene-chip.now::after {
+  content: '';
+  width: 8rpx;
+  height: 8rpx;
+  margin-left: 8rpx;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: 0.45;
+}
 .scene-chip-icon { margin-right: 8rpx; font-size: 26rpx; }
 .scene-chip-name { line-height: 1.2; }
 
@@ -288,6 +300,96 @@
 }
 .nt-fly-1 { left: 120rpx; bottom: 150rpx; animation: fly-around 7s ease-in-out infinite; }
 .nt-fly-2 { right: 150rpx; bottom: 220rpx; animation: fly-around 9s ease-in-out infinite reverse; }
+
+/* ==================================================================
+   夜间变体：19 点后「草地 / 窗台 / 客厅 / 海边」也跟着入夜
+   ————————————————————————————————————————————————
+   三条约束：
+   1. 只换光，不动布局。所有规则都是覆盖颜色，元素位置一个没改，
+      所以白天调好的构图入夜后不会错位。
+   2. 不新增 @keyframes。这一页已经有 16 条动画在跑（云漂 24s、
+      浪摆 5s、灯呼吸 4s、星闪 2.8s…），再堆是无谓的合成层开销。
+      已有的云漂 / 浪摆 / 灯闪换成新配色后自动成立，不用另写。
+   3. 每处都保留「一个亮点」：草地是月亮、窗台是屋里灯光、
+      客厅是落地灯、海边是月亮。全压暗会变成一块死黑，反而没层次。
+   ================================================================== */
+
+/* ---------- 草地入夜：晴转月夜，绿压成冷绿，云只剩轮廓 ---------- */
+.stage-grass.is-night {
+  background: linear-gradient(180deg, #1C2740 0%, #26334E 46%, #1E2C34 100%);
+}
+.stage-grass.is-night .sun-grass {
+  background: radial-gradient(circle at 38% 34%, #FFFDF3 0%, #F2F4E6 72%, #E3E8D7 100%);
+  box-shadow: 0 0 52rpx rgba(226, 236, 214, 0.4);
+}
+/* 云不能压成灰色：夜晚的云是被月光从后面打透的，比天空略亮一点点 */
+.stage-grass.is-night .cloud,
+.stage-grass.is-night .cloud::before,
+.stage-grass.is-night .cloud::after {
+  background: rgba(214, 226, 248, 0.14);
+}
+.stage-grass.is-night .hill-back { background: #2B3D46; }
+.stage-grass.is-night .hill-front { background: #24343C; }
+.stage-grass.is-night .ground-grass {
+  background: linear-gradient(180deg, #24382F 0%, #1B2C25 100%);
+}
+.stage-grass.is-night .tuft { background: #3A5142; }
+
+/* ---------- 窗台入夜：窗外是夜空，屋里只留一盏暖光 ---------- */
+.stage-window.is-night { background: #2A2932; }
+.stage-window.is-night .win-glass {
+  border-color: #CFCDC4;
+  background: linear-gradient(180deg, #1B2740 0%, #2C3B57 100%);
+  box-shadow: 0 6rpx 22rpx rgba(0, 0, 0, 0.3);
+}
+.stage-window.is-night .win-bar-v,
+.stage-window.is-night .win-bar-h,
+.stage-window.is-night .sill { background: #CFCDC4; }
+.stage-window.is-night .win-light {
+  background: linear-gradient(180deg, rgba(255, 214, 140, 0.5) 0%, rgba(255, 214, 140, 0) 100%);
+}
+.stage-window.is-night .ground-floor {
+  background: linear-gradient(180deg, #3A342B 0%, #2C2822 100%);
+}
+.stage-window.is-night .pot-leaf { background: #3E5C47; }
+.stage-window.is-night .pot-body { background: #8A5C44; }
+
+/* ---------- 客厅入夜：家具退到暗部，落地灯顶上来 ---------- */
+.stage-living.is-night {
+  background: linear-gradient(180deg, #2E2A32 0%, #262229 100%);
+}
+.stage-living.is-night .ground-wood {
+  background: linear-gradient(180deg, #3B3128 0%, #2E2720 100%);
+}
+.stage-living.is-night .lv-rug { background: #3C3129; }
+.stage-living.is-night .lv-sofa-back { background: #33463C; }
+.stage-living.is-night .lv-sofa { background: #2B3B32; }
+.stage-living.is-night .lv-lamp-pole,
+.stage-living.is-night .lv-lamp-base { background: #6B5D4C; }
+/* 灯本身不用换色，把光晕放大就够——夜里它该是全屋最亮的点 */
+.stage-living.is-night .lv-lamp {
+  box-shadow: 0 0 90rpx 34rpx rgba(255, 212, 130, 0.26);
+}
+
+/* ---------- 海边入夜：落日换成月亮，海面转深，浪只留一点碎光 ---------- */
+.stage-seaside.is-night {
+  background: linear-gradient(
+    180deg,
+    #182338 0%,
+    #23304C 30%,
+    #1E3A50 31%,
+    #17303F 58%,
+    #2A3038 59%,
+    #232930 100%
+  );
+}
+.stage-seaside.is-night .ss-sun {
+  background: radial-gradient(circle at 42% 38%, #FFFDF3 0%, #F2F4E6 70%, #E3E8D7 100%);
+  box-shadow: 0 0 50rpx rgba(226, 236, 214, 0.42);
+}
+.stage-seaside.is-night .ss-wave { background: rgba(198, 222, 246, 0.3); }
+
+/* 星空本来就是夜，is-night 加不加都一样，不必写覆盖 */
 
 /* ==================================================================
    宠物层

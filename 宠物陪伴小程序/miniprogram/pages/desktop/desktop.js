@@ -1,6 +1,7 @@
 const api = require('../../utils/api');
 const moments = require('../../utils/moments');
 const petLife = require('../../utils/pet-life');
+const timeline = require('../../utils/timeline');
 const { randomFrom } = require('../../utils/format');
 
 const TOUCH_PHRASES = ['呼噜噜…', '别戳啦，痒～', '你终于来看我了', '我一直在等你哦'];
@@ -29,9 +30,6 @@ const DESK_APPS = [
 
 // 四列图标的中心位置（占屏宽百分比）：外层 padding 40rpx，四列各占 1/4
 const ICON_COLUMNS = [16.5, 38.8, 61.2, 83.5];
-
-const NIGHT_START = 19; // 19 点后算夜里
-const NIGHT_END = 6;    // 6 点前仍是夜里
 
 Page({
   data: {
@@ -142,10 +140,10 @@ Page({
     return pad(d.getHours()) + ':' + pad(d.getMinutes());
   },
 
-  // 夜里 = 19:00 之后，或 6:00 之前
+  // 夜里 = 19:00 之后，或 6:00 之前。边界在 utils/timeline.js，
+  // 陪伴页和宠物作息用的是同一份，不再各写一套
   isNight() {
-    const h = new Date().getHours();
-    return h >= NIGHT_START || h < NIGHT_END;
+    return timeline.isNight(new Date().getHours());
   },
 
   tickClock() {

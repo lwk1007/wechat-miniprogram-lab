@@ -16,6 +16,7 @@
 // 换设备重新开始，比强行同步一份半新不旧的日记更像话。
 
 const { randomFrom, timeAgo } = require('./format');
+const timeline = require('./timeline');
 // 心情 → 一句自然语言。留在 chat-brain 里是因为云函数也要用，
 // 而云函数不带本文件；放两份会漂移，所以单向依赖这一处。
 const chatBrain = require('./chat-brain');
@@ -93,12 +94,22 @@ const INTERACTION_MOOD = {
 const INTERACTION_ENERGY = { feed: 6, play: -5, lift: -2 };
 
 // 时段偏置：作息感
+// 边界不在这里写——统一取 timeline.partAt。原先这套边界是 6/9/17/21/23，
+// 和陪伴页场景的 5/9/17/20 差一截，结果 20:00 场景已经进了星空、
+// 它却还停在「傍晚·开心」，中间空了一小时。现在两处共用一个源头。
+const PART_BIAS = {
+  // 深夜：只想睡，别的都提不起劲
+  latenight: { nap: 3, daze: 1.4, chase: 0.4, snack: 0.6, mood: 'sleepy' },
+  // 清晨（5 点起天就亮了，不再算深夜）
+  dawn: { stroll: 1.6, sightsee: 1.4, mood: 'calm' },
+  day: { chase: 1.4, roll: 1.4, stroll: 1.2, mood: 'playful' },
+  dusk: { sightsee: 1.6, snack: 1.3, mood: 'happy' },
+  // 入夜：安静下来，开始看星星
+  evening: { stargaze: 2, nap: 1.6, mood: 'calm' }
+};
+
 function hourBias(h) {
-  if (h >= 23 || h < 6) return { nap: 3, daze: 1.4, chase: 0.4, snack: 0.6, mood: 'sleepy' };
-  if (h < 9)  return { stroll: 1.6, sightsee: 1.4, mood: 'calm' };
-  if (h < 17) return { chase: 1.4, roll: 1.4, stroll: 1.2, mood: 'playful' };
-  if (h < 21) return { sightsee: 1.6, snack: 1.3, mood: 'happy' };
-  return { stargaze: 2, nap: 1.6, mood: 'calm' };
+  return PART_BIAS[timeline.partAt(h).id] || PART_BIAS.day;
 }
 
 // ---------- 纯计算层 ----------

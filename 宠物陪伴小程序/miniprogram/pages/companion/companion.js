@@ -2,6 +2,7 @@ const api = require('../../utils/api');
 const voice = require('../../utils/voice');
 const moments = require('../../utils/moments');
 const petLife = require('../../utils/pet-life');
+const timeline = require('../../utils/timeline');
 const { randomFrom, greetingByHour } = require('../../utils/format');
 
 const PERSONALITY_LABEL = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
@@ -25,7 +26,14 @@ const SCENE_STATUS = {
 };
 
 const SCENE_KEY = 'pet_scene';
+// 记住「这个场景是什么时候选的」：只存 id 的话，三天后回来还停在三天前那个时段
+const SCENE_AT_KEY = 'pet_scene_at';
 const TITLE_KEY = 'pet_owner_title';
+
+// 用户亲手选过场景，三小时内不自动带走（尊重当下的意愿）
+const SCENE_IDLE_MS = 3 * 3600 * 1000;
+// 存下的场景超过半天，认为已经过期，回正到当前时段
+const SCENE_STALE_MS = 12 * 3600 * 1000;
 
 const PHRASES = {
   touch: ['呼噜噜…好舒服呀', '再摸摸嘛', '你的手好温暖'],
@@ -85,6 +93,11 @@ Page({
     scenes: SCENES,
     scene: 'grass',
     sceneName: '草地',
+    // 此刻「本该在哪」：chip 上那个小圆点靠它，和 scene（实际在哪）分开
+    nowScene: '',
+    partId: '',
+    // 天黑没：舞台按它切夜间配色，和「该去哪」是两个维度
+    isNight: false,
     petX: 50,
     // petX 的像素版本：模板里横向位移走 transform，不再用 left 百分比
     xPx: 0,
@@ -105,18 +118,34 @@ Page({
     const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
     this._winWidth = (info && info.windowWidth) || 375;
 
+    const t = timeline.snapshot();
     const saved = wx.getStorageSync(SCENE_KEY);
-    const id = SCENES.some((s) => s.id === saved) ? saved : this.defaultScene();
+    const savedAt = Number(wx.getStorageSync(SCENE_AT_KEY)) || 0;
+    const valid = SCENES.some((s) => s.id === saved);
+    // 存下的场景如果已经是半天前选的，时间早就不是那个时间了，回正
+    const stale = valid && (!savedAt || Date.now() - savedAt > SCENE_STALE_MS);
+    const id = valid && !stale ? saved : t.scene;
+
+    this._lastUserSceneAt = stale ? 0 : savedAt;
     this.applyScene(id, false);
-    this.setData({ voiceOn: voice.enabled });
+    this.setData({
+      voiceOn: voice.enabled,
+      isNight: t.isNight,
+      nowScene: t.scene,
+      partId: t.partId
+    });
   },
 
   onShow() {
+    // 先对齐时间：可能跨档，把场景带到该去的地方（只停走，重启交给下面的 startRoam）
+    this.syncTime();
     this.loadPet().then(() => this.startRoam());
+    this.scheduleSlot();
   },
 
   onHide() {
     this.stopRoam();
+    this.clearSlotTimer();
     voice.stop();
     // 记下离开的时间点，回来时才算得出「你走了多久」
     try { petLife.markLeave(); } catch (e) { /* ignore */ }
@@ -124,6 +153,7 @@ Page({
 
   onUnload() {
     this.stopRoam();
+    this.clearSlotTimer();
     voice.destroy();
     try { petLife.markLeave(); } catch (e) { /* ignore */ }
     clearTimeout(this._animTimer);
@@ -135,20 +165,55 @@ Page({
     clearTimeout(this._effectTimer);
   },
 
-  // 默认场景跟着时间走：早上窗台、白天草地、傍晚海边、夜里星空
-  defaultScene() {
-    const h = new Date().getHours();
-    if (h >= 5 && h < 9) return 'window';
-    if (h >= 9 && h < 17) return 'grass';
-    if (h >= 17 && h < 20) return 'seaside';
-    return 'night';
+  // 对齐时钟：夜色、此刻该去哪、跨档后要不要把场景带过去
+  syncTime() {
+    const t = timeline.snapshot();
+    const patch = {};
+    if (t.isNight !== this.data.isNight) patch.isNight = t.isNight;
+    if (t.scene !== this.data.nowScene) patch.nowScene = t.scene;
+    const crossed = !!this.data.partId && this.data.partId !== t.partId;
+    if (t.partId !== this.data.partId) patch.partId = t.partId;
+    if (Object.keys(patch).length) this.setData(patch);
+
+    if (!crossed) return;
+    if (this.data.scene === t.scene) return; // 本来就在对的地方
+    // 用户最近亲手选过，就先听他的
+    if (Date.now() - (this._lastUserSceneAt || 0) < SCENE_IDLE_MS) return;
+
+    this.stopRoam();
+    // persist=false：自动切换不写 storage、也不记「带它去过」
+    this.applyScene(t.scene, false);
+    this.setData({ bubble: '', anim: '', expression: '' });
+  },
+
+  // 只排一次定时器，精确落到下一个分档点。不用 setInterval 每分钟空转
+  scheduleSlot() {
+    this.clearSlotTimer();
+    const now = Date.now();
+    const delay = Math.max(60000, timeline.nextBoundary(now) - now + 1500);
+    this._slotTimer = setTimeout(() => {
+      this._slotTimer = null;
+      this.syncTime();
+      this.scheduleSlot();
+    }, delay);
+  },
+
+  clearSlotTimer() {
+    if (this._slotTimer) {
+      clearTimeout(this._slotTimer);
+      this._slotTimer = null;
+    }
   },
 
   applyScene(id, persist) {
     const meta = SCENES.filter((s) => s.id === id)[0] || SCENES[0];
+    const t = timeline.snapshot();
     this.setData({
       scene: meta.id,
       sceneName: meta.name,
+      // 换场景不改时刻，但顺手对齐一次，省得舞台和时钟错开
+      isNight: t.isNight,
+      nowScene: t.scene,
       walkMs: 0,
       petX: 50,
       xPx: this.pxOfX(50),
@@ -159,6 +224,7 @@ Page({
     });
     if (persist) {
       wx.setStorageSync(SCENE_KEY, meta.id);
+      wx.setStorageSync(SCENE_AT_KEY, Date.now());
       // 只记用户主动选的场景，自动切换不算「带它去过」
       moments.bumpScene(meta.id);
     }
