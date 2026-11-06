@@ -1,7 +1,8 @@
 // 照片去底：把「白底照片裁成一张贴纸」这件事在本地解决掉，不接分割接口。
 //
-// 只做纯本地计算：读图 → 判定这张是实心主体还是线稿 → 算 alpha → 导出透明 PNG。
-// 一次几毫秒到几十毫秒，不上传、不耗流量。
+// 只做纯本地计算：读图 → 从四边泛洪吃掉背景纸 → 导出透明 PNG。
+// 主体轮廓内的像素原样保留，所以白底上的白主体不会被挖空。
+// 一次几十毫秒，不上传、不耗流量。
 //
 // 失败不是错误，是常态：宠物蹲在沙发上、背景是花纹地毯，这类图本来就不该动。
 // 调用方拿到 reject 应该当「没处理」继续走，不能挡住创建流程。
@@ -75,40 +76,31 @@ function cut(src) {
       return;
     }
 
-    const kind = dewhite.classify(data.data, w, h);
-    if (kind === 'none') {
+    const res = dewhite.removeWhite(data.data, w, h);
+    if (!res.applied) {
       // 四边不是白的，说明背景里有东西 —— 这是分割接口的活，不是这里的
       reject(fail('not-white', '背景不是纯白'));
       return;
     }
-
-    let alpha;
-    let ratio;
-    if (kind === 'lineart') {
-      // 线稿不能走泛洪：笔画一闭口，身体里的白纸就锁在里面了。
-      // 它要的是「所有纸都透明、只留线条」，所以按亮度直接定透明度。
-      alpha = dewhite.lineArtAlpha(data.data, w, h);
-      ratio = 1 - dewhite.whiteRatio(data.data, w, h);
-      if (ratio < 0.02) {
-        reject(fail('no-line', '整张几乎是白纸，没找到线条'));
-        return;
-      }
-    } else {
-      // 实心主体：从四边往里泛洪，只吃和边框连着的近白。白猫胸口那种内部白会留着
-      const res = dewhite.removeWhite(data.data, w, h);
-      if (!res.applied) {
-        reject(fail('not-white', '边框白色只占 ' + Math.round(res.borderRatio * 100) + '%'));
-        return;
-      }
-      alpha = res.alpha;
-      ratio = dewhite.removedRatio(res);
-      if (ratio > 0.97) {
-        reject(fail('all-white', '整张几乎全白'));
-        return;
-      }
+    const ratio = dewhite.removedRatio(res);
+    // 一个墨点都没有 = 空图。不能用「去掉了 97%」当判据：
+    // 稀疏的线稿本来就 98% 是纸，那样会被误杀。
+    if (res.removed >= res.total) {
+      reject(fail('all-white', '整张几乎全白'));
+      return;
     }
 
-    dewhite.applyAlpha(data.data, alpha);
+    // 保留下来多少纸白，决定这张在桌面上的样子：轮廓闭合时身体里的白留着，
+    // 这个数就大；线条没围住东西时它接近 0，说明只剩线条。
+    // 只有「白纸 + 墨线」的图才认这种情况，彩色实心主体不会被误当成线稿翻色。
+    const kept = dewhite.keptRatio(res);
+    const prof = dewhite.inkProfile(data.data, w, h);
+    const inkDrawing = prof.whiteRatio >= dewhite.LINEART_WHITE
+      && prof.avgChroma <= dewhite.LINEART_CHROMA
+      && prof.darkRatio <= dewhite.LINEART_DARK;
+    const kind = (kept < 0.02 && inkDrawing) ? 'line' : 'cutout';
+
+    dewhite.applyAlpha(data.data, res.alpha);
     try {
       ctx.putImageData(data, 0, 0);
     } catch (e) {
@@ -124,12 +116,12 @@ function cut(src) {
   }));
 }
 
-// 给 UI 用的一句话说明。ratio 是「去掉了多少」（线稿是「有内容的部分」的补数）
+// 给 UI 用的一句话说明。ratio 是「去掉了多少」
 function describe(res) {
   if (!res) return '';
   const pct = Math.round((res.ratio || 0) * 100);
-  return res.kind === 'lineart'
-    ? '白纸已去掉，只留线条（' + pct + '% 是纸）'
+  return res.kind === 'line'
+    ? '背景已去掉，只留下线条（线条没围住身体）'
     : '白底已去掉（' + pct + '% 是背景）';
 }
 

@@ -27,7 +27,7 @@
         />
       </view>
       <view wx:if="{{photoCut}}" class="cut-row">
-        <view class="cut-state">{{useCut ? '已去掉白底' : '当前是原图'}}{{photoCutKind === 'lineart' ? ' · 线稿' : ''}}</view>
+        <view class="cut-state">{{useCut ? '已去掉白底' : '当前是原图'}}{{photoCutKind === 'line' ? ' · 只剩线条' : ''}}</view>
         <view class="cut-toggle" bindtap="toggleCut">{{useCut ? '换回原图' : '用去底版'}}</view>
       </view>
       <view wx:elif="{{photoCutting}}" class="cut-row">

@@ -100,6 +100,20 @@ function linePixels(w, h) {
   for (let y = y0; y <= y1; y++) { ink(x0, y); ink(x1, y); }
   return d;
 }
+// 白底 + 几根互不相连的线 → 什么都没围住，去完只剩线条
+function strokesPixels(w, h) {
+  const d = new Uint8ClampedArray(w * h * 4);
+  for (let i = 0; i < w * h; i++) {
+    d[i * 4] = 252; d[i * 4 + 1] = 252; d[i * 4 + 2] = 252; d[i * 4 + 3] = 255;
+  }
+  const ink = (x, y) => {
+    const p = (y * w + x) * 4;
+    d[p] = 25; d[p + 1] = 25; d[p + 2] = 25;
+  };
+  for (let x = 8; x <= 31; x++) ink(x, Math.round(h * 0.4));
+  for (let y = Math.round(h * 0.55); y <= Math.round(h * 0.8); y++) ink(Math.round(w * 0.3), y);
+  return d;
+}
 // 满屏中灰 → 背景里有东西，不该动
 function busyPixels(w, h) {
   const d = new Uint8ClampedArray(w * h * 4);
@@ -116,7 +130,7 @@ function allWhitePixels(w, h) {
   return d;
 }
 
-const SOURCES = { solidPixels, grayBlobPixels, linePixels, busyPixels, allWhitePixels };
+const SOURCES = { solidPixels, grayBlobPixels, linePixels, strokesPixels, busyPixels, allWhitePixels };
 
 // 装一套能跑的 canvas 桩。pixelKind 决定读出来的像素长什么样
 function installCanvas(pixelKind, opts) {
@@ -199,29 +213,29 @@ async function main() {
     ok('主体中心不透明', d[(20 * 40 + 20) * 4 + 3] === 255, d[(20 * 40 + 20) * 4 + 3]);
   }
 
-  console.log('\n[3] 线稿：纸全透明、线留着');
+  console.log('\n[3] 手绘稿：轮廓里的白是主体，不能被挖空');
 
   const l1 = installCanvas('linePixels');
   const r2 = await cutout.cut('wxfile://line.png').then((r) => r, (e) => e);
-  ok('判成线稿', r2.kind === 'lineart', r2.kind);
+  ok('闭合轮廓判成带填充的主体', r2.kind === 'cutout', r2.kind);
   if (l1.put) {
     const d = l1.put.data;
     ok('线条不透明', d[(10 * 40 + 20) * 4 + 3] === 255, d[(10 * 40 + 20) * 4 + 3]);
-    ok('方框里的白纸也透明了', d[(20 * 40 + 20) * 4 + 3] === 0, d[(20 * 40 + 20) * 4 + 3]);
+    ok('方框里的白纸保留（身体不镂空）', d[(20 * 40 + 20) * 4 + 3] === 255, d[(20 * 40 + 20) * 4 + 3]);
     ok('四角透明', d[3] === 0, d[3]);
   }
 
-  console.log('\n[4] 已知局限：白底上一个小号无色块会被判成线稿');
+  console.log('\n[4] 什么都没围住的墨线：只留线条');
 
-  // 这不是意外，是 dewhite.js 里写明的取舍。钉住它，是为了将来有人
-  // 「顺手优化一下判据」时能立刻看到自己动了什么，而不是悄悄改掉。
-  const g1 = installCanvas('grayBlobPixels');
+  // 白纸上只有几根线，没有可称为「身体」的封闭区域 —— 这时候去掉全部纸是对的，
+  // 但要说清楚：它只是外观判断（决定夜间要不要反色），不参与去底决策。
+  const g1 = installCanvas('strokesPixels');
   const r3 = await cutout.cut('wxfile://gray.png').then((r) => r, (e) => e);
-  ok('判成线稿（已知局限）', r3.kind === 'lineart', r3.kind);
+  ok('判成只剩线条（夜里要翻成亮色）', r3.kind === 'line', r3.kind);
   if (g1.put) {
     const d = g1.put.data;
-    ok('纸照样去干净了', d[3] === 0, d[3]);
-    ok('深色块照样不透明（所以错判了也看得过去）', d[(20 * 40 + 20) * 4 + 3] === 255, d[(20 * 40 + 20) * 4 + 3]);
+    ok('纸去干净了', d[3] === 0, d[3]);
+    ok('线条留着', d[(Math.round(40 * 0.4) * 40 + 20) * 4 + 3] === 255, d[(Math.round(40 * 0.4) * 40 + 20) * 4 + 3]);
   }
 
   console.log('\n[5] 该拒绝的时候拒绝');
@@ -232,7 +246,7 @@ async function main() {
 
   installCanvas('allWhitePixels');
   err = await cutout.cut('wxfile://white.png').then(() => null, (e) => e);
-  ok('全白 → no-line（找不到任何内容）', codeOf(err) === 'no-line', codeOf(err));
+  ok('全白 → all-white（一个墨点都没有）', codeOf(err) === 'all-white', codeOf(err));
 
   installCanvas('solidPixels');
   err = await cutout.cut('').then(() => null, (e) => e);
@@ -256,7 +270,7 @@ async function main() {
   console.log('\n[7] 给用户看的说明');
 
   ok('实心主体说去掉了多少背景', /白底已去掉.*% 是背景/.test(cutout.describe({ kind: 'cutout', ratio: 0.83 })), cutout.describe({ kind: 'cutout', ratio: 0.83 }));
-  ok('线稿说只留线条', /线稿|线条/.test(cutout.describe({ kind: 'lineart', ratio: 0.17 })), cutout.describe({ kind: 'lineart', ratio: 0.17 }));
+  ok('只剩线条时说清没说全', /线条/.test(cutout.describe({ kind: 'line', ratio: 0.17 })), cutout.describe({ kind: 'line', ratio: 0.17 }));
   ok('没有结果时返回空串', cutout.describe(null) === '');
 
   console.log('\n[8] 档案里：photoCut 是 photo 的衍生数据');
@@ -276,9 +290,9 @@ async function main() {
   pet = await local.updatePet({ photo: 'wxfile://new.png' });
   ok('换图没带新透明版 → 旧的一起清掉', pet.photoCut === '' && pet.photoCutKind === '', pet.photoCut);
 
-  pet = await local.updatePet({ photo: 'wxfile://new2.png', photoCut: 'wxfile://new2-cut.png', photoCutKind: 'lineart' });
+  pet = await local.updatePet({ photo: 'wxfile://new2.png', photoCut: 'wxfile://new2-cut.png', photoCutKind: 'line' });
   ok('换图带新透明版 → 换成新的', pet.photoCut === 'wxfile://new2-cut.png', pet.photoCut);
-  ok('线稿类型跟着换', pet.photoCutKind === 'lineart', pet.photoCutKind);
+  ok('类型跟着换', pet.photoCutKind === 'line', pet.photoCutKind);
 
   pet = await local.updatePet({ name: '改个名' });
   ok('只改名字不动透明版', pet.photoCut === 'wxfile://new2-cut.png', pet.photoCut);

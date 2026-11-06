@@ -472,8 +472,8 @@
   width: 220rpx;
   height: 220rpx;
 }
-/* 线稿是黑线，夜里压在深色场景上会糊掉，翻成亮线 */
-.stage.is-night .pet-cut.lineart {
+/* 只剩线条时夜里会糊掉，翻成亮线。主体带填充的不翻，一翻身体就变黑 */
+.stage.is-night .pet-cut.line {
   filter: invert(1);
 }
 .pet-generic {

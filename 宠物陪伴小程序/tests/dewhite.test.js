@@ -118,8 +118,8 @@ dw.applyAlpha(d10, a10);
 ok('A 通道被改成 0', d10[3] === 0 && d10[15 * 4 + 3] === 0);
 ok('RGB 不受影响', d10[0] === 255);
 
-console.log('\n[11] 线稿 vs 实心主体');
-// 细线画一个方框，内部全是白 —— 这就是「手绘线稿」的结构
+console.log('\n[11] 手绘稿：轮廓里的白是主体，不是背景');
+// 细线画一个方框，内部全是白 —— 这就是「白底 + 白色主体」的结构
 const line = makeCanvas(W, H);
 for (let x = 10; x <= 29; x++) {
   fillRect(line, W, x, 10, x, 10, [15, 15, 15]);
@@ -129,34 +129,47 @@ for (let y = 10; y <= 29; y++) {
   fillRect(line, W, 10, y, 10, y, [15, 15, 15]);
   fillRect(line, W, 29, y, 29, y, [15, 15, 15]);
 }
-ok('细线画的白底 → lineart', dw.classify(line, W, H) === 'lineart', dw.classify(line, W, H));
-
-const solid = makeCanvas(W, H);
-fillRect(solid, W, 8, 8, 32, 32, [60, 60, 60]);   // 44% 的深色主体
-ok('大面积实心主体 → cutout', dw.classify(solid, W, H) === 'cutout', dw.classify(solid, W, H));
-
-const colorful = makeCanvas(W, H);
-fillRect(colorful, W, 12, 12, 27, 27, [220, 90, 60]);
-ok('彩色主体 → cutout（不当线稿）', dw.classify(colorful, W, H) === 'cutout', dw.classify(colorful, W, H));
-
-ok('灰底 → none', dw.classify(midGray, W, H) === 'none', dw.classify(midGray, W, H));
-
-// 闭合线框：泛洪从外面进不去，内部白纸会整片留下来 ——
-// 这正是线稿不能复用 removeWhite、必须单独走 lineArtAlpha 的原因
 const rl = dw.removeWhite(line, W, H);
 ok('线条本身不透明', rl.alpha[10 * W + 20] === 255, rl.alpha[10 * W + 20]);
-ok('闭合线框里泛洪进不去，白纸被留下', rl.alpha[20 * W + 20] === 255, rl.alpha[20 * W + 20]);
+ok('框内的白保留（身体没被挖空）', rl.alpha[20 * W + 20] === 255, rl.alpha[20 * W + 20]);
+ok('框外的纸被吃掉', rl.alpha[0] === 0, rl.alpha[0]);
+ok('kept 统计到了框内那片白', dw.keptRatio(rl) > 0.2, dw.keptRatio(rl).toFixed(3));
 
-const la = dw.lineArtAlpha(line, W, H);
-ok('线稿算法把纸全部清空（含框内）', la[20 * W + 20] === 0, la[20 * W + 20]);
-ok('线稿算法保留线条', la[10 * W + 20] === 255, la[10 * W + 20]);
-ok('线稿算法对外面那圈纸也透明', la[0] === 0);
+// 断口：手绘线条几乎不可能是完全闭合的，1~2px 的缺口必须能封住
+const gap = makeCanvas(W, H);
+for (let x = 10; x <= 29; x++) {
+  if (x !== 19 && x !== 20) fillRect(gap, W, x, 10, x, 10, [15, 15, 15]);
+  fillRect(gap, W, x, 29, x, 29, [15, 15, 15]);
+}
+for (let y = 10; y <= 29; y++) {
+  fillRect(gap, W, 10, y, 10, y, [15, 15, 15]);
+  fillRect(gap, W, 29, y, 29, y, [15, 15, 15]);
+}
+const rg = dw.removeWhite(gap, W, H);
+ok('顶上留 2px 断口，身体照样保得住', rg.alpha[20 * W + 20] === 255, rg.alpha[20 * W + 20]);
 
-console.log('\n[12] 白纸占比与墨迹画像');
+// 真的没围住东西的（一条横线）→ 只剩线条，这是对的
+const stroke = makeCanvas(W, H);
+fillRect(stroke, W, 12, 20, 27, 20, [15, 15, 15]);
+const rs = dw.removeWhite(stroke, W, H);
+ok('一条线：线留着', rs.alpha[20 * W + 14] === 255, rs.alpha[20 * W + 14]);
+ok('一条线：纸全透明', rs.alpha[5 * W + 5] === 0);
+ok('一条线：kept 接近 0', dw.keptRatio(rs) < 0.01, dw.keptRatio(rs).toFixed(3));
+
+console.log('\n[12] 白纸占比与墨迹画像（只用于决定夜间要不要反色）');
 ok('全白图白占比为 1', dw.whiteRatio(allWhite, W, H) === 1);
 const prof = dw.inkProfile(line, W, H);
 ok('线稿的墨迹占比很低', prof.darkRatio < 0.2, prof.darkRatio.toFixed(3));
 ok('线稿几乎没有颜色', prof.avgChroma < 5, prof.avgChroma.toFixed(1));
+ok('线稿的白纸占比很高', prof.whiteRatio > 0.7, prof.whiteRatio.toFixed(2));
+const solid = makeCanvas(W, H);
+fillRect(solid, W, 8, 8, 32, 32, [60, 60, 60]);   // 44% 的深色实心主体
+ok('实心深色主体不算墨线图', dw.inkProfile(solid, W, H).darkRatio > dw.LINEART_DARK,
+  dw.inkProfile(solid, W, H).darkRatio.toFixed(3));
+const colorful = makeCanvas(W, H);
+fillRect(colorful, W, 12, 12, 27, 27, [220, 90, 60]);
+ok('彩色主体不算墨线图', dw.inkProfile(colorful, W, H).avgChroma > dw.LINEART_CHROMA,
+  dw.inkProfile(colorful, W, H).avgChroma.toFixed(1));
 
 console.log('\n' + '─'.repeat(48));
 console.log('  通过 ' + pass + ' · 失败 ' + fail);

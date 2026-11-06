@@ -382,8 +382,8 @@
   width: 180rpx;
   height: 180rpx;
 }
-/* 线稿只有黑线，白天看得见、夜里糊进深蓝里，所以夜间翻成亮线 */
-.desk.night .pet-cut.lineart {
+/* 只剩线条时黑线夜里会糊进深蓝，翻成亮线。主体带填充的那种不翻，一翻身体就变黑 */
+.desk.night .pet-cut.line {
   filter: invert(1);
 }
 

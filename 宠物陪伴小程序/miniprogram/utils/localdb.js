@@ -83,7 +83,7 @@ async function createPet(data) {
     storageMode: data.storageMode || 'private',
     photo: data.photo || '',
     // 去白底后的透明版：原图留着，展示时优先用它。kind 决定桌面上的呈现
-    // （cutout = 实心主体直接浮在桌面上；lineart = 只有线条，夜里要翻成亮色）
+    // （cutout = 主体带填充，直接浮在桌面上；line = 线条没围住东西，只剩线条，夜里翻成亮色）
     photoCut: data.photoCut || '',
     photoCutKind: data.photoCut ? (data.photoCutKind || 'cutout') : '',
     // 隐私模式照片 22 小时后过期（与云端规则一致，留出清理缓冲）

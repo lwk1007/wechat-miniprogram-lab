@@ -1,12 +1,16 @@
-// 去白底 —— 「照片立体」里 cutout 模式的本地实现
+// 去白底 —— 只清「和画面四边连通的纸白」，被轮廓围住的白一律保留。
 //
-// 原本 cutout 要等分割接口，但宠物照片里有一大类根本不用模型：
-// 手绘稿、白墙前拍的、剪贴风格、表情包，背景就是一片白纸。
-// 这类图用「从四边往内泛洪，只吃掉和边框连着的近白色」就能干净抠出来，
-// 一次几毫秒，不上传、不花钱、不涉及算法备案。
+// 为什么必须按连通性、而不是按颜色来分：
+// 白底配白色主体时（手绘稿的身体、白猫、白瓷杯），主体和背景是同一种颜色，
+// 颜色层面根本不存在可分的信息。真正能把它们分开的是拓扑 ——
+// 背景那层纸连着照片边缘，主体内部的纸被墨线圈住了、够不到边缘。
+// 所以从四边往内泛洪，只吃够得着的白，被围住的白自然活下来。
+// 任何「把白色删掉」的做法（按亮度定透明度、按阈值二值化）都会在主体上打洞。
 //
-// 关键在于「只吃连通的」：主体内部的白色（白猫的胸口、白 T 恤、眼白）
-// 和边框不连通，所以要留着。反过来，任何"把白色全删掉"的做法都会在主体上打洞。
+// 手绘线条有断口，泛洪会顺着断口钻进去把身体也吃掉。对策两步：
+//   1. 封口：把「墨」这层墙向外膨胀 seal 个像素，把窄断口糊住再泛洪；
+//   2. 还白：泛洪结束后，沿纸白像素往回走最多 seal 步，把封口时多挡掉的那圈白还回去。
+// 膨胀多挡出的白必须还，否则主体外面挂一圈白毛边。
 //
 // 纯函数，输入 Uint8ClampedArray，不碰 wx API，测试不用打桩。
 
@@ -20,6 +24,10 @@ const SOFT_ALPHA = 96;
 
 // 边框上白色占比低于这个值，就认为不是白底图，直接不动
 const MIN_BORDER_RATIO = 0.45;
+
+// 封口半径（像素）。手绘断口通常是 1~3px，2 够用；
+// 再大就会把「手指缝」这种正常空隙也糊上。
+const SEAL_RADIUS = 2;
 
 function num(v, d) {
   return typeof v === 'number' && isFinite(v) ? v : d;
@@ -56,8 +64,54 @@ function borderWhiteRatio(rgba, w, h, tone) {
   return total ? white / total : 0;
 }
 
+// 把一张 0/1 掩膜按四邻域膨胀 r 圈。
+// 用四邻域而不是方框核，是为了和 growBg 的度量一致 —— 膨胀挡住的那圈白，
+// 事后能一模一样地还回去，背景边界不会因为核形状差一圈而对不齐。
+function dilate(mask, w, h, r) {
+  let cur = mask;
+  const total = w * h;
+  for (let s = 0; s < r; s++) {
+    const next = new Uint8Array(total);
+    for (let i = 0; i < total; i++) {
+      if (cur[i]) { next[i] = 1; continue; }
+      const x = i % w;
+      const y = (i - x) / w;
+      if ((x > 0 && cur[i - 1]) || (x < w - 1 && cur[i + 1])
+        || (y > 0 && cur[i - w]) || (y < h - 1 && cur[i + w])) next[i] = 1;
+    }
+    cur = next;
+  }
+  return cur;
+}
+
+// 把背景往回扩 steps 步，只走纸白（不穿墙）。
+// 作用是把膨胀封口时多挡掉的那圈白还给背景，否则主体边上会留一圈白毛。
+// 只走固定步数，所以即使断口被糊住了，最多也只从断口渗进去 steps 个像素。
+function growBg(bg, wall, w, h, steps) {
+  let frontier = [];
+  for (let i = 0; i < bg.length; i++) {
+    if (bg[i]) frontier.push(i);
+  }
+  for (let s = 0; s < steps && frontier.length; s++) {
+    const next = [];
+    for (let n = 0; n < frontier.length; n++) {
+      const i = frontier[n];
+      const x = i % w;
+      const y = (i - x) / w;
+      if (x > 0 && !bg[i - 1] && !wall[i - 1]) { bg[i - 1] = 1; next.push(i - 1); }
+      if (x < w - 1 && !bg[i + 1] && !wall[i + 1]) { bg[i + 1] = 1; next.push(i + 1); }
+      if (y > 0 && !bg[i - w] && !wall[i - w]) { bg[i - w] = 1; next.push(i - w); }
+      if (y < h - 1 && !bg[i + w] && !wall[i + w]) { bg[i + w] = 1; next.push(i + w); }
+    }
+    frontier = next;
+  }
+}
+
 // 主体去掉白底之后的 alpha 通道。
 // 返回 applied=false 时 alpha 全是 255，调用方按「没处理」对待即可。
+//
+// kept = 保留下来的纸白像素数。它回答的是「主体的填充还在不在」：
+// 轮廓闭合时这个数接近身体面积；线条没围住东西时它接近 0。
 function removeWhite(rgba, w, h, opts) {
   const o = opts || {};
   const tone = Object.assign({}, TONE, o.tone);
@@ -65,26 +119,34 @@ function removeWhite(rgba, w, h, opts) {
   const alpha = new Uint8ClampedArray(total);
   alpha.fill(255);
   if (!rgba || !w || !h) {
-    return { alpha, removed: 0, total: 0, borderRatio: 0, applied: false };
+    return { alpha, removed: 0, kept: 0, total: 0, borderRatio: 0, applied: false };
   }
 
   const borderRatio = borderWhiteRatio(rgba, w, h, tone);
   if (borderRatio < num(o.minBorderRatio, MIN_BORDER_RATIO)) {
-    return { alpha, removed: 0, total, borderRatio, applied: false };
+    return { alpha, removed: 0, kept: 0, total, borderRatio, applied: false };
   }
 
-  // 泛洪：只从四边起步，所以主体内部的白永远到不了
+  // 墙 = 不是纸白的像素（墨线、深色块）。透明像素不挡路，重复处理结果才稳定
+  const wall = new Uint8Array(total);
+  for (let i = 0; i < total; i++) {
+    const p = i * 4;
+    if (rgba[p + 3] < 8) continue;
+    if (!isWhiteish(rgba[p], rgba[p + 1], rgba[p + 2], tone)) wall[i] = 1;
+  }
+
+  const seal = Math.max(0, Math.round(num(o.seal, SEAL_RADIUS)));
+  const blocked = seal > 0 ? dilate(wall, w, h, seal) : wall;
+
+  // 泛洪：只从四边起步。主体内部的白被墨线围着，永远到不了
   const bg = new Uint8Array(total);
   const queue = new Int32Array(total);
   let head = 0;
   let tail = 0;
   const seed = (i) => {
-    if (bg[i]) return;
-    const p = i * 4;
-    if (rgba[p + 3] < 8 || isWhiteish(rgba[p], rgba[p + 1], rgba[p + 2], tone)) {
-      bg[i] = 1;
-      queue[tail++] = i;
-    }
+    if (bg[i] || blocked[i]) return;
+    bg[i] = 1;
+    queue[tail++] = i;
   };
   for (let x = 0; x < w; x++) {
     seed(x);
@@ -104,12 +166,16 @@ function removeWhite(rgba, w, h, opts) {
     if (y < h - 1) seed(i + w);
   }
 
+  if (seal > 0) growBg(bg, wall, w, h, seal);
+
   let removed = 0;
+  let kept = 0;
   for (let i = 0; i < total; i++) {
     if (bg[i]) { alpha[i] = 0; removed++; }
+    else if (!wall[i]) kept++;
   }
 
-  // 主体外侧那圈浅灰给半透明：不留白边，也不至于把线稿啃掉一截
+  // 主体外侧那圈浅灰给半透明：不留白边，也不至于把线条啃掉一截
   const softLum = num(o.softLum, SOFT_LUM);
   const softAlpha = num(o.softAlpha, SOFT_ALPHA);
   for (let i = 0; i < total; i++) {
@@ -124,7 +190,7 @@ function removeWhite(rgba, w, h, opts) {
     if (lum >= softLum) alpha[i] = softAlpha;
   }
 
-  return { alpha, removed, total, borderRatio, applied: true };
+  return { alpha, removed, kept, total, borderRatio, applied: true };
 }
 
 // 把算好的 alpha 写回 ImageData 的 A 通道（putImageData 要用同一份数据）
@@ -141,17 +207,17 @@ function removedRatio(res) {
   return res.removed / res.total;
 }
 
-// ---------- 线稿识别 ----------
+// 保留下来的纸白占比。轮廓闭合 → 接近身体面积；线条没围住东西 → 接近 0
+function keptRatio(res) {
+  if (!res || !res.total) return 0;
+  return res.kept / res.total;
+}
+
+// ---------- 画像 ----------
 //
-// 手绘稿是另一类：黑线画在白纸上，「身体」本身就是白纸。
-// 对它用去白底，泛洪会顺着线条缺口钻进去把身体也吃掉，
-// 结果只剩一圈描边 —— 看起来像黑色剪影，实际是毛边。
-//
-// 这类图正确的处理是「只留线条」：白色全透明，线条保留原色。
-// 深色场景再靠 filter: invert(1) 翻成亮线，一张图两边都能用。
-//
-// 判据：白纸占比极高 + 几乎没有颜色。实心主体（照片、色块插画）
-// 白色占比上不去，不会误判。
+// 这里只用来回答一个外观问题：「这张是不是白纸 + 墨线」。
+// 它不再参与「怎么去底」的决策 —— 去底一律走连通性，
+// 所以判错最多是夜间反色反错了，不会把主体挖空。
 
 function whiteRatio(rgba, w, h, tone) {
   if (!rgba || !w || !h) return 0;
@@ -163,15 +229,6 @@ function whiteRatio(rgba, w, h, tone) {
   return white / (w * h);
 }
 
-// 判「这是线稿还是实心主体」。
-//
-// 已知局限：白底上放一个面积很小、又没有颜色的实心主体（比如一只小号黑白摆件），
-// 会被判成线稿。这两个在像素上本来就分不开 —— 都占 90% 白纸、都没有色差、
-// 深色部分都不多。曾试过用「笔触细不细」（按 4 邻域腐蚀，看墨迹能不能活下来）
-// 来区分，但 12px 的小方块和 4px 的粗线腐蚀存活率都是 0.6~0.7，分不开；
-// 而调紧阈值会把真实的手绘稿误判成实心主体，代价更大。
-// 所以宁可判成线稿：线稿那条路对黑线是安全的（深色照样不透明），
-// 判断错了用户还能在创建页一眼看出来并点「换回原图」。
 function inkProfile(rgba, w, h, tone) {
   const total = (w || 0) * (h || 0);
   if (!rgba || !total) return { whiteRatio: 0, avgChroma: 0, darkRatio: 0 };
@@ -194,64 +251,23 @@ function inkProfile(rgba, w, h, tone) {
   }
   return {
     whiteRatio: white / total,
-    // 颜色只看「墨」那部分：拿全图平均的话，一小块彩色被大片白纸稀释，
-    // 会被误判成黑白线稿
+    // 颜色只看「墨」那部分：一小块彩色被大片白纸稀释后，
+    // 用全图平均会被误判成黑白
     avgChroma: ink ? inkChroma / ink : 0,
     darkRatio: dark / total
   };
 }
 
 const LINEART_WHITE = 0.72;   // 白纸至少占这么多
-const LINEART_CHROMA = 30;    // 且几乎没颜色（彩色手绘不当线稿）
-const LINEART_DARK = 0.35;    // 且深色只占一小部分（实心主体会超过这个）
-
-function classify(rgba, w, h, opts) {
-  const o = opts || {};
-  const tone = Object.assign({}, TONE, o.tone);
-  const border = borderWhiteRatio(rgba, w, h, tone);
-  if (border < num(o.minBorderRatio, MIN_BORDER_RATIO)) return 'none';
-  const prof = inkProfile(rgba, w, h, tone);
-  if (prof.whiteRatio >= num(o.lineartWhite, LINEART_WHITE)
-    && prof.avgChroma <= num(o.lineartChroma, LINEART_CHROMA)
-    && prof.darkRatio <= num(o.lineartDark, LINEART_DARK)) {
-    return 'lineart';
-  }
-  return 'cutout';
-}
-
-// 线稿专用：不泛洪，直接按「有多不像纸」定透明度。
-//
-// 为什么不能沿用 removeWhite：笔画的方框一旦闭合，泛洪就进不去，
-// 身体内部的白纸会整片留在原地，出来的是一块白填充加黑边 —— 在深色背景上更难看。
-// 线稿的白纸（不管是外面那圈还是身体里那块）都要透明，所以这里不做连通性判断。
-function lineArtAlpha(rgba, w, h, opts) {
-  const o = opts || {};
-  const tone = Object.assign({}, TONE, o.tone);
-  const floor = num(o.floorLum, 90);   // 到这个亮度就是纯不透明
-  const total = (w || 0) * (h || 0);
-  const alpha = new Uint8ClampedArray(total);
-  if (!rgba || !total) return alpha;
-  const span = Math.max(1, tone.lum - floor);
-  for (let i = 0; i < total; i++) {
-    const p = i * 4;
-    if (rgba[p + 3] < 8) { alpha[i] = 0; continue; }
-    const r = rgba[p];
-    const g = rgba[p + 1];
-    const b = rgba[p + 2];
-    if (isWhiteish(r, g, b, tone)) { alpha[i] = 0; continue; }
-    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-    // 纸上没有"半透明的墨"这种说法：越淡越像铅笔灰，按亮度线性给透明度
-    const a = Math.round(((tone.lum - lum) / span) * 255);
-    alpha[i] = a < 0 ? 0 : a > 255 ? 255 : a;
-  }
-  return alpha;
-}
+const LINEART_CHROMA = 30;    // 且几乎没颜色（彩色手绘不当墨线）
+const LINEART_DARK = 0.35;    // 且深色只占一小部分（实心黑色主体会超过这个）
 
 module.exports = {
   TONE,
   SOFT_LUM,
   SOFT_ALPHA,
   MIN_BORDER_RATIO,
+  SEAL_RADIUS,
   LINEART_WHITE,
   LINEART_CHROMA,
   LINEART_DARK,
@@ -259,9 +275,8 @@ module.exports = {
   borderWhiteRatio,
   whiteRatio,
   inkProfile,
-  classify,
   removeWhite,
-  lineArtAlpha,
   applyAlpha,
-  removedRatio
+  removedRatio,
+  keptRatio
 };

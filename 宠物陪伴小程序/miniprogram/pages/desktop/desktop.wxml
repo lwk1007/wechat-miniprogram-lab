@@ -107,7 +107,7 @@
             <!-- 有去白底的透明版就直接用：主体自己立住，不再是一张贴纸 -->
             <image
               wx:if="{{petCut}}"
-              class="pet-cut {{petCutKind === 'lineart' ? 'lineart' : ''}}"
+              class="pet-cut {{petCutKind === 'line' ? 'line' : ''}}"
               src="{{petCut}}"
               mode="aspectFit"
             />
