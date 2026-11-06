@@ -82,6 +82,10 @@ async function createPet(data) {
     sinceDate: data.sinceDate || '',
     storageMode: data.storageMode || 'private',
     photo: data.photo || '',
+    // 去白底后的透明版：原图留着，展示时优先用它。kind 决定桌面上的呈现
+    // （cutout = 实心主体直接浮在桌面上；lineart = 只有线条，夜里要翻成亮色）
+    photoCut: data.photoCut || '',
+    photoCutKind: data.photoCut ? (data.photoCutKind || 'cutout') : '',
     // 隐私模式照片 22 小时后过期（与云端规则一致，留出清理缓冲）
     photoExpiresAt: (data.storageMode || 'private') === 'private' && data.photo ? Date.now() + 22 * 3600e3 : null,
     createdAt: Date.now()
@@ -94,9 +98,16 @@ async function createPet(data) {
 async function updatePet(patch) {
   const pet = get(K.pet, null);
   if (!pet) throw new Error('还没有宠物档案');
-  ['name', 'personality', 'persona', 'type', 'ownerName', 'sinceDate', 'storageMode', 'photo'].forEach((k) => {
+  ['name', 'personality', 'persona', 'type', 'ownerName', 'sinceDate', 'storageMode', 'photo', 'photoCut', 'photoCutKind'].forEach((k) => {
     if (patch[k] !== undefined) pet[k] = patch[k];
   });
+  // 换了照片但没带新的透明版，说明这张新图没处理成功或者不需要处理：
+  // 旧照片的抠图必须一起扔掉，否则新照片会顶着上一张的轮廓显示
+  if (patch.photo !== undefined && patch.photoCut === undefined) {
+    pet.photoCut = '';
+    pet.photoCutKind = '';
+  }
+  if (!pet.photoCut) pet.photoCutKind = '';
   if (patch.photo !== undefined) {
     pet.photoExpiresAt = pet.storageMode === 'private' && patch.photo ? Date.now() + 22 * 3600e3 : null;
   } else if (patch.storageMode === 'persistent') {
@@ -122,6 +133,8 @@ async function removePhoto() {
   const pet = get(K.pet, null);
   if (!pet) return { removed: false, reason: 'no-pet' };
   pet.photo = '';
+  pet.photoCut = '';
+  pet.photoCutKind = '';
   pet.photoExpiresAt = null;
   set(K.pet, pet);
   return { removed: true };

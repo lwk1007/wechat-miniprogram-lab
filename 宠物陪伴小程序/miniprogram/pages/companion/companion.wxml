@@ -153,7 +153,13 @@
                 bindtouchcancel="onPetTouchEnd"
               >
                 <view class="pet-body {{walking ? 'walking' : ''}} {{anim}} {{lifted ? 'dangling' : ''}}">
-                  <image wx:if="{{photo}}" class="pet-img" src="{{photo}}" mode="aspectFill" />
+                  <image
+                    wx:if="{{petCut}}"
+                    class="pet-cut {{petCutKind === 'lineart' ? 'lineart' : ''}}"
+                    src="{{petCut}}"
+                    mode="aspectFit"
+                  />
+                  <image wx:elif="{{photo}}" class="pet-img" src="{{photo}}" mode="aspectFill" />
                   <view wx:else class="pet-generic">{{typeEmoji}}</view>
                 </view>
                 <view wx:if="{{expression}}" class="pet-face">{{expression}}</view>

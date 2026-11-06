@@ -2,6 +2,7 @@ const api = require('../../utils/api');
 const cloudSvc = require('../../utils/cloud');
 const privacy = require('../../utils/privacy');
 const personaUtil = require('../../utils/persona');
+const cutout = require('../../utils/cutout');
 
 const PERSONALITIES = [
   { key: 'loyal', label: '忠心' },
@@ -23,6 +24,12 @@ Page({
     typeIndex: 2,
     photo: '',
     newPhoto: '',
+    // 换图时同样当场试一次去白底，处理结果存在这儿，保存时一起提交
+    newPhotoCut: '',
+    newPhotoCutKind: '',
+    useCut: false,
+    photoCutting: false,
+    cutHint: '',
     name: '',
     personality: '',
     ownerName: '',
@@ -51,6 +58,8 @@ Page({
   },
 
   onUnload() {
+    // 页面没了还在算：把 token 作废，免得回调往一个已销毁的页面上 setData
+    this._cutToken = (this._cutToken || 0) + 1;
     privacy.clearShowHandler();
   },
 
@@ -117,10 +126,50 @@ Page({
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
       success: (res) => {
-        this.setData({ newPhoto: res.tempFiles[0].tempFilePath });
+        const f = res.tempFiles && res.tempFiles[0];
+        if (!f) return;
+        this.setData({ newPhoto: f.tempFilePath });
+        this.startCut(f.tempFilePath);
       }
     });
   },
+
+  // 和创建页同一套：失败不弹窗、不挡保存，只在照片下面留一行说明
+  startCut(src) {
+    const token = (this._cutToken || 0) + 1;
+    this._cutToken = token;
+    this.setData({ photoCutting: true, newPhotoCut: '', newPhotoCutKind: '', useCut: false, cutHint: '' });
+    const task = cutout.cut(src).then((res) => {
+      if (token !== this._cutToken) return;
+      this.setData({
+        photoCutting: false,
+        newPhotoCut: res.path,
+        newPhotoCutKind: res.kind,
+        useCut: true,
+        cutHint: cutout.describe(res)
+      });
+    }).catch((err) => {
+      if (token !== this._cutToken) return;
+      this.setData({ photoCutting: false, cutHint: this.explainCut(err) });
+    });
+    this._cutTask = task;
+    return task;
+  },
+
+  explainCut(err) {
+    const code = err && err.code;
+    if (code === 'unsupported') return '这个环境不支持本地处理，按原图用';
+    if (code === 'not-white') return '这张背景里有东西，先按原图用';
+    if (code === 'all-white') return '这张几乎是纯白，没找到主体，按原图用';
+    if (code === 'no-line') return '这张没找到线条，按原图用';
+    return '这张没能自动处理，按原图用';
+  },
+
+  toggleCut() {
+    if (!this.data.newPhotoCut) return;
+    this.setData({ useCut: !this.data.useCut });
+  },
+
   preview() {
     const url = this.data.newPhoto || this.data.photo;
     if (url) wx.previewImage({ urls: [url] });
@@ -198,11 +247,21 @@ Page({
         sinceDate: this.data.sinceDate
       };
       if (this.data.newPhoto) {
+        // 换的图还在算的时候点了保存：等它算完，否则新图会顶着上一张的轮廓
+        if (this._cutTask) await this._cutTask;
+        const cut = this.data.useCut && this.data.newPhotoCut ? this.data.newPhotoCut : '';
         if (api.isDemo()) {
           patch.photo = this.data.newPhoto;
+          // 显式传空串：localdb 靠「photo 变了但没带 photoCut」来清掉旧抠图，
+          // 这里把意图写明白，别依赖隐式分支
+          patch.photoCut = cut;
+          patch.photoCutKind = cut ? this.data.newPhotoCutKind : '';
         } else {
           const fileID = await cloudSvc.upload('pet/' + Date.now() + '.jpg', this.data.newPhoto);
           patch.newPhotoFileID = fileID;
+          if (cut) {
+            patch.newPhotoCutFileID = await cloudSvc.upload('pet/' + Date.now() + '-cut.png', cut);
+          }
         }
       }
       await api.updatePet(patch);

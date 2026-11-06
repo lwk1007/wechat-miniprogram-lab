@@ -115,6 +115,22 @@ async function createPet(openid, p) {
     assetId = asset._id;
   }
 
+  // 去白底后的透明版：和原图同一个 purpose，清理任务按 purpose 一起删，
+  // 不会出现「原图删了、透明版还躺在云存储里」的情况
+  if (p.photoCutFileID) {
+    await db.collection('mediaAssets').add({
+      data: {
+        _openid: openid,
+        fileID: p.photoCutFileID,
+        purpose: 'pet',
+        storageMode,
+        expiresAt: storageMode === 'private' ? Date.now() + PRIVATE_TTL : null,
+        status: 'active',
+        createdAt: Date.now()
+      }
+    });
+  }
+
   const personaDoc = sanitizePersona(p.persona);
   const pet = await db.collection('pets').add({
     data: {
@@ -127,6 +143,7 @@ async function createPet(openid, p) {
       sinceDate: p.sinceDate || '',
       storageMode,
       photo: p.photoFileID || '',
+      photoCut: p.photoCutFileID || '',
       assetId,
       createdAt: Date.now()
     }
@@ -177,6 +194,22 @@ async function updatePet(openid, p) {
       }
     });
     patch.photo = p.newPhotoFileID;
+    // 换图时新的透明版跟着换；这张新图没处理成功就把旧的一起清掉，
+    // 否则新照片会顶着上一张的轮廓显示
+    patch.photoCut = p.newPhotoCutFileID || '';
+    if (p.newPhotoCutFileID) {
+      await db.collection('mediaAssets').add({
+        data: {
+          _openid: openid,
+          fileID: p.newPhotoCutFileID,
+          purpose: 'pet',
+          storageMode,
+          expiresAt: storageMode === 'private' ? Date.now() + PRIVATE_TTL : null,
+          status: 'active',
+          createdAt: Date.now()
+        }
+      });
+    }
     patch.assetId = asset._id;
     patch.storageMode = storageMode;
   } else if (p.storageMode !== undefined && p.storageMode !== pet.storageMode) {

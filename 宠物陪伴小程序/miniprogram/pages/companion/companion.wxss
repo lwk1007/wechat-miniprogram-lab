@@ -465,6 +465,17 @@
   border-radius: 30rpx;
   box-shadow: 0 10rpx 26rpx rgba(28, 40, 34, 0.22);
 }
+/* 去白底的主体：不套圆角、不投卡片影，靠自己的轮廓站在场景里。
+   这里最容易做错的就是「顺手加个圆角好看点」—— 一加就退回贴纸 */
+.pet-cut {
+  display: block;
+  width: 220rpx;
+  height: 220rpx;
+}
+/* 线稿是黑线，夜里压在深色场景上会糊掉，翻成亮线 */
+.stage.is-night .pet-cut.lineart {
+  filter: invert(1);
+}
 .pet-generic {
   width: 220rpx;
   height: 220rpx;

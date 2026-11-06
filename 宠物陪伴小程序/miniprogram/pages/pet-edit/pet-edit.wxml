@@ -8,6 +8,13 @@
       <view class="photo photo-empty" wx:else>＋</view>
       <view class="photo-mask">{{newPhoto ? '点按预览 · 再点卡片更换' : (photo ? '点按预览 · 点卡片更换' : '添加照片')}}</view>
     </view>
+
+    <view wx:if="{{photoCutting}}" class="cut-note">正在看这张能不能去掉白底…</view>
+    <view wx:elif="{{newPhotoCut}}" class="cut-note" bindtap="toggleCut">
+      <text>{{useCut ? '已去掉白底，桌面上会直接浮起来' : '这张按原图用，会裁成圆角卡片'}}</text>
+      <text class="cut-link">{{useCut ? '换回原图' : '用去底版'}}</text>
+    </view>
+    <view wx:elif="{{cutHint}}" class="cut-note dim">{{cutHint}}</view>
   </view>
 
   <view class="card">

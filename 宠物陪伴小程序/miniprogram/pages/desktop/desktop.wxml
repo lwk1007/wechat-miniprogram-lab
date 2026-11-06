@@ -104,7 +104,14 @@
             bindtouchend="onPetTouchEnd"
             bindtouchcancel="onPetTouchEnd"
           >
-            <image wx:if="{{photo}}" class="pet-photo" src="{{photo}}" mode="aspectFill" />
+            <!-- 有去白底的透明版就直接用：主体自己立住，不再是一张贴纸 -->
+            <image
+              wx:if="{{petCut}}"
+              class="pet-cut {{petCutKind === 'lineart' ? 'lineart' : ''}}"
+              src="{{petCut}}"
+              mode="aspectFit"
+            />
+            <image wx:elif="{{photo}}" class="pet-photo" src="{{photo}}" mode="aspectFill" />
             <view wx:else class="pet-emoji">{{typeEmoji}}</view>
             <view wx:if="{{expression}}" class="pet-face">{{expression}}</view>
           </view>

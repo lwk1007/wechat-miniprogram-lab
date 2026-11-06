@@ -256,9 +256,18 @@ Page({
       await api.ensureUser();
       const pet = await api.getPet();
       let photo = (pet && pet.photo) || '';
-      // 隐私模式照片过期：回退为通用形象
+      // 去白底后的透明版：有就优先用，让主体直接站在场景里
+      let petCut = (pet && pet.photoCut) || '';
+      let petCutKind = (pet && pet.photoCutKind) || '';
+      // 隐私模式照片过期：原图和它的透明版一起失效，回退为通用形象
       if (pet && pet.storageMode === 'private' && pet.photoExpiresAt && Date.now() > pet.photoExpiresAt) {
         photo = '';
+        petCut = '';
+        petCutKind = '';
+      }
+      if (!photo) {
+        petCut = '';
+        petCutKind = '';
       }
       // 它怎么称呼你：宠物身上有就用宠物的，否则用本机记住的，再否则「妈妈」
       const title = (pet && pet.ownerTitle) || wx.getStorageSync(TITLE_KEY) || '妈妈';
@@ -280,6 +289,8 @@ Page({
       this.setData(Object.assign({
         pet: pet || null,
         photo,
+        petCut,
+        petCutKind,
         isDemo: api.isDemo(),
         ownerTitle: title,
         typeEmoji: this.emojiOf(pet && pet.type),

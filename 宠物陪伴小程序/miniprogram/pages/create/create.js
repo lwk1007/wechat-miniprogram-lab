@@ -1,6 +1,7 @@
 const api = require('../../utils/api');
 const cloudSvc = require('../../utils/cloud');
 const privacy = require('../../utils/privacy');
+const cutout = require('../../utils/cutout');
 
 const PERSONALITIES = [
   { key: 'loyal', label: '忠心', desc: '一直守在你身边' },
@@ -21,6 +22,12 @@ Page({
     types: TYPES,
     typeIndex: 2,
     photo: '',
+    // 去白底：选完图当场算一次，算完立刻给用户看对比，让他自己决定用哪张
+    photoCut: '',
+    photoCutKind: '',
+    useCut: false,
+    photoCutting: false,
+    cutHint: '',
     name: '',
     personality: '',
     ownerName: '',
@@ -41,6 +48,8 @@ Page({
   },
 
   onUnload() {
+    // 页面没了还在算：把 token 作废，免得回调往一个已销毁的页面上 setData
+    this._cutToken = (this._cutToken || 0) + 1;
     privacy.clearShowHandler();
   },
 
@@ -54,7 +63,7 @@ Page({
     privacy.reject();
   },
 
-  // 第一步：照片（必填）
+  // 第一步：照片（必填）。选完立刻在本地试一次去白底，几毫秒，不上传
   async choosePhoto() {
     const allowed = await privacy.ensure();
     if (!allowed) {
@@ -67,15 +76,61 @@ Page({
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
       success: (res) => {
-        this.setData({ photo: res.tempFiles[0].tempFilePath });
+        const f = res.tempFiles && res.tempFiles[0];
+        if (!f) return;
+        this.setData({ photo: f.tempFilePath });
+        this.startCut(f.tempFilePath);
       }
     });
   },
+
+  // 失败是常态不是异常：宠物蹲在沙发上、背景是花纹地毯，这类图本来就不该动。
+  // 所以这里不弹 toast、不挡流程，只在照片底下留一行说明，让它按原图走。
+  startCut(src) {
+    // 用户连选两次时，先算完的那张不能覆盖后选的
+    const token = (this._cutToken || 0) + 1;
+    this._cutToken = token;
+    this.setData({ photoCutting: true, photoCut: '', photoCutKind: '', useCut: false, cutHint: '' });
+    const task = cutout.cut(src).then((res) => {
+      if (token !== this._cutToken) return;
+      this.setData({
+        photoCutting: false,
+        photoCut: res.path,
+        photoCutKind: res.kind,
+        useCut: true,
+        cutHint: cutout.describe(res)
+      });
+    }).catch((err) => {
+      if (token !== this._cutToken) return;
+      this.setData({ photoCutting: false, cutHint: this.explainCut(err) });
+    });
+    this._cutTask = task;
+    return task;
+  },
+
+  explainCut(err) {
+    const code = err && err.code;
+    if (code === 'unsupported') return '这个环境不支持本地处理，按原图用';
+    if (code === 'not-white') return '这张背景里有东西，先按原图用';
+    if (code === 'all-white') return '这张几乎是纯白，没找到主体，按原图用';
+    if (code === 'no-line') return '这张没找到线条，按原图用';
+    return '这张没能自动处理，按原图用';
+  },
+
+  // 让用户自己看两张的差别再决定 —— 处理得对不对，他比算法清楚
+  toggleCut() {
+    if (!this.data.photoCut) return;
+    this.setData({ useCut: !this.data.useCut });
+  },
+
   previewPhoto() {
-    wx.previewImage({ urls: [this.data.photo] });
+    const url = this.data.useCut && this.data.photoCut ? this.data.photoCut : this.data.photo;
+    wx.previewImage({ urls: [url] });
   },
   removePhoto() {
-    this.setData({ photo: '' });
+    this._cutToken = (this._cutToken || 0) + 1;
+    this._cutTask = null;
+    this.setData({ photo: '', photoCut: '', photoCutKind: '', useCut: false, photoCutting: false, cutHint: '' });
   },
 
   onNameInput(e) {
@@ -124,6 +179,8 @@ Page({
   async submit() {
     if (this.data.submitting) return;
     if (!this.data.name.trim()) return;
+    // 上一张图还在算的时候点了提交：等它算完，否则会存成「有原图、没透明版」
+    if (this._cutTask) await this._cutTask;
     const base = {
       name: this.data.name,
       personality: this.data.personality,
@@ -132,15 +189,26 @@ Page({
       sinceDate: this.data.sinceDate,
       storageMode: this.data.mode
     };
+    const cut = this.data.useCut && this.data.photoCut ? this.data.photoCut : '';
+    const cutKind = cut ? this.data.photoCutKind : '';
     this.setData({ submitting: true, submitText: '正在上传照片…' });
     try {
       if (api.isDemo()) {
         await new Promise((r) => setTimeout(r, 600));
-        await api.createPet(Object.assign({}, base, { photo: this.data.photo }));
+        await api.createPet(Object.assign({}, base, {
+          photo: this.data.photo,
+          photoCut: cut,
+          photoCutKind: cutKind
+        }));
       } else {
         const fileID = await cloudSvc.upload('pet/' + Date.now() + '.jpg', this.data.photo);
+        let cutFileID = '';
+        if (cut) {
+          this.setData({ submitText: '正在上传形象…' });
+          cutFileID = await cloudSvc.upload('pet/' + Date.now() + '-cut.png', cut);
+        }
         this.setData({ submitText: '正在创建档案…' });
-        await api.createPet(Object.assign({}, base, { photoFileID: fileID }));
+        await api.createPet(Object.assign({}, base, { photoFileID: fileID, photoCutFileID: cutFileID }));
       }
       wx.showToast({ title: '创建成功', icon: 'success' });
       setTimeout(() => wx.reLaunch({ url: '/pages/companion/companion' }), 800);

@@ -178,13 +178,25 @@ Page({
       await api.ensureUser();
       const pet = await api.getPet();
       let photo = (pet && pet.photo) || '';
-      // 隐私模式照片过期：回退为通用形象
+      // 去白底后的透明版：有就优先用它，直接浮在桌面上，不再套白色圆框
+      let petCut = (pet && pet.photoCut) || '';
+      let petCutKind = (pet && pet.photoCutKind) || '';
+      // 隐私模式照片过期：原图和它的透明版一起失效，回退为通用形象
       if (pet && pet.storageMode === 'private' && pet.photoExpiresAt && Date.now() > pet.photoExpiresAt) {
         photo = '';
+        petCut = '';
+        petCutKind = '';
+      }
+      // 原图都没了，它的衍生版留着也没意义
+      if (!photo) {
+        petCut = '';
+        petCutKind = '';
       }
       this.setData({
         pet: pet || null,
         photo,
+        petCut,
+        petCutKind,
         typeEmoji: this.emojiOf(pet && pet.type),
         isDemo: api.isDemo(),
         loading: false

@@ -18,7 +18,24 @@
       <view class="sub">选择照片</view>
     </view>
     <view wx:else class="photo-preview-wrap">
-      <image class="photo-preview" src="{{photo}}" mode="aspectFill" bindtap="previewPhoto" />
+      <view class="photo-stage {{useCut && photoCut ? 'is-cut' : ''}}">
+        <image
+          class="photo-preview"
+          src="{{useCut && photoCut ? photoCut : photo}}"
+          mode="{{useCut && photoCut ? 'aspectFit' : 'aspectFill'}}"
+          bindtap="previewPhoto"
+        />
+      </view>
+      <view wx:if="{{photoCut}}" class="cut-row">
+        <view class="cut-state">{{useCut ? '已去掉白底' : '当前是原图'}}{{photoCutKind === 'lineart' ? ' · 线稿' : ''}}</view>
+        <view class="cut-toggle" bindtap="toggleCut">{{useCut ? '换回原图' : '用去底版'}}</view>
+      </view>
+      <view wx:elif="{{photoCutting}}" class="cut-row">
+        <view class="cut-state dim">正在看这张能不能去掉白底…</view>
+      </view>
+      <view wx:elif="{{cutHint}}" class="cut-row">
+        <view class="cut-state dim">{{cutHint}}</view>
+      </view>
       <view class="photo-ops">
         <view class="photo-op" bindtap="choosePhoto">重新选择</view>
         <view class="photo-op photo-op-remove" bindtap="removePhoto">删除</view>

@@ -71,7 +71,7 @@ async function removePhoto(openid) {
   if (!pet) return ok({ removed: false, reason: 'no-pet' });
   const assets = await purgePetAssets(openid);
   await db.collection('pets').doc(pet._id).update({
-    data: { photo: '', assetId: '' }
+    data: { photo: '', photoCut: '', assetId: '' }
   });
   return ok({ removed: true, assets });
 }

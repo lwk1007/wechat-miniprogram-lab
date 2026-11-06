@@ -9,8 +9,7 @@
     "pages/pet-edit/pet-edit",
     "pages/desktop/desktop",
     "pages/letter/letter",
-    "pages/data-export/data-export",
-    "pages/pet-3d/pet-3d"
+    "pages/data-export/data-export"
   ],
   "window": {
     "navigationBarBackgroundColor": "#F7F8FA",

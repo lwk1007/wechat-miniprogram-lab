@@ -375,6 +375,17 @@
   border-radius: 50%;
   box-shadow: 0 10rpx 26rpx rgba(38, 49, 43, 0.12);
 }
+/* 去白底的主体：不给圆框、不给白边、不给落地阴影（阴影由 .pet-shadow 单独负责），
+   让它靠自己的轮廓站在桌面上。加边框就前功尽弃了 —— 白卡片正是这么来的 */
+.pet-cut {
+  display: block;
+  width: 180rpx;
+  height: 180rpx;
+}
+/* 线稿只有黑线，白天看得见、夜里糊进深蓝里，所以夜间翻成亮线 */
+.desk.night .pet-cut.lineart {
+  filter: invert(1);
+}
 
 /* 待机 / 走动 / 动作反馈：全部只用 transform，避免 setData 每帧刷样式 */
 @keyframes idle-bob {
