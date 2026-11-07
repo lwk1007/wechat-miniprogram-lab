@@ -17,8 +17,7 @@
 
 const { randomFrom, timeAgo } = require('./format');
 const timeline = require('./timeline');
-// 心情 → 一句自然语言。留在 chat-brain 里是因为云函数也要用，
-// 而云函数不带本文件；放两份会漂移，所以单向依赖这一处。
+// 心情 → 一句自然语言，定义在 chat-brain.js（零外部依赖），这里只引用。
 const chatBrain = require('./chat-brain');
 const { moodTextOf } = chatBrain;
 
@@ -40,7 +39,7 @@ const MOODS = {
   grumpy:  { label: '小脾气', face: '😾' }
 };
 
-// 心情 → 云端 prompt 用的一句自然语言（定义在 chat-brain.js，这里只引用）
+// 心情 → 一句自然语言（定义在 chat-brain.js，这里只引用）
 
 // ---------- 自主活动库 ----------
 // scenes: null = 任何场景；数组 = 只在这些场景出现

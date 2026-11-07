@@ -1,11 +1,8 @@
 {
   "pages": [
     "pages/companion/companion",
-    "pages/community/community",
     "pages/profile/profile",
     "pages/create/create",
-    "pages/chat/chat",
-    "pages/publish/publish",
     "pages/pet-edit/pet-edit",
     "pages/desktop/desktop",
     "pages/letter/letter",
@@ -27,10 +24,6 @@
       {
         "pagePath": "pages/companion/companion",
         "text": "陪伴"
-      },
-      {
-        "pagePath": "pages/community/community",
-        "text": "社区"
       },
       {
         "pagePath": "pages/profile/profile",

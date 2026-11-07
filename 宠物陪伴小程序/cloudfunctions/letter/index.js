@@ -15,8 +15,6 @@ const MODEL_NAME = process.env.MODEL_NAME || '';
 const isRealModel = MODEL_PROVIDER === 'openai-compatible' && !!(MODEL_BASE_URL && MODEL_API_KEY && MODEL_NAME);
 
 const COOLDOWN = 12 * 3600 * 1000;      // 12 小时只写一封，避免重复消耗模型
-const WINDOW_DAYS = 30;                // 素材窗口
-const HISTORY_KEEP = 60;               // 最多读多少条聊天
 const KEEP_LETTERS = 20;               // 每人只留最近 20 封
 
 const PERSONALITY_TEXT = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
@@ -67,25 +65,7 @@ async function getPet(openid) {
   return r.data[0] || null;
 }
 
-// 素材：最近 30 天的聊天记录
-async function collectTalks(openid) {
-  const since = Date.now() - WINDOW_DAYS * 86400e3;
-  const r = await db.collection('messages')
-    .where({ _openid: openid, createdAt: _.gt(since) })
-    .orderBy('createdAt', 'desc')
-    .limit(HISTORY_KEEP)
-    .get();
-  const list = r.data.slice().reverse();
-  const users = list.filter((m) => m.role === 'user' && m.content);
-  // 摘录：取最近用户说过的话里，长度合适的 3 句
-  const excerpts = users
-    .filter((m) => m.content.length >= 4)
-    .slice(-3)
-    .map((m) => m.content.slice(0, 30));
-  return { total: list.length, userCount: users.length, excerpts, users };
-}
-
-function buildPrompt(pet, stats, ownerTitle, talks, lifeLabel) {
+function buildPrompt(pet, stats, ownerTitle, lifeLabel) {
   const personaData = pet.persona || {};
   const bits = [];
   bits.push(`你是一只名叫「${pet.name}」的${PERSONALITY_TEXT[pet.personality] || '亲人'}的${TYPE_TEXT[pet.type] || '小可爱'}。`);
@@ -97,14 +77,11 @@ function buildPrompt(pet, stats, ownerTitle, talks, lifeLabel) {
   bits.push(`你要给你最爱的「${ownerTitle}」写一封短短的信。`);
   bits.push('');
   bits.push('可用素材（只能用这些，不要编造别的经历）：');
-  bits.push(`- 这段时间「${ownerTitle}」来看过你 ${stats.activeDays || 1} 天，你们一共聊过 ${talks.userCount || 0} 句话`);
+  bits.push(`- 这段时间「${ownerTitle}」来看过你 ${stats.activeDays || 1} 天`);
   bits.push(`- 你被喂了 ${stats.feed || 0} 次、被摸了 ${stats.touch || 0} 下、一起玩了 ${stats.play || 0} 回、被拎起来 ${stats.lift || 0} 次`);
   if (stats.scenes && stats.scenes.length) bits.push(`- 你们待过的地方：${stats.scenes.join('、')}`);
   // 「你最近常在做的事」：让它有自己的生活，而不只是被动等你来
   if (lifeLabel) bits.push(`- 你最近常在做的事：${lifeLabel}`);
-  if (talks.excerpts.length) {
-    bits.push(`- 「${ownerTitle}」最近说过：${talks.excerpts.map((e) => '「' + e + '」').join('、')}`);
-  }
   bits.push('');
   bits.push('写法要求：');
   bits.push(`1. 250 字以内，2~3 段，第一人称，称呼对方为「${ownerTitle}」`);
@@ -117,7 +94,7 @@ function buildPrompt(pet, stats, ownerTitle, talks, lifeLabel) {
 }
 
 // 降级模板信：数字全部来自真实互动，不是空话；随机挑句，避免每次一模一样
-function fallbackLetter(pet, stats, ownerTitle, talks) {
+function fallbackLetter(pet, stats, ownerTitle) {
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   const paras = [];
 
@@ -149,14 +126,11 @@ function fallbackLetter(pet, stats, ownerTitle, talks) {
     paras.push('虽然你只是远远看了我一眼就忙去了，我也还是很开心。');
   }
 
-  // 第三段：亮点。最多两句——拎起来单独一句，剩下随机给「场景」或「他说过的话」
+  // 第三段：亮点。最多两句——拎起来单独一句，剩下给「场景」
   const scenePart = (stats.scenes && stats.scenes.length)
     ? `最近我们待得最多的地方是${stats.scenes[0]}${SCENE_LINE[stats.scenes[0]] ? '，' + SCENE_LINE[stats.scenes[0]] : ''}。`
     : '';
-  const talkPart = (talks.excerpts && talks.excerpts.length)
-    ? `你说「${talks.excerpts[talks.excerpts.length - 1]}」的时候，我就在旁边听着。`
-    : '';
-  const extras = [scenePart, talkPart].filter(Boolean);
+  const extras = [scenePart].filter(Boolean);
   const highlight = [];
   if (stats.lift > 0) {
     highlight.push(`你把我拎起来那 ${stats.lift} 次，我一点都不怕——我知道你会接住我。`);
@@ -176,7 +150,7 @@ function fallbackLetter(pet, stats, ownerTitle, talks) {
   return ownerTitle + '：\n\n' + paras.join('\n\n') + '\n\n' + pet.name;
 }
 
-async function generateWithModel(pet, stats, ownerTitle, talks, lifeLabel) {
+async function generateWithModel(pet, stats, ownerTitle, lifeLabel) {
   const messages = [
     // 人设必须放在 system 层：写成「写作助手」会盖掉下面 user 里的宠物身份，
     // 模型最终产出一封编辑腔的信——这是角色一致性最常见的一种崩法。
@@ -223,7 +197,7 @@ async function generate(openid, payload) {
   // payload 是不可信输入，而它会被拼进 prompt 和信的开头，不能让它说了算
   const ownerTitle = titleOf.resolveName(pet.ownerName || (payload && payload.ownerTitle));
   const stats = normalizeStats(payload && payload.stats);
-  const talks = await collectTalks(openid);
+  // 聊天功能已砍掉，信只基于互动统计生成，不再读聊天记录
   // 它最近自己在做什么。客户端当不可信输入处理：只留短词，不拼接任何自由文本
   const lifeLabel = String((payload && payload.activityLabel) || '').slice(0, 16);
 
@@ -231,7 +205,7 @@ async function generate(openid, payload) {
   let isDemo = true;
   if (isRealModel) {
     try {
-      content = await generateWithModel(pet, stats, ownerTitle, talks, lifeLabel);
+      content = await generateWithModel(pet, stats, ownerTitle, lifeLabel);
       isDemo = false;
     } catch (e) {
       // 模型挂了别让用户白等：降级成模板信，标记演示
@@ -239,7 +213,7 @@ async function generate(openid, payload) {
     }
   }
   if (!content) {
-    content = fallbackLetter(pet, stats, ownerTitle, talks);
+    content = fallbackLetter(pet, stats, ownerTitle);
     isDemo = true;
   }
 
@@ -254,7 +228,6 @@ async function generate(openid, payload) {
       feed: stats.feed, play: stats.play, touch: stats.touch, lift: stats.lift,
       activeDays: stats.activeDays, scenes: stats.scenes, spanDays: stats.spanDays
     },
-    chatCount: talks.userCount,
     createdAt: Date.now()
   };
   const added = await db.collection('letters').add({ data: letter });

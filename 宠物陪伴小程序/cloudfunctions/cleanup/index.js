@@ -7,8 +7,7 @@ const _ = db.command;
 // 设计要点：
 // 1. 可重复执行（幂等）：以 status + expiresAt 为准，已清理的记录不会重复处理
 // 2. 隐私模式素材有效期设为 22h + 每小时清理，实际保留时间必然 < 24h
-// 3. 社区公开素材（purpose='post'）不参与过期清理，仅随动态删除
-// 4. replaced（用户换下来的旧照片）必须一起清理：
+// 3. replaced（用户换下来的旧照片）必须一起清理：
 //    否则每换一次照片就有一份旧文件永久留在云存储里，隐私模式的承诺直接失效
 const BATCH = 100;
 const CLEANABLE = ['active', 'failed', 'replaced'];
@@ -70,28 +69,10 @@ async function cleanOneBatch(now) {
   return { cleaned, failed };
 }
 
-// 对话历史保留 90 天，到期删除；同样多跑几轮，最多清 500 条/次
-async function cleanupMessages() {
-  const deadline = Date.now() - 90 * 24 * 3600 * 1000;
-  let removed = 0;
-  for (let round = 0; round < MAX_ROUNDS; round++) {
-    const r = await db.collection('messages')
-      .where({ createdAt: _.lt(deadline) })
-      .limit(BATCH)
-      .remove()
-      .catch(() => ({ stats: { removed: 0 } }));
-    const n = (r && r.stats && r.stats.removed) || 0;
-    removed += n;
-    if (n < BATCH) break;
-  }
-  return { removed };
-}
-
 exports.main = async () => {
   const media = await cleanupMedia();
-  const messages = await cleanupMessages();
   return {
     ok: true,
-    data: { media, messages, ranAt: Date.now() }
+    data: { media, ranAt: Date.now() }
   };
 };

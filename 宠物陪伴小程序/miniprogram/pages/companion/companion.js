@@ -677,10 +677,6 @@ Page({
     voice.speak(text).catch(() => {});
   },
 
-  goChat() {
-    wx.navigateTo({ url: '/pages/chat/chat' });
-  },
-
   goDesktop() {
     if (!this.data.pet) return;
     wx.navigateTo({ url: '/pages/desktop/desktop' });

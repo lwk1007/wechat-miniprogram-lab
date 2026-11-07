@@ -18,12 +18,12 @@
     <view class="onboard-icon">🐾</view>
     <view class="h1">欢迎来到宠物陪伴</view>
     <view class="sub onboard-desc">
-      上传一张照片，创建属于你的宠物。它会在这里陪伴你，也可以和它说说话。
+      上传一张照片，让它以你熟悉的样子，在属于它的世界里继续陪着你。
     </view>
     <view class="onboard-tips">
       <view class="onboard-tip">🌱 无需注册，免费体验</view>
       <view class="onboard-tip">🔒 照片默认 24 小时内自动删除</view>
-      <view class="onboard-tip">💬 可以用宠物口吻和它聊天</view>
+      <view class="onboard-tip">💌 它会写一封信，说说你们一起做过的事</view>
     </view>
     <view class="btn-primary {{creating ? 'btn-loading' : ''}}" bindtap="quickStart">
       {{creating ? '正在创建…' : '免费体验（一键领养）'}}
@@ -33,9 +33,6 @@
 
   <!-- 陪伴空间 -->
   <block wx:else>
-    <view wx:if="{{isDemo}}" class="demo-banner">
-      演示模式：数据仅保存在本机，配置云环境后自动切换为真实服务
-    </view>
 
     <!-- 你不在的时候它也在生活：回来时告诉你它做了什么 -->
     <view wx:if="{{recap.length}}" class="recap-card card">
@@ -198,10 +195,6 @@
       <view class="action" data-type="play" bindtap="interact">
         <view class="action-icon">🎾</view>
         <view>玩耍</view>
-      </view>
-      <view class="action" bindtap="goChat">
-        <view class="action-icon">💬</view>
-        <view>聊聊天</view>
       </view>
     </view>
 

@@ -17,8 +17,6 @@ Page({
     savingMode: false,
     photoRemoving: false,
     purging: false,
-    myPosts: [],
-    postsLoading: true,
     showRules: false,
     showHelp: false
   },
@@ -48,19 +46,8 @@ Page({
         // #9：把自定义过的内容显示出来，否则用户填了也不知道有没有生效
         personaSummary: pet ? personaUtil.summary(pet) : ''
       });
-      this.loadMyPosts();
     } catch (e) {
       wx.showToast({ title: e.message || '加载失败', icon: 'none' });
-    }
-  },
-
-  async loadMyPosts() {
-    this.setData({ postsLoading: true });
-    try {
-      const posts = await api.listMyPosts();
-      this.setData({ myPosts: posts || [], postsLoading: false });
-    } catch (e) {
-      this.setData({ postsLoading: false });
     }
   },
 
@@ -95,30 +82,10 @@ Page({
     }
   },
 
-  deleteMyPost(e) {
-    const id = e.currentTarget.dataset.id;
-    wx.showModal({
-      title: '删除动态',
-      content: '删除后动态、评论、点赞和图片都会一并删除，确定吗？',
-      confirmColor: '#D97A6C',
-      success: async (r) => {
-        if (!r.confirm) return;
-        try {
-          await api.deletePost(id);
-          this.setData({ myPosts: this.data.myPosts.filter((p) => p._id !== id) });
-          getApp().globalData.communityDirty = true;
-          wx.showToast({ title: '已删除', icon: 'success' });
-        } catch (err) {
-          wx.showToast({ title: err.message || '删除失败', icon: 'none' });
-        }
-      }
-    });
-  },
-
   deletePet() {
     wx.showModal({
       title: '删除宠物档案',
-      content: '将删除宠物档案、照片素材、全部聊天记录和它写给你的信，且无法恢复。你的社区动态会保留，可到下方「数据管理」单独清空。确定删除吗？',
+      content: '将删除宠物档案、照片素材和它写给你的信，且无法恢复。确定删除吗？',
       confirmColor: '#D97A6C',
       success: async (r) => {
         if (!r.confirm) return;
@@ -127,7 +94,6 @@ Page({
           // 心情和足迹日记存在本机，云端删宠物时清不到，这里补一刀，
           // 否则删了宠物再领养一只，它还记得上一只的心情
           try { petLife.reset(); } catch (e2) { /* ignore */ }
-          getApp().globalData.communityDirty = true;
           wx.showToast({ title: '已删除', icon: 'success' });
           this.load();
         } catch (e) {
@@ -144,7 +110,7 @@ Page({
     if (this.data.photoRemoving) return;
     wx.showModal({
       title: '立即删除照片',
-      content: '删除后立刻改用通用形象，照片文件不再保留。聊天记录和互动数据不受影响。',
+      content: '删除后立刻改用通用形象，照片文件不再保留。互动数据不受影响。',
       confirmText: '删除照片',
       confirmColor: '#D97A6C',
       success: async (r) => {
@@ -168,7 +134,7 @@ Page({
     if (this.data.purging) return;
     wx.showModal({
       title: '清空全部数据',
-      content: '将删除宠物档案、照片、聊天记录、它写的信，以及你在社区发布的动态、评论和点赞。这些内容都会从服务器移除，无法恢复。',
+      content: '将删除宠物档案、照片和它写给你的信。这些内容都会从服务器移除，无法恢复。',
       confirmText: '继续',
       confirmColor: '#D97A6C',
       success: (r1) => {
@@ -184,16 +150,12 @@ Page({
             try {
               const res = await api.purgeAll();
               try { petLife.reset(); } catch (e2) { /* ignore */ }
-              getApp().globalData.communityDirty = true;
               const s = (res && res.summary) || {};
               wx.showModal({
                 title: '已清空',
-                content: '已删除：宠物 ' + (s.pets || 0) + ' 个、聊天 ' + (s.messages || 0) +
-                  ' 条、信 ' + (s.letters || 0) + ' 封、动态 ' + (s.posts || 0) +
-                  ' 条、评论 ' + (s.comments || 0) + ' 条、点赞 ' + (s.likes || 0) + ' 次。',
+                content: '已删除：宠物 ' + (s.pets || 0) + ' 个、信 ' + (s.letters || 0) + ' 封。',
                 showCancel: false
               });
-              this.setData({ myPosts: [] });
               this.load();
             } catch (e) {
               wx.showToast({ title: e.message || '清空失败', icon: 'none' });
@@ -209,13 +171,12 @@ Page({
   clearLocalCache() {
     wx.showModal({
       title: '清除本机缓存',
-      content: '会清空这台设备上保存的内容（演示数据、场景偏好等）。云端数据不受影响。',
+      content: '会清空这台设备上保存的内容（本机数据、场景偏好等）。云端数据不受影响。',
       confirmColor: '#D97A6C',
       success: (r) => {
         if (!r.confirm) return;
         try {
           wx.clearStorageSync();
-          getApp().globalData.communityDirty = true;
           wx.showToast({ title: '已清除', icon: 'success' });
           setTimeout(() => wx.reLaunch({ url: '/pages/companion/companion' }), 800);
         } catch (e) {

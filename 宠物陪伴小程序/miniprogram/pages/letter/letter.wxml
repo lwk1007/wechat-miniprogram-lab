@@ -39,9 +39,6 @@
 
     <view class="paper-foot">
       <view class="paper-source">{{sourceText}}</view>
-      <view wx:if="{{letter.isDemo}}" class="paper-demo">
-        演示模式：这封信是按真实互动数据拼出的模板信，接入模型后会写得更具体
-      </view>
     </view>
   </view>
 
@@ -61,7 +58,7 @@
     <view class="btn-primary {{(!canWrite || writing) ? 'disabled' : ''}}" bindtap="write">
       {{writing ? '它正在写…' : (letter ? (canWrite ? '再听它说一封' : cooldownText + '后可再写') : '让它写一封信')}}
     </view>
-    <view class="footer-note">信由 AI 根据你们的互动生成，它并不真的记得你说过的话</view>
+    <view class="footer-note">这封信由它根据你们一起做过的事写成，是它想对你说的心里话</view>
   </view>
 
 </view>

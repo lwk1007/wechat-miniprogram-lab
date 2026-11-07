@@ -8,7 +8,7 @@ const { randomFrom } = require('../../utils/format');
 const TOUCH_PHRASES = ['呼噜噜…', '别戳啦，痒～', '你终于来看我了', '我一直在等你哦'];
 const FEED_PHRASES = ['咔嚓咔嚓，好吃！', '还有吗还有吗', '这是我今天最开心的事'];
 const PLAY_PHRASES = ['追我呀追我呀', '接住这个小球！', '再玩一会儿嘛'];
-const CHAT_PHRASES = ['我们去说说话吧', '有好多话想跟你说'];
+const LETTER_PHRASES = ['它给你写了信，去看看吧', '去读读它想对你说的话'];
 const COME_PHRASES = ['我来啦！', '这就到～', '叫我干嘛呀'];
 const LIFT_PHRASES = ['你怎么把我提起来了…', '欸欸，我恐高！', '放我下来啦'];
 const DROP_PHRASES = ['呼…吓我一跳', '安全着陆！', '下次轻点儿…'];
@@ -343,9 +343,9 @@ Page({
     this._lastTap = now;
     if (isDouble) {
       this._lastTap = 0;
-      this.showBubble(randomFrom(CHAT_PHRASES));
+      this.showBubble(randomFrom(LETTER_PHRASES));
       this.react('anim-bounce');
-      setTimeout(() => wx.navigateTo({ url: '/pages/chat/chat' }), 420);
+      setTimeout(() => wx.navigateTo({ url: '/pages/letter/letter' }), 420);
       return;
     }
     this.playAction('touch');
@@ -354,7 +354,7 @@ Page({
   // 底部 Dock：说话 / 喂饭 / 陪玩 / 回陪伴页
   onDockTap(e) {
     const type = (e.currentTarget.dataset || {}).type;
-    if (type === 'chat') { this.goChat(); return; }
+    if (type === 'letter') { this.goLetter(); return; }
     if (type === 'home') { this.goCompanion(); return; }
     // 手里抱着它的时候不喂饭——先放下
     if (!this.data.pet || this.data.lifted) return;
@@ -518,9 +518,9 @@ Page({
     return -1;
   },
 
-  goChat() {
+  goLetter() {
     if (!this.data.pet) return;
-    wx.navigateTo({ url: '/pages/chat/chat' });
+    wx.navigateTo({ url: '/pages/letter/letter' });
   },
 
   // 双击桌面空白处 → 宠物跑过来

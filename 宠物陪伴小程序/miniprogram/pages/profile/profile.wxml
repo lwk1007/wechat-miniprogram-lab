@@ -1,9 +1,5 @@
 <view class="page safe-bottom">
 
-  <view wx:if="{{isDemo}}" class="demo-banner">
-    演示模式：数据仅保存在本机。配置云环境后自动切换（见项目 README）
-  </view>
-
   <!-- 宠物卡片 -->
   <view wx:if="{{pet}}" class="card pet-card">
     <image wx:if="{{photo}}" class="pet-avatar" src="{{photo}}" mode="aspectFill" />
@@ -60,23 +56,8 @@
       <view class="rule-line">1. 隐私模式：宠物照片及衍生素材最迟在上传（或切回隐私模式）后 24 小时内删除（清理任务每小时执行，有效期设为 22 小时以留出重试缓冲）。</view>
       <view class="rule-line">2. 长期保存模式：宠物照片与形象持续保存，直到你切换回隐私模式或删除档案。</view>
       <view class="rule-line">3. 换照片：旧照片按当时所在模式处理，隐私模式下会随下一轮清理一并删除，不会留在服务器上。</view>
-      <view class="rule-line">4. 社区动态：属于你主动公开的内容，与宠物私密照片分开存储、互不影响；删除动态时对应图片一并删除。</view>
-      <view class="rule-line">5. 聊天记录保留最近 90 天，到期自动删除；它写的信只保留最近 20 封，每 12 小时最多生成一封。</view>
-      <view class="rule-line">6. 你可以随时删除宠物档案，或一键清空全部数据（含社区内容）。</view>
-    </view>
-  </view>
-
-  <!-- 我的动态 -->
-  <view class="card">
-    <view class="section-title">我的动态</view>
-    <view wx:if="{{postsLoading}}" class="sub center tip">加载中…</view>
-    <view wx:elif="{{myPosts.length === 0}}" class="sub center tip">还没有动态，去社区分享第一件小事吧</view>
-    <view wx:else>
-      <view wx:for="{{myPosts}}" wx:key="_id" class="my-post">
-        <view class="my-post-content">{{item.content || '[图片]'}}</view>
-        <view class="sub">{{item.likeCount}} 赞 · {{item.commentCount}} 评论</view>
-        <view class="my-post-del" data-id="{{item._id}}" bindtap="deleteMyPost">删除</view>
-      </view>
+      <view class="rule-line">4. 它写给你的信只保留最近 20 封，每 12 小时最多生成一封。</view>
+      <view class="rule-line">5. 你可以随时删除宠物档案，或一键清空全部数据。</view>
     </view>
   </view>
 
@@ -95,7 +76,7 @@
     <view class="link-row action-row" bindtap="goExport">
       <view class="action-body">
         <view class="action-name">查看并导出我的数据</view>
-        <view class="sub">汇总档案、聊天、动态和信，可整份复制保存</view>
+        <view class="sub">汇总档案和它写给你的信，可整份复制保存</view>
       </view>
       <view class="action-arrow">›</view>
     </view>
@@ -111,7 +92,7 @@
     <view class="link-row action-row" bindtap="purgeAll">
       <view class="action-body">
         <view class="action-name danger-link">{{purging ? '清空中…' : '清空全部数据'}}</view>
-        <view class="sub">连同社区动态、评论、点赞一起删除，无法恢复</view>
+        <view class="sub">删除宠物档案、照片和信，无法恢复</view>
       </view>
       <view class="action-arrow">›</view>
     </view>
@@ -125,8 +106,7 @@
     </view>
     <view wx:if="{{showHelp}}" class="rules sub">
       <view class="rule-line">· 陪伴页：点一点宠物，或使用“摸摸、喂食、玩耍”互动。</view>
-      <view class="rule-line">· 聊天：宠物是 AI 陪伴角色，回复由大模型或演示模板生成，不代表真实宠物。</view>
-      <view class="rule-line">· 社区：分享养宠日常，可以点赞、评论；发布前会提示公开展示。</view>
+      <view class="rule-line">· 一封信：它会根据你们最近的互动写一封信，说说心里话。</view>
       <view class="rule-line">· 照片安全：默认隐私模式，24 小时自动删除，不会偷偷保留副本。</view>
     </view>
   </view>

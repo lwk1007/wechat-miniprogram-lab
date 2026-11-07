@@ -5,7 +5,6 @@ const titleOf = require('../../utils/title');
 const MODE_TEXT = { private: '隐私模式（照片最迟 24 小时删除）', persistent: '长期保存模式' };
 const PERSONALITY_TEXT = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
 const TYPE_TEXT = { cat: '猫', dog: '狗', other: '其他' };
-const ROLE_TEXT = { user: '我', pet: '它' };
 
 function pad(n) {
   return String(n).padStart(2, '0');
@@ -63,34 +62,6 @@ Page({
         ] : []
       });
 
-      const msgs = d.messages || [];
-      const shown = msgs.slice(-50);
-      sections.push({
-        key: 'messages',
-        title: '聊天记录',
-        hint: msgs.length
-          ? (msgs.length > 50 ? '共 ' + msgs.length + ' 条，下面显示最近 50 条' : '共 ' + msgs.length + ' 条')
-          : '还没有聊天记录',
-        lines: shown.map((m) => fmtTime(m.createdAt) + '  ' + (ROLE_TEXT[m.role] || '?') + '：' + m.content)
-      });
-
-      const posts = d.posts || [];
-      sections.push({
-        key: 'posts',
-        title: '我发布的动态',
-        hint: posts.length ? '共 ' + posts.length + ' 条（公开内容）' : '还没有发布过动态',
-        lines: posts.map((p) => fmtTime(p.createdAt) + '\n' + (p.content || '[仅图片]') +
-          '\n赞 ' + p.likeCount + ' · 评论 ' + p.commentCount + ' · 图片 ' + p.images + ' 张')
-      });
-
-      const comments = d.comments || [];
-      sections.push({
-        key: 'comments',
-        title: '我的评论',
-        hint: comments.length ? '共 ' + comments.length + ' 条' : '还没有评论过',
-        lines: comments.map((c) => fmtTime(c.createdAt) + '  ' + c.content)
-      });
-
       const letters = d.letters || [];
       sections.push({
         key: 'letters',
@@ -121,10 +92,6 @@ Page({
         scopeText: d.scope === 'local' ? '本机数据' : '云端数据',
         exportedAtText: fmtTime(d.exportedAt),
         counts: [
-          { label: '聊天', value: c.messages || 0 },
-          { label: '动态', value: c.posts || 0 },
-          { label: '评论', value: c.comments || 0 },
-          { label: '点赞', value: c.likes || 0 },
           { label: '信', value: c.letters || 0 },
           { label: '照片', value: c.assets || 0 }
         ],

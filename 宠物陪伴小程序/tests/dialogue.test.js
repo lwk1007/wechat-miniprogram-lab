@@ -1,5 +1,5 @@
-// #9 性格自定义 + #4 对话升级 断言（Node 模拟 wx 环境）
-// 覆盖：人格合并/清洗、prompt 拼装、语音降级、双数据源一致性
+// #9 性格自定义 断言（Node 模拟 wx 环境）
+// 覆盖：人格合并/清洗、语音降级、双数据源一致性
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
@@ -26,7 +26,6 @@ function ok(name, cond, extra) {
 }
 
 const persona = require(path.join(ROOT, 'miniprogram/utils/persona'));
-const cloudPersona = require(path.join(ROOT, 'cloudfunctions/chat/persona'));
 const voice = require(path.join(ROOT, 'miniprogram/utils/voice'));
 const localdb = require(path.join(ROOT, 'miniprogram/utils/localdb'));
 
@@ -90,44 +89,8 @@ const localdb = require(path.join(ROOT, 'miniprogram/utils/localdb'));
   ok('全空返回空对象', Object.keys(persona.sanitize({})).length === 0);
   ok('传 null 不抛错', Object.keys(persona.sanitize(null)).length === 0);
 
-  // ---------- 四、云端 prompt 拼装 ----------
-  console.log('\n[4] cloudfunctions/chat/persona.buildSystemPrompt');
-
-  const p1 = cloudPersona.buildSystemPrompt({
-    name: '豆豆',
-    type: 'dog',
-    personality: 'foodie',
-    ownerName: '妈妈',
-    persona: {
-      traits: ['护食'],
-      speech: '句子很短',
-      catchphrase: '有吃的吗',
-      quirk: '开冰箱就到',
-      scenes: { feed: '还没放下就凑过来' }
-    }
-  });
-  ok('包含名字', p1.indexOf('豆豆') >= 0);
-  ok('包含主人称呼', p1.indexOf('妈妈') >= 0);
-  ok('包含性格底色', p1.indexOf('贪吃') >= 0);
-  ok('包含自定义特质', p1.indexOf('护食') >= 0);
-  ok('包含口头禅', p1.indexOf('有吃的吗') >= 0);
-  ok('包含填过的场景', p1.indexOf('还没放下就凑过来') >= 0);
-  ok('含负面约束（客服腔）', p1.indexOf('客服腔') >= 0);
-  ok('含 50 字长度约束', p1.indexOf('50 字') >= 0);
-  ok('含不声称真实宠物的边界', p1.indexOf('真实宠物') >= 0);
-  ok('没有 undefined 泄漏', p1.indexOf('undefined') < 0);
-  ok('没有 null 泄漏', p1.indexOf('null') < 0);
-
-  const p2 = cloudPersona.buildSystemPrompt({ name: '小黑', type: 'cat', personality: 'loyal' });
-  ok('无 persona 时不含【这些时候你会这样】', p2.indexOf('这些时候你会这样') < 0);
-  ok('无 persona 时仍有完整约束', p2.indexOf('必须遵守') >= 0);
-  ok('无 persona 时不编造场景', p2.indexOf('被拎起来') < 0);
-
-  const p3 = cloudPersona.buildSystemPrompt(null);
-  ok('传 null 也能拼出 prompt', p3.indexOf('必须遵守') >= 0);
-
-  // ---------- 五、语音降级 ----------
-  console.log('\n[5] voice：插件未启用时的降级行为');
+  // ---------- 四、语音降级 ----------
+  console.log('\n[4] voice：插件未启用时的降级行为');
 
   ok('status 为 disabled', voice.status() === 'disabled', voice.status());
   ok('unavailableTip 给出启用路径', voice.unavailableTip().indexOf('同声传译') >= 0);
@@ -144,8 +107,8 @@ const localdb = require(path.join(ROOT, 'miniprogram/utils/localdb'));
   voice.setAutoTts(false);
   ok('能关回去', voice.isAutoTts() === false);
 
-  // ---------- 六、双数据源一致性 ----------
-  console.log('\n[6] localdb：persona 存取与导出');
+  // ---------- 五、双数据源一致性 ----------
+  console.log('\n[5] localdb：persona 存取与导出');
 
   store.clear();
   const created = await localdb.createPet({

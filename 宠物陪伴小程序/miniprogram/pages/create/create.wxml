@@ -102,7 +102,7 @@
         <view class="mode-title">长期保存模式</view>
         <view class="tag" wx:if="{{mode === 'persistent'}}">已选</view>
       </view>
-      <view class="sub">照片和宠物形象会一直保存，用于陪伴和社区展示；可随时在“我的”里撤回并发起删除。</view>
+      <view class="sub">照片和宠物形象会一直保存，用于陪伴空间展示；可随时在“我的”里撤回并发起删除。</view>
     </view>
 
     <view class="summary sub">

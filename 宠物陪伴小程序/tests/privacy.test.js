@@ -61,57 +61,37 @@ const moments = require(path.join(ROOT, 'miniprogram/utils/moments'));
   // ---------- 二、导出 ----------
   console.log('\n[2] 导出我的数据');
   await localdb.updatePet({ photo: 'tmp://c.jpg', storageMode: 'persistent' });
-  await localdb.sendChat('今天加班到十点');
-  await localdb.sendChat('它今天有没有想我');
-  const myPost = await localdb.publishPost({ content: '带它去晒太阳', images: [] });
-  await localdb.addComment('demo-p1', '好可爱呀');
-  await localdb.toggleLike('demo-p1', true);
   await localdb.generateLetter({ ownerTitle: '妈妈', stats: {} });
 
   const exp = await localdb.exportAll();
   ok('2.1 导出标记来源为本地', exp.scope === 'local');
-  ok('2.2 聊天计数正确（2 轮 = 4 条）', exp.counts.messages === 4, exp.counts.messages);
-  ok('2.3 动态只含我发布的，不含示例动态', exp.counts.posts === 1 && exp.posts[0].content === '带它去晒太阳');
-  ok('2.4 评论计数正确', exp.counts.comments === 1);
-  ok('2.5 点赞计数正确', exp.counts.likes === 1);
-  ok('2.6 信计数正确', exp.counts.letters === 1);
-  ok('2.7 有照片时素材 1 条', exp.counts.assets === 1 && exp.assets[0].status === 'active');
-  ok('2.8 档案字段齐全', exp.pet && exp.pet.name === '小毛球' && exp.pet.hasPhoto === true);
-  ok('2.9 聊天带角色标记', exp.messages[0].role === 'user' && exp.messages[1].role === 'pet');
-  ok('2.10 导出不含 openid 等内部标识', JSON.stringify(exp).indexOf('openid') === -1);
+  ok('2.2 信计数正确', exp.counts.letters === 1);
+  ok('2.3 有照片时素材 1 条', exp.counts.assets === 1 && exp.assets[0].status === 'active');
+  ok('2.4 档案字段齐全', exp.pet && exp.pet.name === '小毛球' && exp.pet.hasPhoto === true);
+  ok('2.5 导出不含 openid 等内部标识', JSON.stringify(exp).indexOf('openid') === -1);
 
   // ---------- 三、清空全部数据 ----------
   console.log('\n[3] 清空全部数据');
   moments.bump('feed');
   moments.bump('touch');
-  const beforePosts = (await localdb.listMyPosts()).length;
-  ok('3.1 清空前有我的动态', beforePosts === 1);
 
   const purged = await localdb.purgeAll();
-  ok('3.2 汇总数量与实际一致', purged.summary.posts === 1 && purged.summary.messages === 4 &&
-    purged.summary.comments === 1 && purged.summary.likes === 1 && purged.summary.letters === 1,
+  ok('3.1 汇总数量与实际一致', purged.summary.pets === 1 && purged.summary.letters === 1,
     JSON.stringify(purged.summary));
-  ok('3.3 宠物档案已删除', (await localdb.getPet()) === null);
-  ok('3.4 聊天记录已删除', (await localdb.getChatHistory()).length === 0);
-  ok('3.5 我的动态已删除', (await localdb.listMyPosts()).length === 0);
-  ok('3.6 信已删除', (await localdb.getLetter()).letter === null);
-  ok('3.7 互动统计已清空', !store.has('pet_moments'));
+  ok('3.2 宠物档案已删除', (await localdb.getPet()) === null);
+  ok('3.3 信已删除', (await localdb.getLetter()).letter === null);
+  ok('3.4 互动统计已清空', !store.has('pet_moments'));
 
   const exp2 = await localdb.exportAll();
-  ok('3.8 清空后导出全部为 0',
-    exp2.counts.messages === 0 && exp2.counts.posts === 0 && exp2.counts.letters === 0 && exp2.pet === null);
+  ok('3.5 清空后导出全部为 0', exp2.counts.letters === 0 && exp2.pet === null);
 
-  // ---------- 四、删档案 vs 清空全部 ----------
-  console.log('\n[4] 两种删除的差别');
+  // ---------- 四、删档案 ----------
+  console.log('\n[4] 删除宠物档案');
   await localdb.createPet({ name: '豆豆', personality: 'loyal', storageMode: 'private' });
-  await localdb.publishPost({ content: '这条要保留', images: [] });
+  await localdb.generateLetter({ ownerTitle: '', stats: {} });
   await localdb.deletePet();
-  const afterDelPet = await localdb.listMyPosts();
-  ok('4.1 删档案保留社区动态', afterDelPet.length === 1, afterDelPet.length);
-  ok('4.2 删档案清掉宠物', (await localdb.getPet()) === null);
-  await localdb.purgeAll();
-  ok('4.3 清空全部才删掉社区动态', (await localdb.listMyPosts()).length === 0);
-  void myPost;
+  ok('4.1 删档案清掉宠物', (await localdb.getPet()) === null);
+  ok('4.2 删档案同时清掉信', (await localdb.getLetter()).letter === null);
 
   // ---------- 五、隐私授权 ----------
   console.log('\n[5] 隐私授权');
@@ -154,8 +134,7 @@ const moments = require(path.join(ROOT, 'miniprogram/utils/moments'));
     name: '团团', personality: 'lively', type: 'dog',
     ownerName: '爹地', photo: 'tmp://d.jpg', storageMode: 'persistent'
   });
-  await localdb.sendChat('陪我玩一会儿');
-  await localdb.publishPost({ content: '今天学会了握手', images: [] });
+  await localdb.generateLetter({ ownerTitle: '爹地', stats: {} });
 
   let pageOpts = null;
   global.Page = (o) => { pageOpts = o; };
@@ -167,36 +146,31 @@ const moments = require(path.join(ROOT, 'miniprogram/utils/moments'));
 
   await inst.load();
   ok('6.1 加载无错误', inst.data.error === '');
-  ok('6.2 六个分区齐全', inst.data.sections.length === 6, inst.data.sections.length);
-  ok('6.3 概览有六项计数', inst.data.counts.length === 6);
+  ok('6.2 三个分区齐全', inst.data.sections.length === 3, inst.data.sections.length);
+  ok('6.3 概览有两项计数', inst.data.counts.length === 2);
   ok('6.4 档案分区显示名字', inst.data.sections[0].lines.some((l) => l.text.indexOf('团团') >= 0));
-  ok('6.5 动态分区显示内容', inst.data.sections[2].lines.some((l) => l.text.indexOf('握手') >= 0));
-  ok('6.6 行数据带唯一 key', inst.data.sections.every((s) => s.lines.every((l) => !!l.k)));
-  ok('6.7 标注数据来源为本机', inst.data.scopeText === '本机数据');
+  ok('6.5 行数据带唯一 key', inst.data.sections.every((s) => s.lines.every((l) => !!l.k)));
+  ok('6.6 标注数据来源为本机', inst.data.scopeText === '本机数据');
 
   inst.copyAll();
   await new Promise((r) => setTimeout(r, 10));
-  ok('6.8 复制文本含分区标题', clip.indexOf('【宠物档案】') >= 0 && clip.indexOf('【我的数据') < 0);
-  ok('6.9 复制文本含宠物名与动态', clip.indexOf('团团') >= 0 && clip.indexOf('握手') >= 0);
-  ok('6.10 复制后的提示语出现', toastLog.indexOf('已复制') >= 0);
+  ok('6.7 复制文本含分区标题', clip.indexOf('【宠物档案】') >= 0 && clip.indexOf('【我的数据') < 0);
+  ok('6.8 复制文本含宠物名', clip.indexOf('团团') >= 0);
+  ok('6.9 复制后的提示语出现', toastLog.indexOf('已复制') >= 0);
 
   // ---------- 七、云端源码静态校验 ----------
   console.log('\n[7] 云端源码关键约束');
   const cleanupSrc = fs.readFileSync(path.join(ROOT, 'cloudfunctions/cleanup/index.js'), 'utf8');
   ok('7.1 清理器纳入 replaced 状态', /CLEANABLE\s*=\s*\[[^\]]*'replaced'/.test(cleanupSrc));
   ok('7.2 清理器仍按 expired 过滤', /expiresAt:\s*_\.lt\(now\)/.test(cleanupSrc));
-  ok('7.3 聊天清理有分页循环', /MAX_ROUNDS/.test(cleanupSrc));
 
   const accountSrc = fs.readFileSync(path.join(ROOT, 'cloudfunctions/account/index.js'), 'utf8');
-  ok('7.4 account 暴露三个动作', /case 'removePhoto'/.test(accountSrc) &&
+  ok('7.3 account 暴露三个动作', /case 'removePhoto'/.test(accountSrc) &&
     /case 'purge'/.test(accountSrc) && /case 'export'/.test(accountSrc));
-  ok('7.5 purge 删除社区动态并删文件', /collection\('posts'\)/.test(accountSrc) && /deleteFile/.test(accountSrc));
-  ok('7.6 计数器不会减成负数', /Math\.max\(0,/.test(accountSrc));
-  ok('7.7 导出不返回 openid', accountSrc.indexOf('_openid: openid') === -1 || true);
 
   const petSrc = fs.readFileSync(path.join(ROOT, 'cloudfunctions/pet/index.js'), 'utf8');
-  ok('7.8 换照片把旧素材标记为 replaced', /status: 'replaced'/.test(petSrc));
-  ok('7.9 删档案同时清信', /collection\('letters'\)/.test(petSrc));
+  ok('7.4 换照片把旧素材标记为 replaced', /status: 'replaced'/.test(petSrc));
+  ok('7.5 删档案同时清信', /collection\('letters'\)/.test(petSrc));
 
   console.log('\n通过 ' + pass + ' 项，失败 ' + fail + ' 项');
   process.exit(fail ? 1 : 0);

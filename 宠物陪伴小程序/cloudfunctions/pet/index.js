@@ -95,7 +95,6 @@ async function createPet(openid, p) {
   if (old) {
     await removeAssetsOfPet(openid, old);
     await db.collection('pets').doc(old._id).remove();
-    await db.collection('messages').where({ _openid: openid }).remove().catch(() => {});
     // 旧宠物的信也不能留：换一只宠物后不该还读得到上一只写的信
     await db.collection('letters').where({ _openid: openid }).remove().catch(() => {});
   }
@@ -236,7 +235,6 @@ async function deletePet(openid) {
   if (!pet) return ok({ deleted: true });
   await removeAssetsOfPet(openid, pet);
   await db.collection('pets').doc(pet._id).remove();
-  await db.collection('messages').where({ _openid: openid }).remove().catch(() => {});
   // 删除全部数据：信也要一起删干净
   await db.collection('letters').where({ _openid: openid }).remove().catch(() => {});
   return ok({ deleted: true });

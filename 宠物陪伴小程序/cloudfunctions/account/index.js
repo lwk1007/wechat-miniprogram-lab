@@ -4,9 +4,7 @@ const db = cloud.database();
 const _ = db.command;
 
 // 数据管理云函数：立即删除照片 / 清空全部数据 / 导出我的数据
-// 这三个能力对应个人信息保护法里的「删除权」与「查阅、复制权」，
-// 与 pet 的 delete（删档案、保留社区内容）区别开：
-//   删档案 = 只删私密部分；purge = 连主动公开的社区内容一起删干净
+// 这三个能力对应个人信息保护法里的「删除权」与「查阅、复制权」
 const PAGE = 100;
 const MAX_ROUNDS = 10;
 
@@ -29,15 +27,6 @@ async function fetchAll(makeQuery) {
     if (r.data.length < PAGE) break;
   }
   return out;
-}
-
-// 计数器只减不增，且不允许出现负数（inc 会减成负值，所以先读后写）
-async function decField(collection, docId, field, n) {
-  if (!n) return;
-  const r = await db.collection(collection).doc(docId).get().catch(() => null);
-  if (!r || !r.data) return;
-  const next = Math.max(0, (r.data[field] || 0) - n);
-  await db.collection(collection).doc(docId).update({ data: { [field]: next } }).catch(() => {});
 }
 
 // 删除用户名下全部宠物素材（含换下来的旧照片），文件与记录一起清
@@ -79,64 +68,20 @@ async function removePhoto(openid) {
 // ---------- 清空全部数据 ----------
 async function purge(openid) {
   const summary = {
-    pets: 0, messages: 0, letters: 0, posts: 0,
-    comments: 0, likes: 0, reports: 0, assetRecords: 0, files: 0
+    pets: 0, letters: 0, assetRecords: 0, files: 0
   };
 
-  // 1. 我发布的动态：图片文件 + 该动态下的评论/点赞 + 动态本身
-  const posts = await fetchAll(() => db.collection('posts').where({ _openid: openid }));
-  for (const p of posts) {
-    const fileList = (p.images || []).filter(Boolean);
-    if (fileList.length) {
-      await cloud.deleteFile({ fileList }).catch(() => {});
-      summary.files += fileList.length;
-    }
-    await db.collection('comments').where({ postId: p._id }).remove().catch(() => {});
-    await db.collection('likes').where({ postId: p._id }).remove().catch(() => {});
-    await db.collection('posts').doc(p._id).remove().catch(() => {});
-    summary.posts++;
-  }
-
-  // 2. 我在别人动态下的评论（按动态聚合扣减计数）
-  const myComments = await fetchAll(() => db.collection('comments').where({ _openid: openid }));
-  const cMap = {};
-  myComments.forEach((c) => { cMap[c.postId] = (cMap[c.postId] || 0) + 1; });
-  await db.collection('comments').where({ _openid: openid }).remove().catch(() => {});
-  for (const pid of Object.keys(cMap)) {
-    await decField('posts', pid, 'commentCount', cMap[pid]);
-  }
-  summary.comments = myComments.length;
-
-  // 3. 我点过的赞（计数同样要回收）
-  const myLikes = await fetchAll(() => db.collection('likes').where({ _openid: openid }));
-  const lMap = {};
-  myLikes.forEach((l) => { lMap[l.postId] = (lMap[l.postId] || 0) + 1; });
-  await db.collection('likes').where({ _openid: openid }).remove().catch(() => {});
-  for (const pid of Object.keys(lMap)) {
-    await decField('posts', pid, 'likeCount', lMap[pid]);
-  }
-  summary.likes = myLikes.length;
-
-  // 4. 我提过的举报记录
-  const reports = await fetchAll(() => db.collection('reports').where({ _openid: openid }));
-  await db.collection('reports').where({ _openid: openid }).remove().catch(() => {});
-  summary.reports = reports.length;
-
-  // 5. 宠物素材（文件 + 记录）
+  // 1. 宠物素材（文件 + 记录）
   const assets = await purgePetAssets(openid);
   summary.assetRecords = assets.records;
   summary.files += assets.files;
 
-  // 6. 宠物档案 / 聊天 / 信
+  // 2. 宠物档案 / 信
   const pets = await fetchAll(() => db.collection('pets').where({ _openid: openid }));
   for (const p of pets) {
     await db.collection('pets').doc(p._id).remove().catch(() => {});
   }
   summary.pets = pets.length;
-
-  const msg = await fetchAll(() => db.collection('messages').where({ _openid: openid }));
-  await db.collection('messages').where({ _openid: openid }).remove().catch(() => {});
-  summary.messages = msg.length;
 
   const letters = await fetchAll(() => db.collection('letters').where({ _openid: openid }));
   await db.collection('letters').where({ _openid: openid }).remove().catch(() => {});
@@ -147,12 +92,8 @@ async function purge(openid) {
 
 // ---------- 导出我的数据 ----------
 async function exportAll(openid) {
-  const [pet, msgs, posts, comments, likes, letters, assets] = await Promise.all([
+  const [pet, letters, assets] = await Promise.all([
     getPetDoc(openid),
-    fetchAll(() => db.collection('messages').where({ _openid: openid }).orderBy('createdAt', 'asc')),
-    fetchAll(() => db.collection('posts').where({ _openid: openid }).orderBy('createdAt', 'desc')),
-    fetchAll(() => db.collection('comments').where({ _openid: openid }).orderBy('createdAt', 'desc')),
-    fetchAll(() => db.collection('likes').where({ _openid: openid })),
     fetchAll(() => db.collection('letters').where({ _openid: openid }).orderBy('createdAt', 'desc')),
     fetchAll(() => db.collection('mediaAssets').where({ _openid: openid, purpose: 'pet' }))
   ]);
@@ -171,19 +112,9 @@ async function exportAll(openid) {
       createdAt: pet.createdAt
     } : null,
     counts: {
-      messages: msgs.length,
-      posts: posts.length,
-      comments: comments.length,
-      likes: likes.length,
       letters: letters.length,
       assets: assets.length
     },
-    messages: msgs.map((m) => ({ role: m.role, content: m.content, createdAt: m.createdAt })),
-    posts: posts.map((p) => ({
-      content: p.content, images: (p.images || []).length,
-      likeCount: p.likeCount || 0, commentCount: p.commentCount || 0, createdAt: p.createdAt
-    })),
-    comments: comments.map((c) => ({ postId: c.postId, content: c.content, createdAt: c.createdAt })),
     letters: letters.map((l) => ({ content: l.content, createdAt: l.createdAt })),
     assets: assets.map((a) => ({
       purpose: a.purpose, status: a.status,

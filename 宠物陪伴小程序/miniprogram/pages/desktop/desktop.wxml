@@ -133,16 +133,14 @@
 
   <!-- 底部 Dock：原来是四个装饰格，现在换成真功能，不额外占地方也好发现 -->
   <view class="dock">
-    <view class="dock-item" data-type="chat" catchtap="onDockTap">💬</view>
+    <view class="dock-item" data-type="letter" catchtap="onDockTap">💌</view>
     <view class="dock-item {{lifted ? 'dim' : ''}}" data-type="feed" catchtap="onDockTap">🍖</view>
     <view class="dock-item {{lifted ? 'dim' : ''}}" data-type="play" catchtap="onDockTap">🎾</view>
     <view class="dock-item" data-type="home" catchtap="onDockTap">🐾</view>
   </view>
 
   <!-- 引导 -->
-  <view wx:if="{{showGuide && !loading && pet}}" class="guide">点点它 · 长按能拎起来拖走 · 底部可喂饭陪玩 · 双击聊两句</view>
-
-  <view wx:if="{{isDemo}}" class="demo-tag">演示模式</view>
+  <view wx:if="{{showGuide && !loading && pet}}" class="guide">点点它 · 长按能拎起来拖走 · 底部可喂饭陪玩 · 双击读信</view>
 
   <!-- 日历弹层：一起生活的第 N 天。
        数字、进度百分比、日期文案都在 js 里算好，wxml 只负责显示 -->

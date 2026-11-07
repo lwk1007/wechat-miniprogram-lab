@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "和它聊聊",
-  "usingComponents": {
-    "privacy-popup": "/components/privacy-popup/privacy-popup"
-  }
-}

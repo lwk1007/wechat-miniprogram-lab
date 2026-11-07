@@ -9,13 +9,11 @@
 //   1. BASE：4 个基底性格各自给出「被摸/喂食/玩耍/被拎起」四个场景的具体反应
 //   2. persona：用户可覆盖任意一项，没填的用基底兜底
 //
-// 同一份数据被三处消费：
-//   - chat 页对话（拼进 prompt，云端另有一份 persona.js 只做 prompt 拼装）
+// 同一份数据被两处消费：
 //   - companion / desktop 互动飘字（喂食、摸摸、玩耍、提溜）
 //   - pet-edit 展示层（summary 一行摘要）
 //
 // 注意：这里的文案池只在小程序端用，云函数不引用（云函数是独立部署包）。
-// 若新增场景键，需同步 cloudfunctions/chat/persona.js 的 SCENE_TEXT。
 
 const SCENES = ['touch', 'feed', 'play', 'lift'];
 const SCENE_LABEL = {

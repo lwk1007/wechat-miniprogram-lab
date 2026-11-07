@@ -19,15 +19,9 @@ const ROOT = path.resolve(__dirname, '..');
 
 const SHARED = [
   {
-    name: '对话大脑',
-    from: 'miniprogram/utils/chat-brain.js',
-    to: ['cloudfunctions/chat/chat-brain.js']
-  },
-  {
     name: '称呼解析',
     from: 'miniprogram/utils/title.js',
     to: [
-      'cloudfunctions/chat/title.js',
       'cloudfunctions/letter/title.js',
       'cloudfunctions/pet/title.js'
     ]
