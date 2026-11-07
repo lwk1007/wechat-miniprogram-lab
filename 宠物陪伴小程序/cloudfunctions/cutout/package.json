@@ -1,0 +1,10 @@
+{
+  "name": "cutout",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "onnxruntime-node": "1.18.0",
+    "jimp": "0.16.13"
+  }
+}

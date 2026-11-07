@@ -29,6 +29,8 @@ Page({
     newPhotoCut: '',
     newPhotoCutKind: '',
     useCut: false,
+    // 非白底（本地去不干净）时置真：保存时走云端语义抠图
+    needCloudCut: false,
     photoCutting: false,
     cutHint: '',
     name: '',
@@ -139,7 +141,7 @@ Page({
   startCut(src) {
     const token = (this._cutToken || 0) + 1;
     this._cutToken = token;
-    this.setData({ photoCutting: true, newPhotoCut: '', newPhotoCutKind: '', useCut: false, cutHint: '' });
+    this.setData({ photoCutting: true, newPhotoCut: '', newPhotoCutKind: '', useCut: false, needCloudCut: false, cutHint: '' });
     const task = cutout.cut(src).then((res) => {
       if (token !== this._cutToken) return;
       this.setData({
@@ -147,11 +149,17 @@ Page({
         newPhotoCut: res.path,
         newPhotoCutKind: res.kind,
         useCut: true,
+        needCloudCut: false,
         cutHint: cutout.describe(res)
       });
     }).catch((err) => {
       if (token !== this._cutToken) return;
-      this.setData({ photoCutting: false, cutHint: this.explainCut(err) });
+      const needCloud = err && err.code === 'not-white' && !api.isDemo();
+      this.setData({
+        photoCutting: false,
+        needCloudCut: needCloud,
+        cutHint: needCloud ? '背景较复杂，保存时会自动智能抠图' : this.explainCut(err)
+      });
     });
     this._cutTask = task;
     return task;
@@ -262,6 +270,13 @@ Page({
           patch.newPhotoFileID = fileID;
           if (cut) {
             patch.newPhotoCutFileID = await cloudSvc.upload('pet/' + Date.now() + '-cut.png', cut);
+          } else if (this.data.needCloudCut) {
+            try {
+              const r = await api.cutoutPhoto(fileID);
+              patch.newPhotoCutFileID = (r && r.fileID) || '';
+            } catch (e) {
+              patch.newPhotoCutFileID = '';
+            }
           }
         }
       }

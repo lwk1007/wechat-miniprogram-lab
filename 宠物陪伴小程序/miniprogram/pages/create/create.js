@@ -27,6 +27,8 @@ Page({
     photoCut: '',
     photoCutKind: '',
     useCut: false,
+    // 非白底（本地去不干净）时置真：提交时走云端语义抠图
+    needCloudCut: false,
     photoCutting: false,
     cutHint: '',
     name: '',
@@ -91,7 +93,7 @@ Page({
     // 用户连选两次时，先算完的那张不能覆盖后选的
     const token = (this._cutToken || 0) + 1;
     this._cutToken = token;
-    this.setData({ photoCutting: true, photoCut: '', photoCutKind: '', useCut: false, cutHint: '' });
+    this.setData({ photoCutting: true, photoCut: '', photoCutKind: '', useCut: false, needCloudCut: false, cutHint: '' });
     const task = cutout.cut(src).then((res) => {
       if (token !== this._cutToken) return;
       this.setData({
@@ -99,11 +101,18 @@ Page({
         photoCut: res.path,
         photoCutKind: res.kind,
         useCut: true,
+        needCloudCut: false,
         cutHint: cutout.describe(res)
       });
     }).catch((err) => {
       if (token !== this._cutToken) return;
-      this.setData({ photoCutting: false, cutHint: this.explainCut(err) });
+      // 背景不是纯白 = 本地去不干净。云模式下转交云端语义抠图，演示模式按原图用
+      const needCloud = err && err.code === 'not-white' && !api.isDemo();
+      this.setData({
+        photoCutting: false,
+        needCloudCut: needCloud,
+        cutHint: needCloud ? '背景较复杂，提交时会自动智能抠图' : this.explainCut(err)
+      });
     });
     this._cutTask = task;
     return task;
@@ -207,6 +216,15 @@ Page({
         if (cut) {
           this.setData({ submitText: '正在上传形象…' });
           cutFileID = await cloudSvc.upload('pet/' + Date.now() + '-cut.png', cut);
+        } else if (this.data.needCloudCut) {
+          // 本地去白底没吃掉的复杂背景，交云函数语义抠图；失败降级用原图，不挡创建
+          this.setData({ submitText: '正在智能抠图…' });
+          try {
+            const r = await api.cutoutPhoto(fileID);
+            cutFileID = (r && r.fileID) || '';
+          } catch (e) {
+            cutFileID = '';
+          }
         }
         this.setData({ submitText: '正在创建档案…' });
         await api.createPet(Object.assign({}, base, { photoFileID: fileID, photoCutFileID: cutFileID }));

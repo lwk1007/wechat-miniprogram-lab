@@ -57,5 +57,14 @@ module.exports = {
   },
   generateLetter(payload) {
     return useCloud() ? cloudSvc.call('letter', 'generate', payload || {}) : local.generateLetter(payload || {});
+  },
+
+  // ---------- 语义抠图（云端）----------
+  // 传原图 fileID，返回透明 PNG fileID。演示模式没有云端，reject。
+  // 失败由调用方降级成「按原图用」，不挡创建/编辑流程。
+  cutoutPhoto(fileID) {
+    return useCloud()
+      ? cloudSvc.call('cutout', 'remove', { fileID })
+      : Promise.reject(new Error('演示模式不支持云端抠图'));
   }
 };
