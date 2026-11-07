@@ -5,7 +5,7 @@
   right: 0;
   bottom: 0;
   z-index: 999;
-  background: rgba(38, 49, 43, 0.45);
+  background: rgba(56, 46, 36, 0.45);
   display: flex;
   align-items: flex-end;
 }
@@ -21,24 +21,24 @@
 .privacy-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #26312B;
+  color: #3E3528;
   margin-bottom: 20rpx;
 }
 
 .privacy-body {
   font-size: 28rpx;
   line-height: 1.7;
-  color: #4A544E;
+  color: #5A4B3A;
 }
 
 .privacy-sub {
   margin-top: 12rpx;
   font-size: 26rpx;
-  color: #7B847F;
+  color: #8A7D68;
 }
 
 .privacy-link {
-  color: #6FA58A;
+  color: #7D8F6B;
 }
 
 .privacy-actions {
@@ -63,13 +63,13 @@
 }
 
 .privacy-ghost {
-  color: #7B847F;
-  background: #F2F5F3;
+  color: #8A7D68;
+  background: #F1EBDE;
   margin-right: 20rpx;
 }
 
 .privacy-primary {
-  background: #6FA58A;
+  background: #7D8F6B;
   color: #FFFFFF;
   font-weight: 500;
 }

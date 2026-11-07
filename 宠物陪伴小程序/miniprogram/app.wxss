@@ -1,25 +1,47 @@
-/* 全局样式与设计规范 */
+/* ==================================================================
+   全局样式与设计规范 —— 「温暖纸张 · 纪念烛光」主题
+   基调：暖米白纸、陶土/苔绿/烛金、衬线标题、暖色柔和阴影
+   ================================================================== */
 page {
-  --bg: #F7F8FA;
-  --card: #FFFFFF;
-  --primary: #6FA58A;
-  --primary-light: #EAF3EE;
-  --text: #26312B;
-  --sub: #7B847F;
-  --line: #E9EEEB;
-  --danger: #D97A6C;
+  /* 暖米白纸底，叠一层极淡的纸纹颗粒（不引入外部资源） */
+  --bg: #F7F1E6;
+  --bg-deep: #F0E7D4;
+  --card: #FFFCF5;
+  /* 主色：暖苔绿，延续「陪伴/生命」的绿色基因，但加了暖调 */
+  --primary: #7D8F6B;
+  --primary-deep: #5F7052;
+  --primary-light: #EDF1E4;
+  /* 陶土棕：纪念/仪式的强调色 */
+  --accent: #B08A5E;
+  --accent-light: #F3E6D2;
+  /* 烛金：点灯、烛光、仪式的高光 */
+  --gold: #C99B4E;
+  --gold-light: #F7E8C4;
+  /* 文字：暖深棕，避免冷黑 */
+  --text: #3E3528;
+  --sub: #8A7D68;
+  --line: #E9DFCA;
+  --danger: #C06F5C;
+  --danger-light: #F7E7E1;
+
   background: var(--bg);
   color: var(--text);
   font-size: 28rpx;
   line-height: 1.6;
 }
 
+/* 衬线标题：数字/标题带「信纸」的书写感 */
+.h1, .h2, .serif-title {
+  font-family: Georgia, 'Times New Roman', 'Songti SC', 'STSong', 'SimSun', serif;
+}
+
 /* 8 点间距体系：基础单位 8rpx 的倍数 */
 .card {
   background: var(--card);
-  border-radius: 24rpx;
+  border-radius: 20rpx;
   padding: 32rpx;
   margin: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(84, 64, 40, 0.05);
 }
 
 .h1 { font-size: 44rpx; font-weight: 600; }
@@ -30,20 +52,21 @@ page {
 .btn-primary {
   background: var(--primary);
   color: #fff;
-  border-radius: 44rpx;
+  border-radius: 22rpx;
   height: 88rpx;
   line-height: 88rpx;
   font-size: 30rpx;
   text-align: center;
   font-weight: 500;
+  box-shadow: 0 6rpx 18rpx rgba(95, 112, 82, 0.22);
 }
-.btn-primary.disabled { opacity: 0.5; }
+.btn-primary.disabled { opacity: 0.5; box-shadow: none; }
 .btn-primary.btn-loading { opacity: 0.7; }
 
 .btn-ghost {
   background: var(--primary-light);
-  color: var(--primary);
-  border-radius: 44rpx;
+  color: var(--primary-deep);
+  border-radius: 22rpx;
   height: 88rpx;
   line-height: 88rpx;
   font-size: 30rpx;
@@ -52,9 +75,9 @@ page {
 }
 
 .btn-danger-ghost {
-  background: #FBEEEC;
+  background: var(--danger-light);
   color: var(--danger);
-  border-radius: 44rpx;
+  border-radius: 22rpx;
   height: 88rpx;
   line-height: 88rpx;
   font-size: 30rpx;
@@ -75,7 +98,7 @@ page {
 .tag {
   display: inline-block;
   font-size: 20rpx;
-  color: var(--primary);
+  color: var(--primary-deep);
   background: var(--primary-light);
   border-radius: 8rpx;
   padding: 2rpx 12rpx;
@@ -85,8 +108,8 @@ page {
 .demo-banner {
   margin: 24rpx;
   padding: 16rpx 24rpx;
-  background: #FDF6E9;
-  color: #A2834B;
+  background: var(--gold-light);
+  color: #8A6A33;
   border-radius: 16rpx;
   font-size: 24rpx;
 }
@@ -96,8 +119,67 @@ page {
 .form-item { margin-bottom: 32rpx; }
 .form-label { font-size: 26rpx; color: var(--sub); margin-bottom: 12rpx; }
 .form-input {
-  background: var(--bg);
-  border-radius: 16rpx;
+  background: var(--bg-deep);
+  border-radius: 14rpx;
   padding: 20rpx 24rpx;
   font-size: 28rpx;
+}
+
+/* ==================================================================
+   星空夜色头图：纪念类页面顶部的一段夜空氛围
+   只在暖米纸上贴一张「夜色明信片」，不把整页压黑，内容照常阅读
+   ================================================================== */
+.night-banner {
+  position: relative;
+  height: 300rpx;
+  margin: 24rpx 24rpx 0;
+  border-radius: 20rpx;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1C1826 0%, #282234 62%, #332B3E 100%);
+}
+.night-banner .nb-galaxy {
+  position: absolute;
+  left: -10%; right: -10%; top: 28%;
+  height: 100rpx;
+  background: linear-gradient(90deg,
+    rgba(210, 200, 235, 0) 0%,
+    rgba(222, 212, 240, 0.10) 28%,
+    rgba(234, 226, 246, 0.14) 50%,
+    rgba(222, 212, 240, 0.10) 72%,
+    rgba(210, 200, 235, 0) 100%);
+  transform: rotate(-16deg);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.night-banner .nb-moon {
+  position: absolute;
+  right: 56rpx; top: 44rpx;
+  width: 72rpx; height: 72rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #FFFDF3 0%, #F2F4E6 72%, #E3E8D7 100%);
+  box-shadow: 0 0 40rpx rgba(226, 236, 214, 0.4);
+}
+.night-banner .nb-star {
+  position: absolute;
+  width: 5rpx; height: 5rpx;
+  border-radius: 50%;
+  background: #FFF8E6;
+  box-shadow: 0 0 8rpx rgba(255, 244, 220, 0.6);
+  animation: nb-twinkle 3s ease-in-out infinite;
+}
+.night-banner .nb-star.lg {
+  width: 9rpx; height: 9rpx;
+  background: #F7E7B2;
+  box-shadow: 0 0 14rpx rgba(247, 231, 178, 0.8);
+}
+.night-banner .nb-hill {
+  position: absolute;
+  left: -40rpx; right: -40rpx; bottom: -36rpx;
+  height: 116rpx;
+  background: #17131F;
+  border-radius: 50% 50% 0 0;
+}
+@keyframes nb-twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
 }

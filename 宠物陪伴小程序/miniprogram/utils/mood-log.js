@@ -17,8 +17,8 @@ const KEY = 'pet_moods';
 
 // 心情标签：贴合「思念宠物」场景，而非通用 mood
 const MOODS = {
-  missing:  { label: '想念', face: '🥺', color: '#A5BFD9' },
-  sad:      { label: '难过', face: '😢', color: '#9BA8B8' },
+  missing:  { label: '想念', face: '🥺', color: '#A9C3D4' },
+  sad:      { label: '难过', face: '😢', color: '#A29A8B' },
   calm:     { label: '平静', face: '😌', color: '#A8C9A8' },
   happy:    { label: '开心', face: '😊', color: '#E8C87D' },
   grateful: { label: '感恩', face: '💗', color: '#DEA0A0' }

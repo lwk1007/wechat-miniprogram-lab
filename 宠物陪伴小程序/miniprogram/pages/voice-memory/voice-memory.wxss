@@ -45,20 +45,20 @@
 .rec-timer {
   font-size: 40rpx;
   font-weight: 600;
-  color: #D97A6C;
+  color: #C06F5C;
   font-variant-numeric: tabular-nums;
 }
 .rec-meter {
   margin: 24rpx auto 0;
   width: 80%;
   height: 12rpx;
-  background: #EFEFF2;
+  background: #F1EBDE;
   border-radius: 999rpx;
   overflow: hidden;
 }
 .rec-meter-fill {
   height: 100%;
-  background: linear-gradient(90deg, #E8A87C 0%, #D97A6C 100%);
+  background: linear-gradient(90deg, #E8A87C 0%, #C06F5C 100%);
   border-radius: 999rpx;
   transition: width 0.12s linear;
 }
@@ -68,7 +68,7 @@
   padding: 20rpx 0;
   font-size: 28rpx;
   color: #fff;
-  background: #D97A6C;
+  background: #C06F5C;
   border-radius: 999rpx;
 }
 .rec-stop:active { opacity: 0.8; }
@@ -82,7 +82,7 @@
 .edit-input {
   padding: 20rpx 24rpx;
   font-size: 28rpx;
-  background: #F7F8FA;
+  background: #F7F1E6;
   border-radius: 16rpx;
 }
 .mood-row {
@@ -95,7 +95,7 @@
   padding: 12rpx 24rpx;
   font-size: 24rpx;
   color: var(--text);
-  background: #F2F3F5;
+  background: #F1EBDE;
   border-radius: 999rpx;
 }
 .mood-chip.on {
@@ -109,7 +109,7 @@
   min-height: 140rpx;
   padding: 20rpx 24rpx;
   font-size: 28rpx;
-  background: #F7F8FA;
+  background: #F7F1E6;
   border-radius: 16rpx;
 }
 .edit-actions {
@@ -133,13 +133,13 @@
   text-align: center;
   font-size: 30rpx;
   color: #fff;
-  background: linear-gradient(135deg, #A8C9A8 0%, #6FA58A 100%);
+  background: linear-gradient(135deg, #A8C9A8 0%, #7D8F6B 100%);
   border-radius: 50%;
   flex-shrink: 0;
 }
 .voice-play:active { opacity: 0.8; }
 .voice-play.on {
-  background: linear-gradient(135deg, #E8A87C 0%, #D97A6C 100%);
+  background: linear-gradient(135deg, #E8A87C 0%, #C06F5C 100%);
 }
 .voice-body { flex: 1; margin-left: 20rpx; overflow: hidden; }
 .voice-title {
@@ -162,7 +162,7 @@
 .voice-del {
   margin-left: 16rpx;
   font-size: 24rpx;
-  color: #C9D2CC;
+  color: #C9BFA9;
   flex-shrink: 0;
 }
-.voice-del:active { color: #D97A6C; }
+.voice-del:active { color: #C06F5C; }

@@ -31,14 +31,14 @@ const ACTION_ANIM = { touch: 'anim-happy', feed: 'anim-eat', play: 'anim-bounce'
 
 // col：图标所在列（0~3），宠物走过该列下方时这一列会抖一下
 const DESK_APPS = [
-  { name: '相册', emoji: '🖼️', bg: '#F2F5F8', col: 0 },
-  { name: '天气', emoji: '⛅', bg: '#EAF1FA', col: 1 },
-  { name: '音乐', emoji: '🎵', bg: '#FBEDEF', col: 2 },
-  { name: '备忘', emoji: '📝', bg: '#FDF6E9', col: 3 },
-  { name: '日历', emoji: '📅', bg: '#EFF6EE', col: 0 },
-  { name: '时钟', emoji: '⏰', bg: '#F3F0FA', col: 1 },
-  { name: '相机', emoji: '📷', bg: '#F0F1F3', col: 2 },
-  { name: '设置', emoji: '⚙️', bg: '#EEF2F0', col: 3 }
+  { name: '相册', emoji: '🖼️', bg: '#F2EBDD', col: 0 },
+  { name: '天气', emoji: '⛅', bg: '#EDE7D2', col: 1 },
+  { name: '音乐', emoji: '🎵', bg: '#F6E5DD', col: 2 },
+  { name: '备忘', emoji: '📝', bg: '#FBF1DE', col: 3 },
+  { name: '日历', emoji: '📅', bg: '#ECF1E2', col: 0 },
+  { name: '时钟', emoji: '⏰', bg: '#F0EBE0', col: 1 },
+  { name: '相机', emoji: '📷', bg: '#F0EBDD', col: 2 },
+  { name: '设置', emoji: '⚙️', bg: '#EDEBDE', col: 3 }
 ];
 
 // 四列图标的中心位置（占屏宽百分比）：外层 padding 40rpx，四列各占 1/4

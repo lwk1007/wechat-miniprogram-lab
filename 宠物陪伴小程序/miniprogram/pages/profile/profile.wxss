@@ -71,7 +71,7 @@
 
 .action-arrow {
   font-size: 36rpx;
-  color: #C9D2CC;
+  color: #C9BFA9;
   line-height: 1;
 }
 

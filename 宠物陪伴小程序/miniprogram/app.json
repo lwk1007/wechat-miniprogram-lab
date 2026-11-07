@@ -14,16 +14,16 @@
     "pages/data-export/data-export"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#F7F8FA",
+    "navigationBarBackgroundColor": "#F7F1E6",
     "navigationBarTitleText": "宠物陪伴",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#F7F8FA",
+    "backgroundColor": "#F7F1E6",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
-    "color": "#7B847F",
-    "selectedColor": "#6FA58A",
-    "backgroundColor": "#FFFFFF",
+    "color": "#8A7D68",
+    "selectedColor": "#5F7052",
+    "backgroundColor": "#FFFCF5",
     "borderStyle": "white",
     "list": [
       {

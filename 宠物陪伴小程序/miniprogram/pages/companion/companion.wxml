@@ -111,11 +111,12 @@
 
         <!-- 星空 -->
         <block wx:else>
+          <view class="nt-galaxy"></view>
           <view class="nt-moon"></view>
           <view
             wx:for="{{stars}}"
             wx:key="key"
-            class="nt-star"
+            class="nt-star {{item.size}}"
             style="left: {{item.left}}%; top: {{item.top}}%; animation-delay: {{item.delay}}s"
           ></view>
           <view class="nt-hill"></view>

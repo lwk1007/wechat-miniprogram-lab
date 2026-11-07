@@ -1,5 +1,21 @@
 <view class="page safe-bottom">
 
+  <!-- 星空夜色头图 -->
+  <view class="night-banner">
+    <view class="nb-galaxy"></view>
+    <view class="nb-moon"></view>
+    <view class="nb-star lg" style="left: 14%; top: 26%"></view>
+    <view class="nb-star" style="left: 26%; top: 44%"></view>
+    <view class="nb-star" style="left: 38%; top: 16%"></view>
+    <view class="nb-star lg" style="left: 50%; top: 38%"></view>
+    <view class="nb-star" style="left: 62%; top: 22%"></view>
+    <view class="nb-star" style="left: 72%; top: 50%"></view>
+    <view class="nb-star" style="left: 20%; top: 60%"></view>
+    <view class="nb-star" style="left: 44%; top: 56%"></view>
+    <view class="nb-star" style="left: 66%; top: 64%"></view>
+    <view class="nb-hill"></view>
+  </view>
+
   <!-- 说明：声音是真实存档，不是 AI 合成 -->
   <view class="intro card">
     <view class="intro-icon">🎙️</view>

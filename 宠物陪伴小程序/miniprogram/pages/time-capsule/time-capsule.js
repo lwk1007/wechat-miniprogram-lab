@@ -112,7 +112,7 @@ Page({
     wx.showModal({
       title: '删除这颗胶囊',
       content: '删除后无法恢复，确定吗？',
-      confirmColor: '#D97A6C',
+      confirmColor: '#C06F5C',
       success: (r) => {
         if (!r.confirm) return;
         timeCapsule.remove(id);

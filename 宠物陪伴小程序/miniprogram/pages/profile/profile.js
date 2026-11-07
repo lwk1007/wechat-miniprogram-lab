@@ -90,7 +90,7 @@ Page({
     wx.showModal({
       title: '删除宠物档案',
       content: '将删除宠物档案、照片素材和它写给你的信，且无法恢复。确定删除吗？',
-      confirmColor: '#D97A6C',
+      confirmColor: '#C06F5C',
       success: async (r) => {
         if (!r.confirm) return;
         try {
@@ -120,7 +120,7 @@ Page({
       title: '立即删除照片',
       content: '删除后立刻改用通用形象，照片文件不再保留。互动数据不受影响。',
       confirmText: '删除照片',
-      confirmColor: '#D97A6C',
+      confirmColor: '#C06F5C',
       success: async (r) => {
         if (!r.confirm) return;
         this.setData({ photoRemoving: true });
@@ -144,14 +144,14 @@ Page({
       title: '清空全部数据',
       content: '将删除宠物档案、照片和它写给你的信。这些内容都会从服务器移除，无法恢复。',
       confirmText: '继续',
-      confirmColor: '#D97A6C',
+      confirmColor: '#C06F5C',
       success: (r1) => {
         if (!r1.confirm) return;
         wx.showModal({
           title: '再次确认',
           content: '删除后无法恢复，也没有备份。确定要清空吗？',
           confirmText: '确定清空',
-          confirmColor: '#D97A6C',
+          confirmColor: '#C06F5C',
           success: async (r2) => {
             if (!r2.confirm) return;
             this.setData({ purging: true });
@@ -184,7 +184,7 @@ Page({
     wx.showModal({
       title: '清除本机缓存',
       content: '会清空这台设备上保存的内容（本机数据、场景偏好等）。云端数据不受影响。',
-      confirmColor: '#D97A6C',
+      confirmColor: '#C06F5C',
       success: (r) => {
         if (!r.confirm) return;
         try {

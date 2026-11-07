@@ -29,12 +29,12 @@
 .stat-num {
   font-size: 40rpx;
   font-weight: 600;
-  color: #26312B;
+  color: #3E3528;
 }
 
 .stat-label {
   font-size: 24rpx;
-  color: #7B847F;
+  color: #8A7D68;
 }
 
 .section {
@@ -54,10 +54,10 @@
 
 .line {
   font-size: 26rpx;
-  color: #4A544E;
+  color: #5A4B3A;
   line-height: 1.7;
   padding: 14rpx 0;
-  border-top: 1rpx solid #E9EEEB;
+  border-top: 1rpx solid #E9DFCA;
   white-space: pre-wrap;
   word-break: break-all;
 }

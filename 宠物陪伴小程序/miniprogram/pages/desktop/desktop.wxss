@@ -10,14 +10,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #E8F1F4;
+  background: #F2EADB;
 }
 
 /* ---------- 壁纸 ---------- */
 .wall {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
-  background: linear-gradient(180deg, #DCEBF5 0%, #E7F2EC 58%, #F0F6F0 100%);
+  background: linear-gradient(180deg, #F3E7D1 0%, #EEE8D6 58%, #EAEBDD 100%);
 }
 .sun {
   position: absolute;
@@ -41,12 +41,12 @@
 .hill-back {
   width: 1400rpx; height: 700rpx;
   left: -320rpx; bottom: -380rpx;
-  background: #DDEBE2;
+  background: #C6CCA8;
 }
 .hill-front {
   width: 1600rpx; height: 760rpx;
   right: -420rpx; bottom: -460rpx;
-  background: #D2E5D9;
+  background: #A9BC82;
   opacity: 0.85;
 }
 
@@ -63,7 +63,7 @@
   overflow: hidden;
   transition: opacity 0.9s ease;
   /* 与陪伴页的舞台夜景同一套色，两处夜景别各走一套 */
-  background: linear-gradient(180deg, #101A2E 0%, #1B2740 42%, #2A3A57 72%, #22304A 100%);
+  background: linear-gradient(180deg, #1C1826 0%, #282234 42%, #332B3E 72%, #241F2F 100%);
 }
 .veil.on { opacity: 1; }
 
@@ -76,12 +76,12 @@
 .n-hill-back {
   width: 1500rpx; height: 640rpx;
   left: -360rpx; bottom: -430rpx;
-  background: #1A2436;
+  background: #17131F;
 }
 .n-hill-front {
   width: 1700rpx; height: 680rpx;
   right: -470rpx; bottom: -510rpx;
-  background: #141D2C;
+  background: #120F18;
 }
 /* 四角轻微压暗，视线收到中间，夜景才有纵深 */
 .n-vignette {
@@ -104,14 +104,15 @@
   position: absolute;
   width: 5rpx; height: 5rpx;
   border-radius: 50%;
-  background: #F3F7FF;
+  background: #FFF8E6;
   /* 没有光晕的小白点在深底上会脏成噪点，加一圈微光才像星星 */
-  box-shadow: 0 0 10rpx rgba(214, 230, 255, 0.85);
+  box-shadow: 0 0 10rpx rgba(255, 238, 200, 0.8);
   animation: twinkle 3.2s ease-in-out infinite;
 }
 .star.lg {
   width: 9rpx; height: 9rpx;
-  box-shadow: 0 0 18rpx rgba(226, 238, 255, 0.95);
+  background: #F7E7B2;
+  box-shadow: 0 0 18rpx rgba(247, 231, 178, 0.9);
 }
 @keyframes twinkle {
   0%, 100% { opacity: 0.35; }
@@ -122,21 +123,21 @@
 .sun { transition: background 0.9s ease; z-index: 3; }
 .desk.night .sun {
   background: radial-gradient(circle at 38% 34%, #FFFDF3 0%, #F2F4E6 72%, #E3E8D7 100%);
-  box-shadow: 0 0 60rpx rgba(226, 236, 214, 0.45), 0 0 130rpx rgba(178, 200, 238, 0.16);
+  box-shadow: 0 0 60rpx rgba(226, 236, 214, 0.45), 0 0 130rpx rgba(200, 178, 130, 0.18);
 }
 
 /* 夜间文字反色，否则深色字压在深色壁纸上看不清 */
 .desk.night .sb-clock,
-.desk.night .desk-label { color: rgba(232, 238, 242, 0.82); }
+.desk.night .desk-label { color: rgba(238, 230, 214, 0.82); }
 .desk.night .sb-back {
   background: rgba(255, 255, 255, 0.16);
-  color: #E8EEF2;
+  color: #EEE7DA;
 }
 .desk.night .sig-bar,
-.desk.night .bat-fill { background: #E8EEF2; }
-.desk.night .sb-battery { border-color: rgba(232, 238, 242, 0.78); }
-.desk.night .demo-tag { color: rgba(232, 238, 242, 0.5); }
-.desk.night .center-tip { color: rgba(232, 238, 242, 0.8); }
+.desk.night .bat-fill { background: #EEE7DA; }
+.desk.night .sb-battery { border-color: rgba(238, 230, 214, 0.78); }
+.desk.night .demo-tag { color: rgba(238, 230, 214, 0.5); }
+.desk.night .center-tip { color: rgba(238, 230, 214, 0.8); }
 
 /* 图标：白天是浅色瓷片，夜里原样放着就是一排发光方块。
    不整体调暗（emoji 会糊成灰点），只压到 0.78 并换深色投影，色相留着 */
@@ -144,18 +145,18 @@
   opacity: 0.78;
   box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.38), inset 0 0 0 1rpx rgba(255, 255, 255, 0.12);
 }
-.desk.night .icon-name { color: rgba(224, 233, 243, 0.9); }
+.desk.night .icon-name { color: rgba(238, 228, 210, 0.9); }
 
 /* 宠物：白底圆在夜里是整屏最亮的一块，像灯箱。换成深色玻璃 + 冷色描边 */
 .desk.night .pet-emoji {
-  background: rgba(18, 27, 44, 0.62);
+  background: rgba(32, 26, 20, 0.62);
   /* 只靠深色玻璃会整块融进夜空，补一圈很淡的月光轮廓把它托起来 */
-  box-shadow: inset 0 0 0 2rpx rgba(226, 238, 255, 0.18),
+  box-shadow: inset 0 0 0 2rpx rgba(240, 230, 210, 0.16),
               0 10rpx 26rpx rgba(0, 0, 0, 0.4),
-              0 0 34rpx rgba(150, 180, 220, 0.12);
+              0 0 34rpx rgba(200, 176, 120, 0.12);
 }
 .desk.night .pet-photo {
-  border-color: rgba(226, 238, 255, 0.42);
+  border-color: rgba(240, 230, 210, 0.42);
   box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.45);
 }
 .desk.night .pet-shadow { background: rgba(0, 0, 0, 0.32); }
@@ -182,7 +183,7 @@
   line-height: 50rpx;
   text-align: center;
   font-size: 44rpx;
-  color: #2E3A33;
+  color: #3E3528;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 50%;
 }
@@ -190,14 +191,14 @@
   margin-left: 16rpx;
   font-size: 26rpx;
   font-weight: 600;
-  color: #2E3A33;
+  color: #3E3528;
 }
 .sb-right { display: flex; align-items: center; }
 .sb-signal { display: flex; align-items: flex-end; height: 24rpx; }
 .sig-bar {
   width: 6rpx;
   margin-left: 4rpx;
-  background: #2E3A33;
+  background: #3E3528;
   border-radius: 2rpx;
   opacity: 0.75;
 }
@@ -208,7 +209,7 @@
 .sb-battery {
   width: 44rpx; height: 22rpx;
   margin-left: 14rpx;
-  border: 2rpx solid #2E3A33;
+  border: 2rpx solid #3E3528;
   border-radius: 6rpx;
   padding: 3rpx;
   box-sizing: border-box;
@@ -216,7 +217,7 @@
 .bat-fill {
   width: 68%;
   height: 100%;
-  background: #2E3A33;
+  background: #3E3528;
   border-radius: 2rpx;
 }
 
@@ -226,7 +227,7 @@
   text-align: center;
   font-size: 22rpx;
   letter-spacing: 2rpx;
-  color: rgba(46, 58, 51, 0.5);
+  color: rgba(62, 50, 38, 0.5);
 }
 .desk-mood {
   margin-left: 12rpx;
@@ -237,7 +238,7 @@
 }
 .desk.night .desk-mood {
   background: rgba(255, 255, 255, 0.14);
-  color: rgba(232, 238, 242, 0.9);
+  color: rgba(238, 230, 214, 0.9);
 }
 
 /* ---------- 图标网格 ---------- */
@@ -259,12 +260,12 @@
   border-radius: 26rpx;
   font-size: 44rpx;
   line-height: 96rpx;
-  box-shadow: 0 4rpx 14rpx rgba(38, 49, 43, 0.08);
+  box-shadow: 0 4rpx 14rpx rgba(56, 46, 36, 0.08);
 }
 .icon-name {
   margin-top: 12rpx;
   font-size: 20rpx;
-  color: rgba(46, 58, 51, 0.62);
+  color: rgba(62, 50, 38, 0.62);
 }
 
 /* 宠物走到这一列下方时，整列图标被顶得抖一下 */
@@ -311,7 +312,7 @@
   bottom: -12rpx;
   width: 136rpx;
   height: 26rpx;
-  background: rgba(38, 49, 43, 0.13);
+  background: rgba(56, 46, 36, 0.13);
   border-radius: 50%;
   transition: width 0.3s ease, left 0.3s ease, opacity 0.3s ease;
 }
@@ -364,7 +365,7 @@
   border-radius: 50%;
   border: 6rpx solid #FFFFFF;
   box-sizing: border-box;
-  box-shadow: 0 10rpx 26rpx rgba(38, 49, 43, 0.16);
+  box-shadow: 0 10rpx 26rpx rgba(56, 46, 36, 0.16);
 }
 .pet-emoji {
   width: 180rpx;
@@ -373,7 +374,7 @@
   font-size: 130rpx;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  box-shadow: 0 10rpx 26rpx rgba(38, 49, 43, 0.12);
+  box-shadow: 0 10rpx 26rpx rgba(56, 46, 36, 0.12);
 }
 /* 去白底的主体：不给圆框、不给白边、不给落地阴影（阴影由 .pet-shadow 单独负责），
    让它靠自己的轮廓站在桌面上。加边框就前功尽弃了 —— 白卡片正是这么来的 */
@@ -450,7 +451,7 @@
   font-size: 38rpx;
   background: #FFFFFF;
   border-radius: 50%;
-  box-shadow: 0 4rpx 14rpx rgba(38, 49, 43, 0.18);
+  box-shadow: 0 4rpx 14rpx rgba(56, 46, 36, 0.18);
   animation: fade-in 0.2s ease;
 }
 
@@ -514,14 +515,14 @@
   border-radius: 24rpx;
   font-size: 26rpx;
   color: var(--text);
-  box-shadow: 0 6rpx 20rpx rgba(38, 49, 43, 0.14);
+  box-shadow: 0 6rpx 20rpx rgba(56, 46, 36, 0.14);
 }
 .guide {
   position: relative;
   z-index: 25;
   margin: 8rpx auto 0;
   padding: 12rpx 28rpx;
-  background: rgba(38, 49, 43, 0.66);
+  background: rgba(56, 46, 36, 0.66);
   color: #FFFFFF;
   font-size: 22rpx;
   border-radius: 30rpx;
@@ -568,7 +569,7 @@
   bottom: 186rpx;
   z-index: 25;
   font-size: 20rpx;
-  color: rgba(46, 58, 51, 0.4);
+  color: rgba(62, 50, 38, 0.4);
 }
 
 /* ---------- 加载 / 失败 ---------- */
@@ -599,7 +600,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(18, 24, 28, 0.44);
+  background: rgba(30, 24, 18, 0.44);
   animation: tg-fade 0.2s ease;
 }
 /* 只做一次入场淡入，不是 infinite 循环——这一页已经有 18 个循环动画了 */
@@ -615,7 +616,7 @@
   padding: 48rpx 44rpx 36rpx;
   border-radius: 34rpx;
   background: #FFFFFF;
-  box-shadow: 0 24rpx 64rpx rgba(20, 30, 26, 0.2);
+  box-shadow: 0 24rpx 64rpx rgba(40, 32, 24, 0.2);
   text-align: center;
 }
 
@@ -653,8 +654,8 @@
   display: flex;
   margin-top: 36rpx;
   padding: 24rpx 0;
-  border-top: 1rpx solid #EEF1EE;
-  border-bottom: 1rpx solid #EEF1EE;
+  border-top: 1rpx solid #E9DFCA;
+  border-bottom: 1rpx solid #E9DFCA;
 }
 .tg-stat {
   flex: 1;
@@ -684,7 +685,7 @@
   margin-top: 14rpx;
   height: 8rpx;
   border-radius: 4rpx;
-  background: #EDF1EE;
+  background: #EDE6D6;
   overflow: hidden;
 }
 .tg-bar-fill {
@@ -705,21 +706,21 @@
 
 /* 夜里弹层不能还是一张白纸，否则跟刚做完的夜色打架 */
 .desk.night .tg-card {
-  background: rgba(26, 36, 54, 0.97);
+  background: rgba(38, 32, 26, 0.97);
   box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.5);
 }
 .desk.night .tg-day,
 .desk.night .tg-num {
-  color: #E8EFF8;
+  color: #EEE7DA;
 }
 .desk.night .tg-eyebrow,
 .desk.night .tg-since,
 .desk.night .tg-cap,
 .desk.night .tg-mile-txt {
-  color: rgba(214, 226, 240, 0.62);
+  color: rgba(222, 212, 192, 0.62);
 }
 .desk.night .tg-unit {
-  color: rgba(214, 226, 240, 0.72);
+  color: rgba(222, 212, 192, 0.72);
 }
 .desk.night .tg-stats {
   border-top-color: rgba(255, 255, 255, 0.09);
@@ -729,9 +730,9 @@
   background: rgba(255, 255, 255, 0.12);
 }
 .desk.night .tg-bar-fill {
-  background: #8FC7AB;
+  background: #A9C29A;
 }
 .desk.night .tg-close {
-  background: rgba(143, 199, 171, 0.16);
-  color: #9FD4B8;
+  background: rgba(169, 194, 154, 0.18);
+  color: #B4C9A4;
 }

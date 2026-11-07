@@ -13,9 +13,9 @@
   min-height: 160rpx;
   margin-top: 12rpx;
 }
-.letter-ph { color: #B5BDB8; }
+.letter-ph { color: #B8AD96; }
 .date-pick { margin-top: 12rpx; }
-.date-pick.ph { color: #B5BDB8; }
+.date-pick.ph { color: #B8AD96; }
 
 .stat-line {
   margin: 8rpx 32rpx 0;
@@ -39,7 +39,7 @@
   border-radius: 8rpx;
   padding: 2rpx 12rpx;
 }
-.capsule-del { font-size: 24rpx; color: #B5BDB8; padding: 4rpx 8rpx; }
+.capsule-del { font-size: 24rpx; color: #B8AD96; padding: 4rpx 8rpx; }
 
 .capsule-lock-icon { font-size: 48rpx; text-align: center; margin: 12rpx 0 8rpx; }
 .capsule-title { font-size: 30rpx; font-weight: 600; text-align: center; }
@@ -62,7 +62,7 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background: rgba(28, 40, 34, 0.5);
+  background: rgba(48, 38, 28, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;

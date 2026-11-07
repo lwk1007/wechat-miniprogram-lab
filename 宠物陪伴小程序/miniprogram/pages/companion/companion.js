@@ -106,11 +106,18 @@ Page({
     facing: 'right',
     dragging: false,
     stars: [
-      { key: 1, left: 16, top: 18, delay: 0 },
-      { key: 2, left: 32, top: 34, delay: 0.7 },
-      { key: 3, left: 48, top: 14, delay: 1.4 },
-      { key: 4, left: 62, top: 30, delay: 2.1 },
-      { key: 5, left: 86, top: 20, delay: 1.1 }
+      { key: 1, left: 10, top: 20, delay: 0, size: 'lg' },
+      { key: 2, left: 22, top: 36, delay: 0.7, size: 'sm' },
+      { key: 3, left: 34, top: 12, delay: 1.4, size: 'sm' },
+      { key: 4, left: 46, top: 30, delay: 2.1, size: 'lg' },
+      { key: 5, left: 58, top: 16, delay: 1.1, size: 'sm' },
+      { key: 6, left: 70, top: 38, delay: 0.4, size: 'sm' },
+      { key: 7, left: 82, top: 14, delay: 2.6, size: 'lg' },
+      { key: 8, left: 92, top: 30, delay: 0.9, size: 'sm' },
+      { key: 9, left: 16, top: 46, delay: 1.8, size: 'sm' },
+      { key: 10, left: 40, top: 44, delay: 0.2, size: 'sm' },
+      { key: 11, left: 64, top: 46, delay: 2.9, size: 'sm' },
+      { key: 12, left: 88, top: 44, delay: 1.3, size: 'sm' }
     ]
   },
 

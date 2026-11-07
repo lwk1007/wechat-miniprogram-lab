@@ -36,7 +36,7 @@
   min-height: 120rpx;
   margin-bottom: 24rpx;
 }
-.note-ph { color: #B5BDB8; }
+.note-ph { color: #B8AD96; }
 
 /* ---------- 安心卡 ---------- */
 .soothe {

@@ -12,7 +12,7 @@
   font-size: 24rpx;
   color: var(--text-sub);
 }
-.cut-note.dim { color: #9AA3B2; }
+.cut-note.dim { color: #9A8E78; }
 .cut-link {
   flex: none;
   margin-left: 16rpx;
@@ -38,7 +38,7 @@
 .photo-mask {
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  background: rgba(38, 49, 43, 0.45);
+  background: rgba(56, 46, 36, 0.45);
   color: #fff;
   font-size: 24rpx;
   text-align: center;

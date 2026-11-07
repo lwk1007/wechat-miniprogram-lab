@@ -40,7 +40,7 @@
   margin-right: 12rpx;
   padding: 10rpx 22rpx;
   border-radius: 26rpx;
-  background: #F2F5F3;
+  background: #F1EBDE;
   font-size: 24rpx;
   color: var(--sub);
 }
@@ -76,7 +76,7 @@
 
 /* ---------- 草地 ---------- */
 .stage-grass {
-  background: linear-gradient(180deg, #BFE4F7 0%, #DCF1F8 46%, #EAF7EE 100%);
+  background: linear-gradient(180deg, #F6E7CE 0%, #F7ECD6 46%, #EDF0D8 100%);
 }
 .sun { border-radius: 50%; }
 .sun-grass {
@@ -115,16 +115,16 @@
 .hill-back {
   left: -180rpx; bottom: 54rpx;
   width: 760rpx; height: 300rpx;
-  background: #B9DEB2;
+  background: #C6CCA8;
 }
 .hill-front {
   right: -140rpx; bottom: 30rpx;
   width: 660rpx; height: 240rpx;
-  background: #93CB8D;
+  background: #A9BC82;
 }
 .tuft {
   width: 8rpx; height: 26rpx;
-  background: #7CBB76;
+  background: #7E9A5C;
   border-radius: 8rpx;
 }
 .tuft-1 { left: 60rpx; bottom: 74rpx; transform: rotate(-12deg); }
@@ -132,7 +132,7 @@
 .ground-grass {
   left: 0; right: 0; bottom: 0;
   height: 92rpx;
-  background: linear-gradient(180deg, #86C47F 0%, #6CB066 100%);
+  background: linear-gradient(180deg, #8AA566 0%, #68844C 100%);
 }
 
 /* ---------- 窗台 ---------- */
@@ -143,7 +143,7 @@
   box-sizing: border-box;
   border: 14rpx solid #FFFFFF;
   border-radius: 10rpx;
-  background: linear-gradient(180deg, #CFEAFA 0%, #EAF7FB 100%);
+  background: linear-gradient(180deg, #F6E7CF 0%, #FBF1DF 100%);
   box-shadow: 0 6rpx 22rpx rgba(176, 156, 128, 0.16);
 }
 .win-bar-v {
@@ -242,8 +242,8 @@
     180deg,
     #FFEBCB 0%,
     #FFD99F 30%,
-    #AEE0F2 31%,
-    #8AC9E4 58%,
+    #BFD8D4 31%,
+    #A4C6C0 58%,
     #F5E4C7 59%,
     #EBD2AC 100%
   );
@@ -271,7 +271,7 @@
 
 /* ---------- 星空 ---------- */
 .stage-night {
-  background: linear-gradient(180deg, #1B2740 0%, #2A3A57 56%, #1F2B42 100%);
+  background: linear-gradient(180deg, #1C1826 0%, #282234 56%, #332B3E 100%);
 }
 .nt-moon {
   right: 78rpx; top: 52rpx;
@@ -283,23 +283,41 @@
 .nt-star {
   width: 8rpx; height: 8rpx;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: #FFF6E4;
+  box-shadow: 0 0 8rpx rgba(255, 244, 220, 0.7);
   animation: twinkle 2.8s ease-in-out infinite;
 }
+/* 星空里大小错落的星：亮星带暖金光晕，暗星细密，才有真实夜空的样子 */
+.nt-star.sm { width: 5rpx; height: 5rpx; background: #FFF8E6; box-shadow: none; }
+.nt-star.lg { width: 12rpx; height: 12rpx; background: #F7E7B2; box-shadow: 0 0 16rpx rgba(247, 231, 178, 0.85); }
 .nt-hill {
   left: -80rpx; right: -80rpx; bottom: -40rpx;
   height: 170rpx;
-  background: #16202F;
+  background: #17131F;
   border-radius: 50% 50% 0 0;
 }
 .nt-fly {
   width: 10rpx; height: 10rpx;
   border-radius: 50%;
-  background: #FFE9A8;
-  box-shadow: 0 0 18rpx #FFE9A8;
+  background: #F7D77E;
+  box-shadow: 0 0 20rpx #F7D77E;
 }
 .nt-fly-1 { left: 120rpx; bottom: 150rpx; animation: fly-around 7s ease-in-out infinite; }
 .nt-fly-2 { right: 150rpx; bottom: 220rpx; animation: fly-around 9s ease-in-out infinite reverse; }
+/* 银河：一条斜向的极淡柔光带，夜空因此有了纵深 */
+.nt-galaxy {
+  left: -12%; right: -12%; top: 24%;
+  height: 150rpx;
+  background: linear-gradient(90deg,
+    rgba(210, 200, 235, 0) 0%,
+    rgba(222, 212, 240, 0.10) 28%,
+    rgba(234, 226, 246, 0.15) 50%,
+    rgba(222, 212, 240, 0.10) 72%,
+    rgba(210, 200, 235, 0) 100%);
+  transform: rotate(-16deg);
+  border-radius: 50%;
+  pointer-events: none;
+}
 
 /* ==================================================================
    夜间变体：19 点后「草地 / 窗台 / 客厅 / 海边」也跟着入夜
@@ -316,7 +334,7 @@
 
 /* ---------- 草地入夜：晴转月夜，绿压成冷绿，云只剩轮廓 ---------- */
 .stage-grass.is-night {
-  background: linear-gradient(180deg, #1C2740 0%, #26334E 46%, #1E2C34 100%);
+  background: linear-gradient(180deg, #2B241E 0%, #383029 46%, #25281F 100%);
 }
 .stage-grass.is-night .sun-grass {
   background: radial-gradient(circle at 38% 34%, #FFFDF3 0%, #F2F4E6 72%, #E3E8D7 100%);
@@ -326,20 +344,20 @@
 .stage-grass.is-night .cloud,
 .stage-grass.is-night .cloud::before,
 .stage-grass.is-night .cloud::after {
-  background: rgba(214, 226, 248, 0.14);
+  background: rgba(233, 220, 196, 0.16);
 }
-.stage-grass.is-night .hill-back { background: #2B3D46; }
-.stage-grass.is-night .hill-front { background: #24343C; }
+.stage-grass.is-night .hill-back { background: #3B332B; }
+.stage-grass.is-night .hill-front { background: #2F2A24; }
 .stage-grass.is-night .ground-grass {
-  background: linear-gradient(180deg, #24382F 0%, #1B2C25 100%);
+  background: linear-gradient(180deg, #2E3627 0%, #242B1E 100%);
 }
-.stage-grass.is-night .tuft { background: #3A5142; }
+.stage-grass.is-night .tuft { background: #3C5238; }
 
 /* ---------- 窗台入夜：窗外是夜空，屋里只留一盏暖光 ---------- */
-.stage-window.is-night { background: #2A2932; }
+.stage-window.is-night { background: #2C2620; }
 .stage-window.is-night .win-glass {
   border-color: #CFCDC4;
-  background: linear-gradient(180deg, #1B2740 0%, #2C3B57 100%);
+  background: linear-gradient(180deg, #2C2520 0%, #3D342C 100%);
   box-shadow: 0 6rpx 22rpx rgba(0, 0, 0, 0.3);
 }
 .stage-window.is-night .win-bar-v,
@@ -356,7 +374,7 @@
 
 /* ---------- 客厅入夜：家具退到暗部，落地灯顶上来 ---------- */
 .stage-living.is-night {
-  background: linear-gradient(180deg, #2E2A32 0%, #262229 100%);
+  background: linear-gradient(180deg, #302820 0%, #282019 100%);
 }
 .stage-living.is-night .ground-wood {
   background: linear-gradient(180deg, #3B3128 0%, #2E2720 100%);
@@ -375,19 +393,19 @@
 .stage-seaside.is-night {
   background: linear-gradient(
     180deg,
-    #182338 0%,
-    #23304C 30%,
-    #1E3A50 31%,
-    #17303F 58%,
-    #2A3038 59%,
-    #232930 100%
+    #251F18 0%,
+    #332C23 30%,
+    #2F3B36 31%,
+    #27332E 58%,
+    #2F2C25 59%,
+    #272218 100%
   );
 }
 .stage-seaside.is-night .ss-sun {
   background: radial-gradient(circle at 42% 38%, #FFFDF3 0%, #F2F4E6 70%, #E3E8D7 100%);
   box-shadow: 0 0 50rpx rgba(226, 236, 214, 0.42);
 }
-.stage-seaside.is-night .ss-wave { background: rgba(198, 222, 246, 0.3); }
+.stage-seaside.is-night .ss-wave { background: rgba(210, 205, 185, 0.28); }
 
 /* 星空本来就是夜，is-night 加不加都一样，不必写覆盖 */
 
@@ -422,7 +440,7 @@
   width: 148rpx; height: 24rpx;
   margin-left: -74rpx;
   border-radius: 50%;
-  background: rgba(28, 40, 34, 0.2);
+  background: rgba(48, 38, 28, 0.2);
   transition: width 0.3s ease, margin-left 0.3s ease, opacity 0.3s ease;
 }
 /* 被提起来时影子变小变淡：离地越高，影子越弱 */
@@ -463,7 +481,7 @@
   width: 220rpx;
   height: 220rpx;
   border-radius: 30rpx;
-  box-shadow: 0 10rpx 26rpx rgba(28, 40, 34, 0.22);
+  box-shadow: 0 10rpx 26rpx rgba(48, 38, 28, 0.22);
 }
 /* 去白底的主体：不套圆角、不投卡片影，靠自己的轮廓站在场景里。
    这里最容易做错的就是「顺手加个圆角好看点」—— 一加就退回贴纸 */
@@ -618,7 +636,7 @@
   font-size: 24rpx;
   line-height: 1.4;
   color: var(--text);
-  box-shadow: 0 6rpx 18rpx rgba(28, 40, 34, 0.14);
+  box-shadow: 0 6rpx 18rpx rgba(48, 38, 28, 0.14);
   word-break: break-all;
 }
 
@@ -681,7 +699,7 @@
 .actions {
   display: flex;
   margin: 24rpx;
-  background: #fff;
+  background: var(--card);
   border-radius: 24rpx;
   padding: 24rpx 0;
 }
@@ -700,7 +718,7 @@
   align-items: center;
   margin: 0 24rpx;
   padding: 28rpx 32rpx;
-  background: #fff;
+  background: var(--card);
   border-radius: 24rpx;
 }.desk-entry:active { opacity: 0.7; }
 .desk-entry-icon {
@@ -714,7 +732,7 @@
 .desk-entry-text { flex: 1; margin-left: 24rpx; }
 .desk-entry-title { font-size: 30rpx; font-weight: 500; }
 .desk-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: var(--sub); }
-.desk-entry-arrow { font-size: 40rpx; color: #C9D2CC; }
+.desk-entry-arrow { font-size: 40rpx; color: #C9BFA9; }
 
 /* 回忆时间轴入口：淡蓝卡片，和下面的写信/桌面入口区分开 */
 .memory-entry {
@@ -722,9 +740,9 @@
   align-items: center;
   margin: 0 24rpx 16rpx;
   padding: 28rpx 32rpx;
-  background: linear-gradient(135deg, #F0F6FC 0%, #E7F0FA 100%);
+  background: linear-gradient(135deg, #FBF1DE 0%, #F7E9CE 100%);
   border-radius: 24rpx;
-  border: 1rpx solid rgba(90, 130, 170, 0.15);
+  border: 1rpx solid rgba(176, 138, 94, 0.16);
 }
 .memory-entry:active { opacity: 0.75; }
 .memory-entry-icon {
@@ -734,12 +752,12 @@
   font-size: 40rpx;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 20rpx;
-  box-shadow: 0 4rpx 14rpx rgba(90, 130, 170, 0.12);
+  box-shadow: 0 4rpx 14rpx rgba(176, 138, 94, 0.12);
 }
 .memory-entry-text { flex: 1; margin-left: 24rpx; }
-.memory-entry-title { font-size: 30rpx; font-weight: 500; color: #3A4B5E; }
-.memory-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #7B8BA0; }
-.memory-entry-arrow { font-size: 40rpx; color: #C2D0DE; }
+.memory-entry-title { font-size: 30rpx; font-weight: 500; color: #5A4A30; }
+.memory-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #A08B6C; }
+.memory-entry-arrow { font-size: 40rpx; color: #D8C3A5; }
 
 /* 心情日志 + 思念信箱：两个轻量入口并排 */
 .mini-entries {
@@ -752,7 +770,7 @@
   display: flex;
   align-items: center;
   padding: 24rpx;
-  background: #fff;
+  background: var(--card);
   border-radius: 24rpx;
 }
 .mini-entry:active { opacity: 0.7; }
