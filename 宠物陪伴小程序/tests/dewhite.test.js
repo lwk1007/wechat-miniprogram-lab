@@ -171,6 +171,53 @@ fillRect(colorful, W, 12, 12, 27, 27, [220, 90, 60]);
 ok('彩色主体不算墨线图', dw.inkProfile(colorful, W, H).avgChroma > dw.LINEART_CHROMA,
   dw.inkProfile(colorful, W, H).avgChroma.toFixed(1));
 
+console.log('\n[13] 贴边暗条：照片自带的边要剥掉，画面内容不能误伤');
+
+// 白底 + 中间闭合主体，再往指定边糊一条暗带
+function edgeCanvas(strip) {
+  const c = makeCanvas(W, H);
+  fillRect(c, W, 12, 12, 27, 27, [40, 40, 44]);
+  if (strip === 'top') fillRect(c, W, 0, 0, W - 1, 0, [22, 22, 22]);
+  if (strip === 'top2') fillRect(c, W, 0, 0, W - 1, 1, [22, 22, 22]);
+  if (strip === 'left') fillRect(c, W, 0, 0, 0, H - 1, [22, 22, 22]);
+  if (strip === 'bottom') fillRect(c, W, 0, H - 1, W - 1, H - 1, [22, 22, 22]);
+  if (strip === 'short') fillRect(c, W, 0, 0, 7, 0, [22, 22, 22]);   // 只占 20% 宽
+  return c;
+}
+
+const e1 = dw.removeWhite(edgeCanvas('top'), W, H);
+ok('顶边 1px 暗线被剥掉', e1.alpha[0 * W + 20] === 0, e1.alpha[20]);
+ok('剥完后主体还在', e1.alpha[20 * W + 20] === 255, e1.alpha[20 * W + 20]);
+ok('数得出剥了几条线', e1.edge === 1, e1.edge);
+
+const e2 = dw.removeWhite(edgeCanvas('top2'), W, H);
+ok('顶边 2px 暗带一次剥干净', e2.alpha[20] === 0 && e2.alpha[W + 20] === 0,
+  e2.alpha[20] + ' / ' + e2.alpha[W + 20]);
+
+const e3 = dw.removeWhite(edgeCanvas('left'), W, H);
+ok('左边暗线也剥', e3.alpha[20 * W] === 0, e3.alpha[20 * W]);
+const e4 = dw.removeWhite(edgeCanvas('bottom'), W, H);
+ok('底边暗线也剥', e4.alpha[(H - 1) * W + 20] === 0, e4.alpha[(H - 1) * W + 20]);
+
+const esh = dw.removeWhite(edgeCanvas('short'), W, H);
+// 查短线自身那格（x=3,y=0），不是查旁边的白
+ok('只占 20% 宽的短线不当边（那是画面内容）', esh.alpha[3] === 255, esh.alpha[3]);
+
+// 安全阀：主体自己贴着顶边，顶行是满的，但下一行还是主体 → 不能下刀
+const hug = makeCanvas(W, H);
+fillRect(hug, W, 0, 0, W - 1, 8, [40, 40, 44]);
+const eh = dw.removeWhite(hug, W, H);
+ok('主体贴边时一行都不剥', eh.edge === 0, eh.edge);
+ok('贴边主体完好', eh.alpha[2 * W + 20] === 255, eh.alpha[2 * W + 20]);
+
+const clean = makeCanvas(W, H);
+fillRect(clean, W, 12, 12, 27, 27, [40, 40, 44]);
+const ec = dw.removeWhite(clean, W, H);
+ok('没有暗条的图 edge 为 0', ec.edge === 0, ec.edge);
+
+const off = dw.removeWhite(edgeCanvas('top'), W, H, { edgeClean: false });
+ok('可以关掉（edgeClean:false）', off.edge === 0 && off.alpha[20] === 255, off.alpha[20]);
+
 console.log('\n' + '─'.repeat(48));
 console.log('  通过 ' + pass + ' · 失败 ' + fail);
 process.exit(fail ? 1 : 0);

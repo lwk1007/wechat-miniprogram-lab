@@ -29,6 +29,18 @@ const MIN_BORDER_RATIO = 0.45;
 // 再大就会把「手指缝」这种正常空隙也糊上。
 const SEAL_RADIUS = 2;
 
+// 边缘细条清理。拍/扫的纸边上常带一道 1~3px 的暗边（纸的投影、扫描仪黑边、
+// 拍进画面的桌沿）。它不是纸白，泛洪当它是「墨」而留下，抠完就在主体上方浮一条
+// 笔直的暗线 —— 这条线是暗的、比背景更暗，所以不是羽化不足，也不是白边残留。
+//
+// 判据只有一条：细、横贯整幅、紧接着就是空的。真正的画面内容不会「占满一整行、
+// 下一行立刻什么都没有」。主体若贴着这条边，下一行还是主体，就不会被误删。
+const EDGE_BAND_RATIO = 0.008;  // 最多从每条边往内剥这么厚（相对短边）
+const EDGE_BAND_MAX = 3;        // 上限压到 3px：照片边几乎都是 1~3px，再厚就该人工裁了
+const EDGE_COVER = 0.5;         // 这一行/列有一半可见 → 可疑
+const EDGE_GAP = 0.35;          // 往里紧接的一行必须几乎全空，才敢下刀
+const EDGE_VISIBLE = 40;        // 算「可见」的 alpha 下限（含半透明的软边）
+
 function num(v, d) {
   return typeof v === 'number' && isFinite(v) ? v : d;
 }
@@ -105,6 +117,61 @@ function growBg(bg, wall, w, h, steps) {
     }
     frontier = next;
   }
+}
+
+// 剥掉贴着画面四边的细暗条。返回清掉的线条数，0 表示四边都正常。
+//
+// 只在最外那圈（默认 1.5% 短边，最多 8px）里找，找到的每一条都必须满足：
+//   1. 这一行/列至少一半是可见的；
+//   2. 连续几行都这样（把 2~3px 厚的暗边一次剥干净）；
+//   3. 再往里紧接的一行几乎全空。
+// 第 3 条是安全阀：主体贴着边时条件 1、2 成立，但第 3 条不成立，于是不动。
+function stripEdgeLines(alpha, w, h, opts) {
+  if (!alpha || !w || !h) return 0;
+  const o = opts || {};
+  const visible = num(o.edgeVisible, EDGE_VISIBLE);
+  const band = Math.max(2, Math.min(
+    Math.round(Math.min(w, h) * num(o.bandRatio, EDGE_BAND_RATIO)),
+    num(o.bandMax, EDGE_BAND_MAX)
+  ));
+  const COVER = num(o.edgeCover, EDGE_COVER);
+  const GAP = num(o.edgeGap, EDGE_GAP);
+
+  const lineLen = (dir) => (dir < 2 ? w : h);
+  // dir: 0 上 / 1 下 / 2 左 / 3 右；i 是从该边往内的第几行（列），k 是沿线第几个像素
+  const idxOf = (dir, i, k) => {
+    if (dir === 0) return i * w + k;
+    if (dir === 1) return (h - 1 - i) * w + k;
+    if (dir === 2) return k * w + i;
+    return k * w + (w - 1 - i);
+  };
+  const cover = (dir, i) => {
+    // 越界当「满」，免得把「画面外」误判成空
+    if (i >= (dir < 2 ? h : w)) return 1;
+    const n = lineLen(dir);
+    let c = 0;
+    for (let k = 0; k < n; k++) if (alpha[idxOf(dir, i, k)] >= visible) c++;
+    return c / n;
+  };
+
+  let cleared = 0;
+  for (let dir = 0; dir < 4; dir++) {
+    let i = 0;
+    while (i < band && cover(dir, i) < COVER) i++;
+    if (i >= band) continue;
+    let j = i;
+    while (j + 1 < band && cover(dir, j + 1) >= COVER) j++;
+    if (cover(dir, j + 1) > GAP) continue;
+    const n = lineLen(dir);
+    for (let r = i; r <= j; r++) {
+      for (let k = 0; k < n; k++) {
+        const idx = idxOf(dir, r, k);
+        if (alpha[idx]) alpha[idx] = 0;
+      }
+    }
+    cleared += j - i + 1;
+  }
+  return cleared;
 }
 
 // 主体去掉白底之后的 alpha 通道。
@@ -190,7 +257,10 @@ function removeWhite(rgba, w, h, opts) {
     if (lum >= softLum) alpha[i] = softAlpha;
   }
 
-  return { alpha, removed, kept, total, borderRatio, applied: true };
+  // 最后剥掉照片自带的那道边。放在软边之后，因为它专门吃「半明半暗的细条」
+  const edge = o.edgeClean === false ? 0 : stripEdgeLines(alpha, w, h, o);
+
+  return { alpha, removed, kept, total, borderRatio, applied: true, edge };
 }
 
 // 把算好的 alpha 写回 ImageData 的 A 通道（putImageData 要用同一份数据）
@@ -268,6 +338,9 @@ module.exports = {
   SOFT_ALPHA,
   MIN_BORDER_RATIO,
   SEAL_RADIUS,
+  EDGE_BAND_RATIO,
+  EDGE_COVER,
+  EDGE_GAP,
   LINEART_WHITE,
   LINEART_CHROMA,
   LINEART_DARK,
@@ -276,6 +349,7 @@ module.exports = {
   whiteRatio,
   inkProfile,
   removeWhite,
+  stripEdgeLines,
   applyAlpha,
   removedRatio,
   keptRatio
