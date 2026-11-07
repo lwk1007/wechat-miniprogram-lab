@@ -198,7 +198,17 @@
       </view>
     </view>
 
-    <!-- AI 总结：以宠物口吻写的一封信 -->
+    <!-- 回忆时间轴：把相遇、里程碑、日记、来信串成一条线 -->
+    <view class="memory-entry" bindtap="goMemory">
+      <view class="memory-entry-icon">🗓️</view>
+      <view class="memory-entry-text">
+        <view class="memory-entry-title">回忆时间轴</view>
+        <view class="memory-entry-desc">一起走过的日子，都在这里</view>
+      </view>
+      <view class="memory-entry-arrow">›</view>
+    </view>
+
+    <!-- 以宠物口吻写的一封信 -->
     <view class="letter-entry" bindtap="goLetter">
       <view class="letter-entry-icon">💌</view>
       <view class="letter-entry-text">

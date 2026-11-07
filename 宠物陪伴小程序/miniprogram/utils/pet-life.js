@@ -388,6 +388,7 @@ module.exports = {
   offlineRecap,
   writeRoamDiary,
   markLeave,
+  getDiaryList,
   decorateDiary,
   summary,
   reset

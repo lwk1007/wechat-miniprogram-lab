@@ -716,6 +716,31 @@
 .desk-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: var(--sub); }
 .desk-entry-arrow { font-size: 40rpx; color: #C9D2CC; }
 
+/* 回忆时间轴入口：淡蓝卡片，和下面的写信/桌面入口区分开 */
+.memory-entry {
+  display: flex;
+  align-items: center;
+  margin: 0 24rpx 16rpx;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #F0F6FC 0%, #E7F0FA 100%);
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(90, 130, 170, 0.15);
+}
+.memory-entry:active { opacity: 0.75; }
+.memory-entry-icon {
+  width: 76rpx; height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  font-size: 40rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 14rpx rgba(90, 130, 170, 0.12);
+}
+.memory-entry-text { flex: 1; margin-left: 24rpx; }
+.memory-entry-title { font-size: 30rpx; font-weight: 500; color: #3A4B5E; }
+.memory-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #7B8BA0; }
+.memory-entry-arrow { font-size: 40rpx; color: #C2D0DE; }
+
 /* 一封信入口：暖色卡片，和下面的桌面入口区分开 */
 .letter-entry {
   display: flex;

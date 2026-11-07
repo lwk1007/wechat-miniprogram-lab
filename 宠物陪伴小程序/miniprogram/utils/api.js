@@ -49,6 +49,12 @@ module.exports = {
   getLetter() {
     return useCloud() ? cloudSvc.call('letter', 'latest') : local.getLetter();
   },
+  // 全部信件（回忆时间轴用）：统一返回数组，最新在前
+  listLetters() {
+    return useCloud()
+      ? cloudSvc.call('letter', 'list').then((r) => (r && r.letters) || [])
+      : local.listLetters();
+  },
   generateLetter(payload) {
     return useCloud() ? cloudSvc.call('letter', 'generate', payload || {}) : local.generateLetter(payload || {});
   }

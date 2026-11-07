@@ -1,0 +1,99 @@
+<view class="page safe-bottom">
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="empty">
+    <view class="empty-icon">🐾</view>
+    <view>正在翻回忆…</view>
+  </view>
+
+  <!-- 加载失败 -->
+  <view wx:elif="{{error}}" class="empty">
+    <view class="empty-icon">🌧️</view>
+    <view>{{error}}</view>
+    <view class="btn-ghost retry-btn" bindtap="loadRetry">重试</view>
+  </view>
+
+  <!-- 内容 -->
+  <block wx:else>
+
+    <!-- 概览：一起生活的第 N 天 -->
+    <view class="hero card">
+      <view class="hero-top">
+        <view class="hero-emoji">{{typeEmoji}}</view>
+        <view class="hero-title">和 {{petName}} 一起生活</view>
+      </view>
+      <view class="hero-days">
+        <text class="hero-num">{{header.days}}</text>
+        <text class="hero-unit">天</text>
+      </view>
+      <view class="hero-since">{{header.startText}} 起</view>
+      <view class="hero-stats">
+        <view class="hero-stat">
+          <view class="stat-num">{{header.feed}}</view>
+          <view class="stat-label">次喂食</view>
+        </view>
+        <view class="hero-stat">
+          <view class="stat-num">{{header.play}}</view>
+          <view class="stat-label">次玩耍</view>
+        </view>
+        <view class="hero-stat">
+          <view class="stat-num">{{header.touch}}</view>
+          <view class="stat-label">次摸摸</view>
+        </view>
+        <view class="hero-stat">
+          <view class="stat-num">{{header.streak}}</view>
+          <view class="stat-label">连续陪伴</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 往年今日：陪伴满一年后出现 -->
+    <view wx:if="{{onThisDay}}" class="otd card">
+      <view class="otd-head">
+        <text class="otd-title">📅 往年今日</text>
+        <text class="otd-badge">第 {{onThisDay.thatDay}} 天</text>
+      </view>
+      <view class="otd-desc">去年的今天（{{onThisDay.dateText}}），你们刚认识不久</view>
+      <block wx:if="{{onThisDay.hasRecord}}">
+        <view wx:for="{{onThisDay.items}}" wx:key="key" class="otd-item">
+          <text class="otd-emoji">{{item.icon || item.emoji}}</text>
+          <text class="otd-text">{{item.text}}</text>
+        </view>
+      </block>
+      <view wx:else class="otd-empty">那一天它刚来到你身边，还没有留下特别的记录</view>
+    </view>
+
+    <!-- 时间轴 -->
+    <view class="timeline">
+      <view class="tl-line"></view>
+      <view wx:for="{{groups}}" wx:key="key" class="tl-group">
+
+        <!-- 组头：日期 + 第 N 天 -->
+        <view class="tl-date">
+          <view class="tl-date-dot"></view>
+          <text class="tl-date-text">{{item.dateText}}</text>
+          <text wx:if="{{item.dayText}}" class="tl-day-tag">{{item.dayText}}</text>
+        </view>
+
+        <!-- 组内事件 -->
+        <view class="tl-items">
+          <view wx:for="{{item.items}}" wx:for-item="ev" wx:key="key" class="tl-item">
+            <view class="tl-dot {{ev.type}}">{{ev.icon || ev.emoji}}</view>
+            <view class="tl-card {{ev.type}}">
+              <view class="tl-text">{{ev.text}}</view>
+              <view wx:if="{{ev.type === 'letter'}}" class="tl-cta" bindtap="goLetter">读这封信 ›</view>
+            </view>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- 空态：理论上相遇节点总会存在，这里是兜底 -->
+    <view wx:if="{{!hasData}}" class="empty">
+      <view class="empty-icon">🌱</view>
+      <view>还没有可以回忆的瞬间</view>
+    </view>
+
+  </block>
+</view>

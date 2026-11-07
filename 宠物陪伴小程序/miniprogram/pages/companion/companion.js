@@ -682,6 +682,11 @@ Page({
     wx.navigateTo({ url: '/pages/desktop/desktop' });
   },
 
+  goMemory() {
+    if (!this.data.pet) return;
+    wx.navigateTo({ url: '/pages/memory/memory' });
+  },
+
   goLetter() {
     if (!this.data.pet) return;
     wx.navigateTo({ url: '/pages/letter/letter' });

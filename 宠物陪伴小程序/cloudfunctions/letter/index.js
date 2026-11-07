@@ -155,7 +155,7 @@ async function generateWithModel(pet, stats, ownerTitle, lifeLabel) {
     // 人设必须放在 system 层：写成「写作助手」会盖掉下面 user 里的宠物身份，
     // 模型最终产出一封编辑腔的信——这是角色一致性最常见的一种崩法。
     { role: 'system', content: '你正在扮演一只宠物，用它自己的口吻给主人写一封短短的私信。只输出信的正文，不写标题、不加引号、不解释。温暖但克制，不煽情。' },
-    { role: 'user', content: buildPrompt(pet, stats, ownerTitle, talks, lifeLabel) }
+    { role: 'user', content: buildPrompt(pet, stats, ownerTitle, lifeLabel) }
   ];
   const res = await httpsPostJSON(
     MODEL_BASE_URL.replace(/\/$/, '') + '/chat/completions',
@@ -175,6 +175,16 @@ async function latest(openid) {
     .get();
   const letter = r.data[0] || null;
   return ok({ letter, nextAt: letter ? letter.createdAt + COOLDOWN : 0 });
+}
+
+// 全部信件（回忆时间轴用）：只回内容与时间，最新在前
+async function list(openid) {
+  const r = await db.collection('letters')
+    .where({ _openid: openid })
+    .orderBy('createdAt', 'desc')
+    .limit(KEEP_LETTERS)
+    .get();
+  return ok({ letters: r.data || [] });
 }
 
 async function generate(openid, payload) {
@@ -275,6 +285,7 @@ exports.main = async (event) => {
   try {
     switch (action) {
       case 'latest': return await latest(OPENID);
+      case 'list': return await list(OPENID);
       case 'generate': return await generate(OPENID, payload);
       default: return { ok: false, error: '未知操作' };
     }

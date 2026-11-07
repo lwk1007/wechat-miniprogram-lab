@@ -160,6 +160,11 @@ async function getLetter() {
   return { letter, nextAt: letter ? letter.createdAt + LETTER_COOLDOWN : 0 };
 }
 
+// 全部信件（时间轴用）：最新的在前
+async function listLetters() {
+  return get(K.letters, []) || [];
+}
+
 async function generateLetter({ ownerTitle: passedTitle, stats } = {}) {
   const pet = get(K.pet, null);
   if (!pet) throw new Error('请先创建宠物');
@@ -194,5 +199,5 @@ async function generateLetter({ ownerTitle: passedTitle, stats } = {}) {
 module.exports = {
   ensureUser, getPet, createPet, updatePet, deletePet,
   removePhoto, purgeAll, exportAll,
-  getLetter, generateLetter
+  getLetter, listLetters, generateLetter
 };
