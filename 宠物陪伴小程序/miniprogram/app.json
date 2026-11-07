@@ -18,11 +18,6 @@
     "backgroundColor": "#F7F8FA",
     "backgroundTextStyle": "dark"
   },
-  "permission": {
-    "scope.record": {
-      "desc": "用于语音聊天，把你说的话转成文字发给我"
-    }
-  },
   "tabBar": {
     "color": "#7B847F",
     "selectedColor": "#6FA58A",
