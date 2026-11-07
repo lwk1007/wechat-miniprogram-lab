@@ -1,8 +1,7 @@
 const api = require('../../utils/api');
 const moments = require('../../utils/moments');
 const petLife = require('../../utils/pet-life');
-
-const TITLE_KEY = 'pet_owner_title';
+const titleOf = require('../../utils/title');
 
 Page({
   data: {
@@ -16,7 +15,7 @@ Page({
     petName: '',
     photo: '',
     typeEmoji: '🐾',
-    ownerTitle: '妈妈',
+    ownerTitle: titleOf.DEFAULT_TITLE,
     // 冷却
     canWrite: false,
     cooldownText: '',
@@ -25,20 +24,15 @@ Page({
   },
 
   onLoad() {
-    let title = '妈妈';
-    try {
-      const saved = wx.getStorageSync(TITLE_KEY);
-      if (saved) title = saved;
-    } catch (e) { /* 用默认称呼 */ }
-    this.setData({ ownerTitle: title });
-    this.load(title);
+    // 称呼要等 pet 读出来才知道（存在云端档案里），不先猜一个写到 data 里
+    this.load();
   },
 
   onUnload() {
     clearInterval(this._tick);
   },
 
-  async load(title) {
+  async load() {
     this.setData({ loading: true, error: '' });
     try {
       await api.ensureUser();
@@ -47,7 +41,7 @@ Page({
         this.setData({ loading: false, error: '还没有宠物，先去创建一个吧' });
         return;
       }
-      const owner = pet.ownerTitle || title || '妈妈';
+      const owner = titleOf.resolve(pet);
       this.setData({
         petName: pet.name || '它',
         photo: (pet.photo && !this.photoExpired(pet)) ? pet.photo : '',
@@ -87,7 +81,7 @@ Page({
     const paras = blocks.map((text, i) => ({
       key: i,
       text,
-      // 第一行是「妈妈：」这样的称呼，最后一行是署名
+      // 第一行是「主人：」这样的称呼，最后一行是署名
       greet: i === 0 && /[:：]$/.test(text) && text.length <= 12,
       sign: i === last && i > 0 && text.length <= 12 && text.indexOf('\n') < 0
     }));
@@ -181,6 +175,6 @@ Page({
   },
 
   loadRetry() {
-    this.load(this.data.ownerTitle);
+    this.load();
   }
 });

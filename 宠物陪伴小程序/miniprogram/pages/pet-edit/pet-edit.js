@@ -3,6 +3,7 @@ const cloudSvc = require('../../utils/cloud');
 const privacy = require('../../utils/privacy');
 const personaUtil = require('../../utils/persona');
 const cutout = require('../../utils/cutout');
+const titleOf = require('../../utils/title');
 
 const PERSONALITIES = [
   { key: 'loyal', label: '忠心' },
@@ -243,7 +244,7 @@ Page({
         personality: this.data.personality,
         persona: personaUtil.sanitize(this.data.persona),
         type: this.data.types[this.data.typeIndex].key,
-        ownerName: this.data.ownerName,
+        ownerName: titleOf.normalize(this.data.ownerName),
         sinceDate: this.data.sinceDate
       };
       if (this.data.newPhoto) {

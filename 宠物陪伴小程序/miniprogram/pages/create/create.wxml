@@ -75,7 +75,7 @@
     </view>
     <view class="form-item">
       <view class="form-label">怎么称呼你</view>
-      <input class="form-input" placeholder="比如：妈妈" maxlength="12" value="{{ownerName}}" bindinput="onOwnerNameInput" />
+      <input class="form-input" placeholder="留空就叫「主人」，也可以填妈妈、铲屎官…" maxlength="12" value="{{ownerName}}" bindinput="onOwnerNameInput" />
     </view>
     <view class="form-item">
       <view class="form-label">开始陪伴的日子</view>

@@ -1,4 +1,5 @@
 const cloud = require('wx-server-sdk');
+const titleOf = require('./title');
 const https = require('https');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
@@ -218,7 +219,9 @@ async function generate(openid, payload) {
     throw new Error('刚写过一封啦，' + hours + ' 小时后再来听它说点什么吧');
   }
 
-  const ownerTitle = (payload && payload.ownerTitle) || '妈妈';
+  // 称呼以服务端档案为准，客户端传的只做兜底：
+  // payload 是不可信输入，而它会被拼进 prompt 和信的开头，不能让它说了算
+  const ownerTitle = titleOf.resolveName(pet.ownerName || (payload && payload.ownerTitle));
   const stats = normalizeStats(payload && payload.stats);
   const talks = await collectTalks(openid);
   // 它最近自己在做什么。客户端当不可信输入处理：只留短词，不拼接任何自由文本

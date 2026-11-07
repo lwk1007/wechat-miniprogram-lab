@@ -2,6 +2,7 @@
 // 数据仅保存在本机 Storage，用于在未配置云环境时体验完整流程
 const { timeAgo } = require('./format');
 const { composeLetter } = require('./letter-template');
+const titleOf = require('./title');
 const moments = require('./moments');
 const brain = require('./chat-brain');
 const petLife = require('./pet-life');
@@ -78,7 +79,7 @@ async function createPet(data) {
     // 性格自定义（#9）：与云端 pets.persona 同结构，null 表示全用预设
     persona: data.persona || null,
     type: data.type || 'other',
-    ownerName: data.ownerName || '',
+    ownerName: titleOf.normalize(data.ownerName),
     sinceDate: data.sinceDate || '',
     storageMode: data.storageMode || 'private',
     photo: data.photo || '',
@@ -101,6 +102,8 @@ async function updatePet(patch) {
   ['name', 'personality', 'persona', 'type', 'ownerName', 'sinceDate', 'storageMode', 'photo', 'photoCut', 'photoCutKind'].forEach((k) => {
     if (patch[k] !== undefined) pet[k] = patch[k];
   });
+  // 称呼在存储层就归一化：空串代表「没填」，读取时才补「主人」
+  if (patch.ownerName !== undefined) pet.ownerName = titleOf.normalize(patch.ownerName);
   // 换了照片但没带新的透明版，说明这张新图没处理成功或者不需要处理：
   // 旧照片的抠图必须一起扔掉，否则新照片会顶着上一张的轮廓显示
   if (patch.photo !== undefined && patch.photoCut === undefined) {
@@ -260,7 +263,7 @@ async function getLetter() {
   return { letter, nextAt: letter ? letter.createdAt + LETTER_COOLDOWN : 0 };
 }
 
-async function generateLetter({ ownerTitle, stats } = {}) {
+async function generateLetter({ ownerTitle: passedTitle, stats } = {}) {
   const pet = get(K.pet, null);
   if (!pet) throw new Error('请先创建宠物');
 
@@ -270,6 +273,9 @@ async function generateLetter({ ownerTitle, stats } = {}) {
     const min = Math.max(1, Math.ceil((LETTER_COOLDOWN - (Date.now() - prev.createdAt)) / 60000));
     throw new Error('刚写过一封啦，' + min + ' 分钟后再来听听它想说什么吧');
   }
+
+  // 档案里的称呼优先，入参只做兜底：调用方可能是个还没读到 pet 的旧入口
+  const ownerTitle = titleOf.resolveName(pet.ownerName || passedTitle);
 
   const messages = get(K.messages, []) || [];
   const users = messages.filter((m) => m.role === 'user' && m.content);
@@ -283,7 +289,7 @@ async function generateLetter({ ownerTitle, stats } = {}) {
     _id: 'demo-letter-' + Date.now(),
     petId: pet._id,
     petName: pet.name,
-    ownerTitle: ownerTitle || '妈妈',
+    ownerTitle: ownerTitle || titleOf.DEFAULT_TITLE,
     content,
     isDemo: true,
     stats: stats || {},

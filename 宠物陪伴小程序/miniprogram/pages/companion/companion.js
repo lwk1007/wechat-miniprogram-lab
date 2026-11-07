@@ -3,6 +3,7 @@ const voice = require('../../utils/voice');
 const moments = require('../../utils/moments');
 const petLife = require('../../utils/pet-life');
 const timeline = require('../../utils/timeline');
+const titleOf = require('../../utils/title');
 const { randomFrom, greetingByHour } = require('../../utils/format');
 
 const PERSONALITY_LABEL = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
@@ -28,7 +29,6 @@ const SCENE_STATUS = {
 const SCENE_KEY = 'pet_scene';
 // 记住「这个场景是什么时候选的」：只存 id 的话，三天后回来还停在三天前那个时段
 const SCENE_AT_KEY = 'pet_scene_at';
-const TITLE_KEY = 'pet_owner_title';
 
 // 用户亲手选过场景，三小时内不自动带走（尊重当下的意愿）
 const SCENE_IDLE_MS = 3 * 3600 * 1000;
@@ -78,7 +78,7 @@ Page({
     ball: false,
     lifted: false,
     liftY: 0,
-    ownerTitle: '妈妈',
+    ownerTitle: titleOf.DEFAULT_TITLE,
     voiceOn: false,
 
     // 自主生命：心情徽章、活动特效、离线补记、足迹日记
@@ -269,8 +269,8 @@ Page({
         petCut = '';
         petCutKind = '';
       }
-      // 它怎么称呼你：宠物身上有就用宠物的，否则用本机记住的，再否则「妈妈」
-      const title = (pet && pet.ownerTitle) || wx.getStorageSync(TITLE_KEY) || '妈妈';
+      // 它怎么称呼你：唯一出口在 utils/title.js —— 填过就用填的，没填就是「主人」
+      const title = titleOf.resolve(pet);
 
       // 生命状态：只在这次进入页面算一次离线补记，
       // 否则从别的页面返回时时间差是 0，卡片会被反复清空又出现

@@ -1,5 +1,6 @@
 const api = require('../../utils/api');
 const privacy = require('../../utils/privacy');
+const titleOf = require('../../utils/title');
 
 const MODE_TEXT = { private: '隐私模式（照片最迟 24 小时删除）', persistent: '长期保存模式' };
 const PERSONALITY_TEXT = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
@@ -54,7 +55,7 @@ Page({
           '名字：' + pet.name,
           '类型：' + (TYPE_TEXT[pet.type] || '其他'),
           '性格：' + (PERSONALITY_TEXT[pet.personality] || '—'),
-          '它怎么称呼你：' + (pet.ownerName || '未设置'),
+          '它怎么称呼你：' + titleOf.label(pet),
           '保存模式：' + (MODE_TEXT[pet.storageMode] || '—'),
           '在一起的第几天起算：' + (pet.sinceDate || '未填写'),
           '档案创建时间：' + fmtTime(pet.createdAt),

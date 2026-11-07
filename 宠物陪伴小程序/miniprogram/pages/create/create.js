@@ -2,6 +2,7 @@ const api = require('../../utils/api');
 const cloudSvc = require('../../utils/cloud');
 const privacy = require('../../utils/privacy');
 const cutout = require('../../utils/cutout');
+const titleOf = require('../../utils/title');
 
 const PERSONALITIES = [
   { key: 'loyal', label: '忠心', desc: '一直守在你身边' },
@@ -185,7 +186,7 @@ Page({
       name: this.data.name,
       personality: this.data.personality,
       type: this.data.types[this.data.typeIndex].key,
-      ownerName: this.data.ownerName,
+      ownerName: titleOf.normalize(this.data.ownerName),
       sinceDate: this.data.sinceDate,
       storageMode: this.data.mode
     };

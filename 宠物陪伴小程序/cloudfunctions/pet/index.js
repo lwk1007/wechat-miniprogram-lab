@@ -1,4 +1,5 @@
 const cloud = require('wx-server-sdk');
+const titleOf = require('./title');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const _ = db.command;
@@ -139,7 +140,7 @@ async function createPet(openid, p) {
       personality: p.personality,
       persona: personaDoc,
       type: p.type || 'other',
-      ownerName: (p.ownerName || '').trim().slice(0, 12),
+      ownerName: titleOf.normalize(p.ownerName),
       sinceDate: p.sinceDate || '',
       storageMode,
       photo: p.photoFileID || '',
@@ -171,7 +172,7 @@ async function updatePet(openid, p) {
     patch.persona = sanitizePersona(p.persona);
   }
   if (p.type !== undefined && TYPES.includes(p.type)) patch.type = p.type;
-  if (p.ownerName !== undefined) patch.ownerName = p.ownerName.trim().slice(0, 12);
+  if (p.ownerName !== undefined) patch.ownerName = titleOf.normalize(p.ownerName);
   if (p.sinceDate !== undefined) patch.sinceDate = p.sinceDate;
 
   // 更换照片：旧素材立即标记过期（由清理任务删除文件），新素材按当前模式建档

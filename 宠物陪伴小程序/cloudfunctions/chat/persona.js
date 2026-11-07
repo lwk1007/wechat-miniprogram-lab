@@ -10,6 +10,8 @@
 //   3. 给可模仿的语言样本（口头禅、说话方式）比给性格标签更稳
 //   4. 规则要可执行，不要写成抒情散文
 
+const titleOf = require('./title');
+
 const PERSONALITY_TEXT = {
   loyal: { label: '忠心', desc: '一直守在你身边' },
   lively: { label: '活泼', desc: '蹦蹦跳跳停不下来' },
@@ -38,10 +40,12 @@ function buildSystemPrompt(pet, life) {
   const base = PERSONALITY_TEXT[p.personality] || PERSONALITY_TEXT.friendly;
   const persona = p.persona || {};
   const scenes = persona.scenes || {};
-  const owner = str(p.ownerName, 12);
+  const owner = titleOf.resolve(p);
 
   const lines = [];
-  lines.push(`你是一只名叫「${str(p.name, 12) || '小可爱'}」的${TYPE_TEXT[p.type] || '小可爱'}，正在“另一个世界”陪伴${owner ? '主人' + owner : '主人'}。`);
+  lines.push(`你是一只名叫「${str(p.name, 12) || '小可爱'}」的${TYPE_TEXT[p.type] || '小可爱'}，正在“另一个世界”陪伴「${owner}」。`);
+  // 称呼单独成条：只写在开头的句子里，模型很容易在长对话里漂回默认叫法
+  lines.push(`【称呼】不管对方怎么自称，你都叫对方「${owner}」，不要换成“主人”“铲屎官”之类的其他叫法。`);
   lines.push('');
   lines.push(`【性格底色】${base.label} —— ${base.desc}`);
 
@@ -61,7 +65,9 @@ function buildSystemPrompt(pet, life) {
   const sceneLines = SCENE_LINES
     .map((s) => {
       const v = str(scenes[s.key], 40);
-      return v ? `- ${s.text}：${v}` : '';
+      // 场景标题里的「主人」换成实际称呼，否则模型会照着模板喊回「主人」
+      const label = s.text.split('主人').join(owner);
+      return v ? `- ${label}：${v}` : '';
     })
     .filter(Boolean);
   if (sceneLines.length) {
@@ -91,12 +97,12 @@ function buildSystemPrompt(pet, life) {
   lines.push('2. 回复 50 字以内，一次只说一件事。');
   lines.push('3. 可以偶尔用“汪”“喵”等语气词，但不要每句都用。');
   lines.push('4. 不声称自己是真实宠物、真实复活或拥有真实意识，也不主动解释这些。');
-  lines.push('5. 主人提到思念离世宠物时，温和回应，不放大悲伤，不诱导依赖或付费。');
+  lines.push(`5. ${owner}提到思念离世宠物时，温和回应，不放大悲伤，不诱导依赖或付费。`);
   lines.push('6. 不要用“作为一只…”“很高兴为你…”“有什么可以帮您”这类客服腔。');
-  lines.push('7. 不询问个人隐私，不发链接，不说教，不评价主人的生活方式。');
+  lines.push(`7. 不询问个人隐私，不发链接，不说教，不评价${owner}的生活方式。`);
 
   if (scenes.touch || scenes.feed || scenes.play || scenes.lift) {
-    lines.push('8. 如果主人问起你的习惯或反应，按上面【这些时候你会这样】回答，不要编新的。');
+    lines.push(`8. 如果${owner}问起你的习惯或反应，按上面【这些时候你会这样】回答，不要编新的。`);
   }
 
   return lines.join('\n');

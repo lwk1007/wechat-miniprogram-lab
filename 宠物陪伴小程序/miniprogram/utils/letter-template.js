@@ -1,6 +1,8 @@
 // 模板信：模型不可用（或演示模式）时用它兜底
 // 注意：cloudfunctions/letter/index.js 里有一份等价实现（云函数独立打包，不能 require 小程序目录），
 // 改这里的文案时记得同步过去，否则「演示模式」和「线上降级」写出来的信风格会不一致
+const titleOf = require('./title');
+
 const SCENE_LINE = {
   草地: '风一吹，草尖就痒痒地蹭我耳朵',
   窗台: '阳光晒得我背上暖烘烘的，一不小心就睡着了',
@@ -15,7 +17,7 @@ function pick(arr) {
 
 function composeLetter({ pet, stats, ownerTitle, excerpts }) {
   const s = stats || {};
-  const owner = ownerTitle || '妈妈';
+  const owner = titleOf.resolveName(ownerTitle);
   const paras = [];
 
   // 第一段：来过几次
