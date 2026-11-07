@@ -42,11 +42,12 @@ function typeIcon(type) {
   if (type === 'diary') return '🐾';
   if (type === 'letter') return '💌';   // 它写给你的信
   if (type === 'tribute') return '🕯️';  // 你写给它的思念信
+  if (type === 'voice') return '🎙️';    // 你录下的声音
   return '•';
 }
 
 // 组装完整时间轴（倒序，最新在前），并按天分组
-function build({ pet, diary, letters, tributes, now }) {
+function build({ pet, diary, letters, tributes, voices, now }) {
   const t = now == null ? Date.now() : now;
   const start = together.startAt(pet || {});
   const days = together.daysTogether(pet || {}, t);
@@ -114,6 +115,18 @@ function build({ pet, diary, letters, tributes, now }) {
     });
   });
 
+  // 声音纪念（你录下的真实声音）
+  (voices || []).forEach((v) => {
+    if (!v || !v.createdAt) return;
+    events.push({
+      type: 'voice',
+      ts: v.createdAt,
+      day: 0,
+      text: '录下了一段声音：' + (v.title || '想对它说的话'),
+      icon: typeIcon('voice')
+    });
+  });
+
   // 按时间倒序
   events.sort((a, b) => b.ts - a.ts);
   // 给每个事件一个稳定 key（同一天同类事件用序号区分），供 wx:for 使用
@@ -141,7 +154,7 @@ function build({ pet, diary, letters, tributes, now }) {
 }
 
 // 往年今日：陪伴满一年后，回看「去年的今天」附近发生了什么
-function onThisDay({ pet, diary, letters, tributes, now }) {
+function onThisDay({ pet, diary, letters, tributes, voices, now }) {
   const t = now == null ? Date.now() : now;
   const start = together.startAt(pet || {});
   const days = together.daysTogether(pet || {}, t);
@@ -173,6 +186,12 @@ function onThisDay({ pet, diary, letters, tributes, now }) {
   (tributes || []).forEach((t) => {
     if (t && t.createdAt && Math.abs(t.createdAt - target) < 12 * 3600e3) {
       items.push({ type: 'tribute', text: '你给它写了一封思念信', icon: '🕯️' });
+    }
+  });
+  // 那天的声音
+  (voices || []).forEach((v) => {
+    if (v && v.createdAt && Math.abs(v.createdAt - target) < 12 * 3600e3) {
+      items.push({ type: 'voice', text: '录下了一段声音', icon: '🎙️' });
     }
   });
 

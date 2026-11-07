@@ -1,0 +1,168 @@
+/* 声音纪念页 */
+
+.intro {
+  display: flex;
+  align-items: flex-start;
+  margin: 24rpx;
+  padding: 28rpx 32rpx;
+}
+.intro-icon {
+  width: 80rpx; height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 44rpx;
+  background: var(--primary-light);
+  border-radius: 20rpx;
+  flex-shrink: 0;
+}
+.intro-body { margin-left: 24rpx; }
+.intro-title { font-size: 30rpx; font-weight: 500; }
+.intro-desc { margin-top: 6rpx; font-size: 24rpx; color: var(--sub); line-height: 1.6; }
+
+/* 录音区 */
+.record-zone {
+  margin: 0 24rpx;
+  padding: 48rpx 32rpx;
+  text-align: center;
+}
+.rec-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.rec-btn:active { opacity: 0.7; }
+.rec-btn-icon {
+  width: 140rpx; height: 140rpx;
+  line-height: 140rpx;
+  font-size: 72rpx;
+  background: linear-gradient(135deg, #F3E8F8 0%, #EBDCF4 100%);
+  border: 3rpx solid rgba(150, 100, 190, 0.25);
+  border-radius: 50%;
+}
+.rec-btn-text { margin-top: 20rpx; font-size: 28rpx; font-weight: 500; color: #6A4A82; }
+.rec-hint { margin-top: 16rpx; font-size: 22rpx; color: var(--sub); }
+
+.rec-timer {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #D97A6C;
+  font-variant-numeric: tabular-nums;
+}
+.rec-meter {
+  margin: 24rpx auto 0;
+  width: 80%;
+  height: 12rpx;
+  background: #EFEFF2;
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+.rec-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #E8A87C 0%, #D97A6C 100%);
+  border-radius: 999rpx;
+  transition: width 0.12s linear;
+}
+.rec-stop {
+  margin: 36rpx auto 0;
+  width: 240rpx;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #fff;
+  background: #D97A6C;
+  border-radius: 999rpx;
+}
+.rec-stop:active { opacity: 0.8; }
+
+/* 编辑面板 */
+.edit-panel {
+  margin: 24rpx;
+  padding: 28rpx 32rpx;
+}
+.edit-head { font-size: 28rpx; font-weight: 500; margin-bottom: 20rpx; }
+.edit-input {
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  background: #F7F8FA;
+  border-radius: 16rpx;
+}
+.mood-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin: 20rpx 0;
+}
+.mood-chip {
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+  color: var(--text);
+  background: #F2F3F5;
+  border-radius: 999rpx;
+}
+.mood-chip.on {
+  color: var(--primary);
+  background: var(--primary-light);
+  font-weight: 500;
+}
+.edit-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 140rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  background: #F7F8FA;
+  border-radius: 16rpx;
+}
+.edit-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 24rpx;
+}
+.edit-btn { flex: 1; }
+
+/* 列表 */
+.voice-list { margin: 24rpx; }
+.voice-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding: 24rpx;
+}
+.voice-play {
+  width: 72rpx; height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #A8C9A8 0%, #6FA58A 100%);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.voice-play:active { opacity: 0.8; }
+.voice-play.on {
+  background: linear-gradient(135deg, #E8A87C 0%, #D97A6C 100%);
+}
+.voice-body { flex: 1; margin-left: 20rpx; overflow: hidden; }
+.voice-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.voice-mood { margin-left: 8rpx; font-size: 22rpx; color: var(--primary); font-weight: 400; }
+.voice-note {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  color: var(--sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.voice-meta { margin-top: 4rpx; font-size: 22rpx; color: var(--sub); }
+.voice-del {
+  margin-left: 16rpx;
+  font-size: 24rpx;
+  color: #C9D2CC;
+  flex-shrink: 0;
+}
+.voice-del:active { color: #D97A6C; }

@@ -236,6 +236,16 @@
       <view class="time-entry-arrow">›</view>
     </view>
 
+    <!-- 声音纪念：录下想对它说的话，留住它真实的声音 -->
+    <view class="voice-entry" bindtap="goVoiceMemory">
+      <view class="voice-entry-icon">🎙️</view>
+      <view class="voice-entry-text">
+        <view class="voice-entry-title">声音纪念</view>
+        <view class="voice-entry-desc">录下想对它说的话，留住它的声音</view>
+      </view>
+      <view class="voice-entry-arrow">›</view>
+    </view>
+
     <!-- 以宠物口吻写的一封信 -->
     <view class="letter-entry" bindtap="goLetter">
       <view class="letter-entry-icon">💌</view>

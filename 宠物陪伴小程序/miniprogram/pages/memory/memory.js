@@ -2,6 +2,7 @@ const api = require('../../utils/api');
 const petLife = require('../../utils/pet-life');
 const together = require('../../utils/together');
 const tribute = require('../../utils/tribute');
+const voiceMemory = require('../../utils/voice-memory');
 const memory = require('../../utils/memory-timeline');
 
 Page({
@@ -32,13 +33,14 @@ Page({
       const diary = petLife.getDiaryList();
       const letters = await api.listLetters();
       const tributes = tribute.list();
+      const voices = voiceMemory.list();
       const now = Date.now();
 
       // 概览：第 N 天 + 互动统计（together.summary 内部聚合 moments）
       const summary = together.summary(pet, now);
       // 时间轴 + 往年今日（纯函数，时间注入同一个 now）
-      const tl = memory.build({ pet, diary, letters, tributes, now });
-      const otd = memory.onThisDay({ pet, diary, letters, tributes, now });
+      const tl = memory.build({ pet, diary, letters, tributes, voices, now });
+      const otd = memory.onThisDay({ pet, diary, letters, tributes, voices, now });
 
       this.setData({
         petName: pet.name || '它',

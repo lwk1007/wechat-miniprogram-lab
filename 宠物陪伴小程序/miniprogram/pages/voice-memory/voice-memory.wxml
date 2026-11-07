@@ -1,0 +1,75 @@
+<view class="page safe-bottom">
+
+  <!-- 说明：声音是真实存档，不是 AI 合成 -->
+  <view class="intro card">
+    <view class="intro-icon">🎙️</view>
+    <view class="intro-body">
+      <view class="intro-title">声音纪念</view>
+      <view class="intro-desc">录下想对它说的话，或留住它真实的声音。声音只存在你的手机里，不上传、也不会被 AI 改动。</view>
+    </view>
+  </view>
+
+  <!-- 录音区 -->
+  <view class="record-zone card">
+    <block wx:if="{{!recording}}">
+      <view class="rec-btn" bindtap="startRec">
+        <view class="rec-btn-icon">🎙️</view>
+        <view class="rec-btn-text">点一下开始录音</view>
+      </view>
+      <view class="rec-hint">最长 1 分钟 · 说点想对它说的</view>
+    </block>
+    <block wx:else>
+      <view class="rec-timer">{{recSecs}} 秒</view>
+      <view class="rec-meter">
+        <view class="rec-meter-fill" style="width: {{recLevel * 100}}%"></view>
+      </view>
+      <view class="rec-stop" bindtap="stopRec">结束录音</view>
+      <view class="rec-hint">正在听你说话…</view>
+    </block>
+  </view>
+
+  <!-- 编辑面板（录音完成后弹出） -->
+  <view wx:if="{{editing}}" class="edit-panel card">
+    <view class="edit-head">为这段声音写点什么</view>
+    <input class="edit-input" placeholder="标题（可选）" value="{{draft.title}}" maxlength="20" bindinput="inputTitle" />
+    <view class="mood-row">
+      <view
+        wx:for="{{moodOptions}}"
+        wx:key="key"
+        class="mood-chip {{draft.mood === item.key ? 'on' : ''}}"
+        data-mood="{{item.key}}"
+        bindtap="pickMood"
+      >{{item.face}} {{item.label}}</view>
+    </view>
+    <textarea class="edit-textarea" placeholder="写一句此刻想说的话（可选）" value="{{draft.note}}" maxlength="120" bindinput="inputNote" />
+    <view class="edit-actions">
+      <view class="btn-ghost edit-btn" bindtap="cancelDraft">取消</view>
+      <view class="btn-primary edit-btn" bindtap="saveDraft">珍藏这段声音</view>
+    </view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="voice-list">
+    <view wx:if="{{voices.length === 0 && !editing}}" class="empty">
+      <view class="empty-icon">🎙️</view>
+      <view>还没有珍藏的声音</view>
+    </view>
+    <view wx:for="{{voices}}" wx:key="_id" class="voice-item card">
+      <view
+        class="voice-play {{playingId === item._id && playing ? 'on' : ''}}"
+        data-id="{{item._id}}"
+        bindtap="play"
+      >{{playingId === item._id && playing ? '⏸' : '▶'}}</view>
+      <view class="voice-body">
+        <view class="voice-title">
+          {{item.title || '一段想说的话'}}
+          <text wx:if="{{item.moodFace}}" class="voice-mood">{{item.moodFace}} {{item.moodLabel}}</text>
+        </view>
+        <view wx:if="{{item.note}}" class="voice-note">{{item.note}}</view>
+        <view class="voice-meta">{{item.durationText}} · {{item.dateText}}</view>
+      </view>
+      <view class="voice-del" data-id="{{item._id}}" catchtap="removeVoice">删除</view>
+    </view>
+  </view>
+
+</view>

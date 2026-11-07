@@ -10,6 +10,7 @@
     "pages/mood-log/mood-log",
     "pages/tribute/tribute",
     "pages/time-capsule/time-capsule",
+    "pages/voice-memory/voice-memory",
     "pages/data-export/data-export"
   ],
   "window": {

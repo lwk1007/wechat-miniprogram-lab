@@ -702,6 +702,11 @@ Page({
     wx.navigateTo({ url: '/pages/time-capsule/time-capsule' });
   },
 
+  goVoiceMemory() {
+    if (!this.data.pet) return;
+    wx.navigateTo({ url: '/pages/voice-memory/voice-memory' });
+  },
+
   goLetter() {
     if (!this.data.pet) return;
     wx.navigateTo({ url: '/pages/letter/letter' });

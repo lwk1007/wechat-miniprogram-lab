@@ -794,6 +794,31 @@
 .time-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #A08B5C; }
 .time-entry-arrow { font-size: 40rpx; color: #D8C8A0; }
 
+/* 声音纪念入口：淡紫卡片，声音与记忆的意象 */
+.voice-entry {
+  display: flex;
+  align-items: center;
+  margin: 0 24rpx 16rpx;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #F7F0FB 0%, #F1E7F7 100%);
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(150, 110, 185, 0.18);
+}
+.voice-entry:active { opacity: 0.75; }
+.voice-entry-icon {
+  width: 76rpx; height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  font-size: 40rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 14rpx rgba(150, 110, 185, 0.12);
+}
+.voice-entry-text { flex: 1; margin-left: 24rpx; }
+.voice-entry-title { font-size: 30rpx; font-weight: 500; color: #5A3A6E; }
+.voice-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #9A7FAE; }
+.voice-entry-arrow { font-size: 40rpx; color: #D6C6DE; }
+
 /* 一封信入口：暖色卡片，和下面的桌面入口区分开 */
 .letter-entry {
   display: flex;
