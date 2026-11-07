@@ -6,6 +6,7 @@ const moments = require('./moments');
 const petLife = require('./pet-life');
 const moodLog = require('./mood-log');
 const tribute = require('./tribute');
+const timeCapsule = require('./time-capsule');
 
 const K = {
   pet: 'demo_pet',
@@ -98,6 +99,7 @@ async function deletePet() {
   petLife.reset();
   moodLog.reset();
   tribute.reset();
+  timeCapsule.reset();
 }
 
 // 立即删除照片（不等 22 小时自动过期）
@@ -126,6 +128,7 @@ async function purgeAll() {
   petLife.reset();
   moodLog.reset();
   tribute.reset();
+  timeCapsule.reset();
   return { purged: true, summary };
 }
 

@@ -697,6 +697,11 @@ Page({
     wx.navigateTo({ url: '/pages/tribute/tribute' });
   },
 
+  goTimeCapsule() {
+    if (!this.data.pet) return;
+    wx.navigateTo({ url: '/pages/time-capsule/time-capsule' });
+  },
+
   goLetter() {
     if (!this.data.pet) return;
     wx.navigateTo({ url: '/pages/letter/letter' });

@@ -4,6 +4,7 @@ const personaUtil = require('../../utils/persona');
 const petLife = require('../../utils/pet-life');
 const moodLog = require('../../utils/mood-log');
 const tribute = require('../../utils/tribute');
+const timeCapsule = require('../../utils/time-capsule');
 
 const PERSONALITY_LABEL = { loyal: '忠心', lively: '活泼', foodie: '贪吃', friendly: '亲人' };
 
@@ -98,6 +99,7 @@ Page({
           try { petLife.reset(); } catch (e2) { /* ignore */ }
           try { moodLog.reset(); } catch (e2) { /* ignore */ }
           try { tribute.reset(); } catch (e2) { /* ignore */ }
+          try { timeCapsule.reset(); } catch (e2) { /* ignore */ }
           wx.showToast({ title: '已删除', icon: 'success' });
           this.load();
         } catch (e) {
@@ -156,6 +158,7 @@ Page({
               try { petLife.reset(); } catch (e2) { /* ignore */ }
               try { moodLog.reset(); } catch (e2) { /* ignore */ }
               try { tribute.reset(); } catch (e2) { /* ignore */ }
+              try { timeCapsule.reset(); } catch (e2) { /* ignore */ }
               const s = (res && res.summary) || {};
               wx.showModal({
                 title: '已清空',

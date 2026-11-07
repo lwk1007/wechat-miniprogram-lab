@@ -1,0 +1,84 @@
+<view class="page safe-bottom">
+
+  <!-- 埋胶囊 -->
+  <view class="card">
+    <view class="card-title">埋下一个时光胶囊</view>
+    <view class="card-sub">写给未来的自己，也写给未来的它</view>
+
+    <view wx:if="{{!showForm}}" class="btn-primary capsule-cta" bindtap="showForm">开始写</view>
+
+    <block wx:else>
+      <view class="form-item">
+        <view class="form-label">胶囊名字（可选）</view>
+        <input class="form-input" placeholder="比如：给一年后的我们" value="{{title}}" maxlength="20" bindinput="onTitle" />
+      </view>
+      <view class="form-item">
+        <view class="form-label">想对未来说的话</view>
+        <textarea class="letter-input" placeholder="时间会把它带到你想去的未来…" placeholder-class="letter-ph" value="{{content}}" maxlength="500" bindinput="onContent" />
+      </view>
+      <view class="form-item">
+        <view class="form-label">什么时候开启</view>
+        <picker mode="date" start="{{minDate}}" end="{{maxDate}}" value="{{unlockDate}}" bindchange="onDate">
+          <view class="form-input date-pick {{unlockDate ? '' : 'ph'}}">{{unlockDate || '选一个未来的日子'}}</view>
+        </picker>
+      </view>
+      <view class="btn-primary {{content && unlockDate ? '' : 'disabled'}}" bindtap="save">埋下胶囊</view>
+      <view class="btn-ghost capsule-cta" bindtap="hideForm">取消</view>
+    </block>
+  </view>
+
+  <!-- 统计 -->
+  <view wx:if="{{capsules.length > 0}}" class="stat-line">已埋下 {{capsules.length}} 颗胶囊</view>
+
+  <!-- 胶囊列表 -->
+  <block wx:if="{{capsules.length > 0}}">
+    <view wx:for="{{capsules}}" wx:key="_id" class="capsule-card card" data-id="{{item._id}}" bindtap="onTapCapsule">
+      <view class="capsule-head">
+        <text class="capsule-tag">{{item.unlocked ? (item.openedAt ? '已开启' : '待开启') : '等待中'}}</text>
+        <text class="capsule-del" data-id="{{item._id}}" catchtap="removeCapsule">删除</text>
+      </view>
+
+      <!-- 锁定：倒计时，内容不可见 -->
+      <block wx:if="{{!item.unlocked}}">
+        <view class="capsule-lock-icon">🔒</view>
+        <view class="capsule-title">{{item.title || '未命名胶囊'}}</view>
+        <view class="capsule-count">{{item.countdown}}</view>
+      </block>
+
+      <!-- 解锁未读：点击开启 -->
+      <block wx:elif="{{!item.openedAt}}">
+        <view class="capsule-ready">
+          <view class="capsule-lock-icon">⏰</view>
+          <view class="capsule-title">时间到了</view>
+          <view class="capsule-count">点这里，开启这封写给未来的信</view>
+        </view>
+      </block>
+
+      <!-- 已读：内容展开 -->
+      <block wx:else>
+        <view class="capsule-open-title">{{item.title || '未命名胶囊'}}</view>
+        <view class="capsule-content">{{item.content}}</view>
+        <view class="capsule-meta">{{item.dateText}} 埋下{{item.openText ? ' · ' + item.openText + ' 开启' : ''}}</view>
+      </block>
+    </view>
+  </block>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty">
+    <view class="empty-icon">⏳</view>
+    <view>还没有埋下时光胶囊</view>
+    <view class="sub">把一句话埋进时间，等未来的某天再打开</view>
+  </view>
+
+  <!-- 开启仪式 -->
+  <view wx:if="{{opening}}" class="open-mask">
+    <view class="open-card card">
+      <view class="open-icon">📜</view>
+      <view class="open-title">时间到了</view>
+      <view class="open-text">这是你在 {{opening.dateText}} 写给未来的话</view>
+      <view class="open-content">{{opening.content}}</view>
+      <view class="btn-ghost open-btn" bindtap="closeOpen">收好这封信</view>
+    </view>
+  </view>
+
+</view>

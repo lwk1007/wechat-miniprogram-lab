@@ -769,6 +769,31 @@
 .mini-entry-title { font-size: 28rpx; font-weight: 500; }
 .mini-entry-desc { margin-top: 2rpx; font-size: 22rpx; color: var(--sub); }
 
+/* 时光胶囊入口：淡琥珀卡片，时间与等待的意象 */
+.time-entry {
+  display: flex;
+  align-items: center;
+  margin: 0 24rpx 16rpx;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #FBF5EA 0%, #F6EBD6 100%);
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(186, 150, 80, 0.18);
+}
+.time-entry:active { opacity: 0.75; }
+.time-entry-icon {
+  width: 76rpx; height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  font-size: 40rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 14rpx rgba(160, 120, 60, 0.12);
+}
+.time-entry-text { flex: 1; margin-left: 24rpx; }
+.time-entry-title { font-size: 30rpx; font-weight: 500; color: #5A4A28; }
+.time-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #A08B5C; }
+.time-entry-arrow { font-size: 40rpx; color: #D8C8A0; }
+
 /* 一封信入口：暖色卡片，和下面的桌面入口区分开 */
 .letter-entry {
   display: flex;

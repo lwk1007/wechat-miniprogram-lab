@@ -226,6 +226,16 @@
       </view>
     </view>
 
+    <!-- 时光胶囊：写一句给未来的话，等时间到了再打开 -->
+    <view class="time-entry" bindtap="goTimeCapsule">
+      <view class="time-entry-icon">⏳</view>
+      <view class="time-entry-text">
+        <view class="time-entry-title">时光胶囊</view>
+        <view class="time-entry-desc">写一句给未来的话，等时间到了再打开</view>
+      </view>
+      <view class="time-entry-arrow">›</view>
+    </view>
+
     <!-- 以宠物口吻写的一封信 -->
     <view class="letter-entry" bindtap="goLetter">
       <view class="letter-entry-icon">💌</view>

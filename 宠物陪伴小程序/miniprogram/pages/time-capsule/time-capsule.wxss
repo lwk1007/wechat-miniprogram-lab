@@ -1,0 +1,90 @@
+.page { padding-bottom: 48rpx; }
+.card-title { font-size: 32rpx; font-weight: 600; }
+.card-sub { margin-top: 4rpx; font-size: 24rpx; color: var(--sub); }
+.capsule-cta { margin-top: 24rpx; }
+
+.letter-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  min-height: 160rpx;
+  margin-top: 12rpx;
+}
+.letter-ph { color: #B5BDB8; }
+.date-pick { margin-top: 12rpx; }
+.date-pick.ph { color: #B5BDB8; }
+
+.stat-line {
+  margin: 8rpx 32rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--sub);
+}
+
+/* ---------- 胶囊卡片 ---------- */
+.capsule-card { padding: 28rpx 32rpx; }
+.capsule-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+.capsule-tag {
+  font-size: 22rpx;
+  color: var(--primary);
+  background: var(--primary-light);
+  border-radius: 8rpx;
+  padding: 2rpx 12rpx;
+}
+.capsule-del { font-size: 24rpx; color: #B5BDB8; padding: 4rpx 8rpx; }
+
+.capsule-lock-icon { font-size: 48rpx; text-align: center; margin: 12rpx 0 8rpx; }
+.capsule-title { font-size: 30rpx; font-weight: 600; text-align: center; }
+.capsule-count { text-align: center; font-size: 24rpx; color: var(--sub); margin-top: 6rpx; }
+.capsule-ready { text-align: center; padding: 8rpx 0; }
+
+.capsule-open-title { font-size: 30rpx; font-weight: 600; }
+.capsule-content {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  line-height: 1.7;
+  word-break: break-all;
+}
+.capsule-meta { margin-top: 12rpx; font-size: 22rpx; color: var(--sub); }
+
+/* ---------- 开启仪式 ---------- */
+.open-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(28, 40, 34, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+.open-card {
+  width: 560rpx;
+  text-align: center;
+  padding: 48rpx 40rpx;
+  margin: 0;
+  box-sizing: border-box;
+}
+.open-icon { font-size: 72rpx; margin-bottom: 12rpx; }
+.open-title { font-size: 36rpx; font-weight: 600; }
+.open-text { margin-top: 8rpx; font-size: 24rpx; color: var(--sub); }
+.open-content {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
+  text-align: left;
+  word-break: break-all;
+  max-height: 480rpx;
+  overflow-y: auto;
+}
+.open-btn { margin-top: 32rpx; }
