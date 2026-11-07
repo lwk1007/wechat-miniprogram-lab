@@ -10,7 +10,7 @@
 //   node scripts/sync-shared.js --check  只校验，不一致则退出码 1（供测试用）
 //
 // 新增共享模块时，在 SHARED 里加一行即可。to 支持多个目标：
-// 一个模块可能被好几个云函数用到（称呼就是 chat / letter / pet 三个都要）。
+// 一个模块可能被好几个云函数用到（称呼就是 letter / pet 两个都要）。
 
 const fs = require('fs');
 const path = require('path');
