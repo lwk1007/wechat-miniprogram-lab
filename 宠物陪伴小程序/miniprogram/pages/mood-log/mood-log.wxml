@@ -1,0 +1,84 @@
+<view class="page safe-bottom">
+
+  <!-- 今日记录 -->
+  <view class="card">
+    <view class="card-title">今天，想对它说</view>
+    <view class="card-sub">记下此刻的心情，一天一条</view>
+
+    <view class="mood-options">
+      <view
+        wx:for="{{moodList}}"
+        wx:key="key"
+        class="mood-opt {{selected === item.key ? 'on' : ''}}"
+        data-mood="{{item.key}}"
+        bindtap="pickMood"
+      >
+        <view class="mood-face">{{item.face}}</view>
+        <view class="mood-label">{{item.label}}</view>
+      </view>
+    </view>
+
+    <textarea
+      class="note-input"
+      placeholder="写一句想对它说的话（可选）"
+      placeholder-class="note-ph"
+      value="{{note}}"
+      maxlength="120"
+      bindinput="onNote"
+    />
+
+    <view class="btn-primary {{selected ? '' : 'disabled'}}" bindtap="save">记下此刻</view>
+  </view>
+
+  <!-- 安心卡：心情低落时出现 -->
+  <view wx:if="{{soothe}}" class="soothe card">
+    <view class="soothe-title">{{soothe.face}} 抱一抱此刻的你</view>
+    <view class="soothe-text">{{soothe.text}}</view>
+
+    <view wx:if="{{!breathing}}" class="btn-ghost soothe-btn" bindtap="startBreath">做一次呼吸练习</view>
+    <view wx:else class="breath">
+      <view class="breath-ring {{breathPhase}}">
+        <view class="breath-inner">
+          <view class="breath-step">{{breathStep}}</view>
+          <view class="breath-left">{{breathLeft}}</view>
+        </view>
+      </view>
+      <view class="breath-hint">跟着节奏，慢慢呼吸</view>
+    </view>
+  </view>
+
+  <!-- 月历回看 -->
+  <view class="card">
+    <view class="cal-head">
+      <view class="cal-nav" bindtap="prevMonth">‹</view>
+      <view class="cal-month">{{monthText}}</view>
+      <view class="cal-nav" bindtap="nextMonth">›</view>
+    </view>
+
+    <view class="cal-week">
+      <view wx:for="{{['一','二','三','四','五','六','日']}}" wx:key="*this" class="cal-week-item">{{item}}</view>
+    </view>
+
+    <view class="cal-grid">
+      <view
+        wx:for="{{cells}}"
+        wx:key="index"
+        class="cal-cell {{item.blank ? 'blank' : ''}} {{item.isToday ? 'today' : ''}}"
+      >
+        <view wx:if="{{!item.blank}}" class="cal-day" style="{{item.color ? 'background:' + item.color + ';' : ''}}">
+          {{item.day}}
+        </view>
+      </view>
+    </view>
+
+    <view class="cal-legend">
+      <view wx:for="{{moodList}}" wx:key="key" class="legend-item">
+        <view class="legend-dot" style="background: {{item.color}}"></view>
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{summary.days > 0}}" class="cal-count">已经记下了 {{summary.days}} 天的心情</view>
+  </view>
+
+</view>

@@ -195,6 +195,16 @@
   background: linear-gradient(135deg, #FFFAF0 0%, #FDF2E1 100%);
   border: 1rpx solid rgba(192, 139, 78, 0.12);
 }
+
+/* 思念信：淡橙，和来信的暖黄区分开 */
+.tl-card.tribute {
+  background: linear-gradient(135deg, #FFF5EE 0%, #FDEADB 100%);
+  border: 1rpx solid rgba(190, 120, 70, 0.12);
+}
+.tl-dot.tribute {
+  background: #FDEADB;
+  border-color: #E8C8A8;
+}
 .tl-cta {
   margin-top: 10rpx;
   font-size: 24rpx;

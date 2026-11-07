@@ -741,6 +741,34 @@
 .memory-entry-desc { margin-top: 4rpx; font-size: 24rpx; color: #7B8BA0; }
 .memory-entry-arrow { font-size: 40rpx; color: #C2D0DE; }
 
+/* 心情日志 + 思念信箱：两个轻量入口并排 */
+.mini-entries {
+  display: flex;
+  gap: 16rpx;
+  margin: 0 24rpx 16rpx;
+}
+.mini-entry {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+}
+.mini-entry:active { opacity: 0.7; }
+.mini-entry-icon {
+  width: 68rpx;
+  height: 68rpx;
+  line-height: 68rpx;
+  text-align: center;
+  font-size: 36rpx;
+  background: var(--primary-light);
+  border-radius: 18rpx;
+}
+.mini-entry-text { margin-left: 16rpx; }
+.mini-entry-title { font-size: 28rpx; font-weight: 500; }
+.mini-entry-desc { margin-top: 2rpx; font-size: 22rpx; color: var(--sub); }
+
 /* 一封信入口：暖色卡片，和下面的桌面入口区分开 */
 .letter-entry {
   display: flex;

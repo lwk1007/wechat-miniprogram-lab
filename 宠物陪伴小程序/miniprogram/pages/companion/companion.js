@@ -687,6 +687,16 @@ Page({
     wx.navigateTo({ url: '/pages/memory/memory' });
   },
 
+  goMoodLog() {
+    if (!this.data.pet) return;
+    wx.navigateTo({ url: '/pages/mood-log/mood-log' });
+  },
+
+  goTribute() {
+    if (!this.data.pet) return;
+    wx.navigateTo({ url: '/pages/tribute/tribute' });
+  },
+
   goLetter() {
     if (!this.data.pet) return;
     wx.navigateTo({ url: '/pages/letter/letter' });

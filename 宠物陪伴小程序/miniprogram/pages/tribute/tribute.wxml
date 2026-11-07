@@ -1,0 +1,60 @@
+<view class="page safe-bottom">
+
+  <!-- 写信 -->
+  <view class="card">
+    <view class="card-title">写一封思念信</view>
+    <view class="card-sub">有些话，说给风听，也说给它听</view>
+    <textarea
+      class="letter-input"
+      placeholder="写下你想对它说的话…"
+      placeholder-class="letter-ph"
+      value="{{content}}"
+      maxlength="500"
+      bindinput="onContent"
+    />
+    <view class="btn-primary {{content ? '' : 'disabled'}}" bindtap="send">寄出这封信</view>
+  </view>
+
+  <!-- 统计 -->
+  <view wx:if="{{letters.length > 0}}" class="stat-line">
+    <text>已写下 {{letters.length}} 封思念</text>
+    <text wx:if="{{litCount > 0}}"> · 点亮 {{litCount}} 盏灯</text>
+  </view>
+
+  <!-- 历史思念信 -->
+  <block wx:if="{{letters.length > 0}}">
+    <view wx:for="{{letters}}" wx:key="_id" class="tribute-item card">
+      <view class="tribute-head">
+        <text class="tribute-date">{{item.dateText}}</text>
+        <text class="tribute-candle {{item.lit ? 'on' : ''}}">{{item.lit ? '🕯️' : '✉️'}}</text>
+      </view>
+      <view class="tribute-content">{{item.content}}</view>
+    </view>
+  </block>
+
+  <!-- 还没有写过 -->
+  <view wx:else class="empty">
+    <view class="empty-icon">💌</view>
+    <view>还没有写下思念</view>
+    <view class="sub">写一封信，它会一直在这里等你</view>
+  </view>
+
+  <!-- 点灯仪式 -->
+  <view wx:if="{{ceremony}}" class="ceremony-mask">
+    <view class="ceremony card">
+      <view class="candle">
+        <view class="candle-flame {{ceremony.lit ? 'lit' : ''}}"></view>
+        <view class="candle-body">
+          <view class="candle-wick"></view>
+        </view>
+      </view>
+      <view class="ceremony-title">{{ceremony.lit ? '灯亮了' : '为它点亮一盏灯'}}</view>
+      <view class="ceremony-text">
+        {{ceremony.lit ? '这盏灯会一直亮着，照着你写下的思念。' : '思念会顺着光，飘到它在的地方。'}}
+      </view>
+      <view wx:if="{{!ceremony.lit}}" class="btn-primary ceremony-btn" bindtap="light">点亮</view>
+      <view wx:else class="btn-ghost ceremony-btn" bindtap="closeCeremony">收好这盏灯</view>
+    </view>
+  </view>
+
+</view>

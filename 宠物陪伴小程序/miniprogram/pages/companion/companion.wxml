@@ -208,6 +208,24 @@
       <view class="memory-entry-arrow">›</view>
     </view>
 
+    <!-- 心情日志 + 思念信箱：两个轻量入口并排 -->
+    <view class="mini-entries">
+      <view class="mini-entry" bindtap="goMoodLog">
+        <view class="mini-entry-icon">📖</view>
+        <view class="mini-entry-text">
+          <view class="mini-entry-title">心情日志</view>
+          <view class="mini-entry-desc">记下此刻的心情</view>
+        </view>
+      </view>
+      <view class="mini-entry" bindtap="goTribute">
+        <view class="mini-entry-icon">💌</view>
+        <view class="mini-entry-text">
+          <view class="mini-entry-title">思念信箱</view>
+          <view class="mini-entry-desc">写一封给它</view>
+        </view>
+      </view>
+    </view>
+
     <!-- 以宠物口吻写的一封信 -->
     <view class="letter-entry" bindtap="goLetter">
       <view class="letter-entry-icon">💌</view>

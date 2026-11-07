@@ -74,15 +74,21 @@ function flatten(groups) {
     const letters = [
       { createdAt: memory.dayTs(START, 30), content: '你好' }
     ];
-    const { groups } = memory.build({ pet, diary, letters, now });
+    // 思念信：一封在第 30 天，点亮过灯
+    const tributes = [
+      { createdAt: memory.dayTs(START, 30), content: '想你', lit: true }
+    ];
+    const { groups } = memory.build({ pet, diary, letters, tributes, now });
     const events = flatten(groups);
     // 倒序：最新的（第 30 天）在最前
     ok('最新事件在最前', events[0].ts === memory.dayTs(START, 30));
     ok('最旧事件在最后', events[events.length - 1].ts === START);
-    // 第 30 天有 3 个事件：日记 + 信件 + 里程碑30
+    // 第 30 天有 4 个事件：日记 + 信件 + 里程碑30 + 思念信
     const day30 = groups[0];
-    ok('第 30 天归为一组', day30.items.length === 3, 'items=' + day30.items.length);
+    ok('第 30 天归为一组', day30.items.length === 4, 'items=' + day30.items.length);
     ok('同一天的日记和信件在同一组', day30.items.some((e) => e.type === 'diary') && day30.items.some((e) => e.type === 'letter'));
+    ok('思念信进入时间轴', day30.items.some((e) => e.type === 'tribute'));
+    ok('点亮过的思念信文案带点灯', day30.items.some((e) => e.type === 'tribute' && e.text.indexOf('点亮') >= 0));
     // 分组总数：第30天 + 第14天 + 第7天 + 第5天(日记) + 第1天(相遇) = 5 组
     ok('分组数量正确', groups.length === 5, 'groups=' + groups.length);
     // 组头带第 N 天标记
@@ -99,11 +105,13 @@ function flatten(groups) {
     // 满一年：第 400 天 → 去年今日 = 第 35 天
     const now = memory.dayTs(START, 400);
     const diary = [{ createdAt: memory.dayTs(START, 35), text: '去年今天的足迹', emoji: '🐾' }];
-    const otd = memory.onThisDay({ pet, diary, letters: [], now });
+    const tributes = [{ createdAt: memory.dayTs(START, 35), content: '想你', lit: false }];
+    const otd = memory.onThisDay({ pet, diary, letters: [], tributes, now });
     ok('满一年返回对象', !!otd);
     ok('thatDay 正确', otd && otd.thatDay === 35, otd && otd.thatDay);
     ok('那天有记录则 hasRecord 为真', otd && otd.hasRecord === true);
     ok('命中的日记被收集', otd && otd.items.some((i) => i.text === '去年今天的足迹'));
+    ok('命中的思念信被收集', otd && otd.items.some((i) => i.text === '你给它写了一封思念信'));
 
     // 那天没记录 → hasRecord false
     const empty = memory.onThisDay({ pet, diary: [], letters: [], now });
@@ -121,7 +129,7 @@ function flatten(groups) {
     ok('milestoneText 兜底', memory.milestoneText(200) === '第 200 天');
     ok('dayTs 第 1 天 = start', memory.dayTs(START, 1) === START);
     ok('dayTs 第 2 天 = start + 1 天', memory.dayTs(START, 2) === START + 86400e3);
-    ok('typeIcon 四类', memory.typeIcon('meet') === '🏠' && memory.typeIcon('milestone') === '🎉' && memory.typeIcon('diary') === '🐾' && memory.typeIcon('letter') === '💌');
+    ok('typeIcon 五类', memory.typeIcon('meet') === '🏠' && memory.typeIcon('milestone') === '🎉' && memory.typeIcon('diary') === '🐾' && memory.typeIcon('letter') === '💌' && memory.typeIcon('tribute') === '🕯️');
   }
 
   console.log('\n────────────────────────────────────────────────');

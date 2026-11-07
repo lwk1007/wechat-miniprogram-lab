@@ -82,6 +82,7 @@
             <view class="tl-card {{ev.type}}">
               <view class="tl-text">{{ev.text}}</view>
               <view wx:if="{{ev.type === 'letter'}}" class="tl-cta" bindtap="goLetter">读这封信 ›</view>
+              <view wx:elif="{{ev.type === 'tribute'}}" class="tl-cta" bindtap="goTribute">去思念信箱 ›</view>
             </view>
           </view>
         </view>

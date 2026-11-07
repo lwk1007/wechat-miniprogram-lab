@@ -1,0 +1,114 @@
+.page {
+  padding-bottom: 48rpx;
+}
+
+.card-title { font-size: 32rpx; font-weight: 600; }
+.card-sub { margin-top: 4rpx; font-size: 24rpx; color: var(--sub); }
+
+/* ---------- 写信 ---------- */
+.letter-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  min-height: 200rpx;
+  margin: 24rpx 0;
+}
+.letter-ph { color: #B5BDB8; }
+
+/* ---------- 统计 ---------- */
+.stat-line {
+  margin: 8rpx 32rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--sub);
+}
+
+/* ---------- 历史思念信 ---------- */
+.tribute-item { padding: 28rpx 32rpx; }
+.tribute-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+.tribute-date { font-size: 24rpx; color: var(--sub); }
+.tribute-candle { font-size: 28rpx; }
+.tribute-content {
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: var(--text);
+  word-break: break-all;
+}
+
+/* ---------- 点灯仪式 ---------- */
+.ceremony-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(28, 40, 34, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+.ceremony {
+  width: 560rpx;
+  text-align: center;
+  padding: 48rpx 40rpx;
+  margin: 0;
+  box-sizing: border-box;
+}
+.ceremony-title { font-size: 34rpx; font-weight: 600; }
+.ceremony-text { margin-top: 12rpx; font-size: 26rpx; color: var(--sub); line-height: 1.7; }
+.ceremony-btn { margin-top: 36rpx; }
+
+/* 蜡烛 */
+.candle {
+  position: relative;
+  width: 120rpx;
+  margin: 8rpx auto 32rpx;
+}
+.candle-flame {
+  width: 44rpx;
+  height: 60rpx;
+  margin: 0 auto 4rpx;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: linear-gradient(180deg, #FFF3C4 0%, #FFD98A 55%, #FFB84D 100%);
+  opacity: 0.16;
+  transition: opacity 0.4s;
+  transform-origin: 50% 100%;
+}
+.candle-flame.lit {
+  opacity: 1;
+  animation: flame-flicker 1s ease-in-out infinite;
+}
+.candle-body {
+  position: relative;
+  width: 72rpx;
+  height: 150rpx;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #F7E8CE 0%, #EED3A8 100%);
+  border-radius: 14rpx 14rpx 8rpx 8rpx;
+}
+.candle-wick {
+  position: absolute;
+  top: -10rpx;
+  left: 50%;
+  width: 4rpx;
+  height: 12rpx;
+  margin-left: -2rpx;
+  background: #5A4B36;
+  border-radius: 2rpx;
+}
+
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) translateY(0); }
+  25% { transform: scale(1.08, 1.15) translateY(-2rpx); }
+  50% { transform: scale(0.95, 0.9); }
+  75% { transform: scale(1.05, 1.1) translateY(-1rpx); }
+}

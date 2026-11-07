@@ -7,6 +7,8 @@
     "pages/desktop/desktop",
     "pages/letter/letter",
     "pages/memory/memory",
+    "pages/mood-log/mood-log",
+    "pages/tribute/tribute",
     "pages/data-export/data-export"
   ],
   "window": {

@@ -4,6 +4,8 @@ const { composeLetter } = require('./letter-template');
 const titleOf = require('./title');
 const moments = require('./moments');
 const petLife = require('./pet-life');
+const moodLog = require('./mood-log');
+const tribute = require('./tribute');
 
 const K = {
   pet: 'demo_pet',
@@ -90,10 +92,12 @@ async function updatePet(patch) {
 
 async function deletePet() {
   set(K.pet, null);
-  // 删宠物 = 删干净：信、互动统计、它的心情和日记都不能留下来
+  // 删宠物 = 删干净：信、互动统计、它的心情和日记、思念信都不能留下来
   set(K.letters, []);
   moments.reset();
   petLife.reset();
+  moodLog.reset();
+  tribute.reset();
 }
 
 // 立即删除照片（不等 22 小时自动过期）
@@ -120,6 +124,8 @@ async function purgeAll() {
   set(K.letters, []);
   moments.reset();
   petLife.reset();
+  moodLog.reset();
+  tribute.reset();
   return { purged: true, summary };
 }
 
